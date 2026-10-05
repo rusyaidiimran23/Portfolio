@@ -40,7 +40,7 @@ Secrets (garage password, SMTP for the contact form) live on the server in
 
 Turn on contact-form email (via Resend - DigitalOcean blocks outgoing SMTP; asks for the API key, hidden, then sends a test email):
 ```powershell
-.\deploy\set-email.ps1 -Server root@SERVER_IP -Gmail you@gmail.com
+.\deploy\set-email.ps1 -Server root@SERVER_IP -To you@gmail.com
 ```
 
 Visitor stats: counted on your own server (no cookies, bots and Do-Not-Track skipped),
