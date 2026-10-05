@@ -8,7 +8,8 @@
 #
 # Installs Caddy + Python, creates a 'portfolio' service user, writes
 # /etc/portfolio.env (secrets), a systemd service for the API, and the Caddyfile.
-# Safe to re-run: existing secrets are kept.
+# Safe to re-run: existing secrets are kept. Started on an IP? Re-run it with
+# your domain later to switch over (HTTPS + www redirect).
 set -euo pipefail
 
 SITE="${1:?usage: bash setup.sh <domain-or-ip> [garage-password]}"
@@ -98,6 +99,15 @@ ${SITE} {
 	}
 }
 EOF
+# a real domain (not an IP) also gets www.<domain> -> <domain>
+if [[ ! "$SITE" =~ ^[0-9.]+$ ]] && [[ "$SITE" != www.* ]]; then
+  cat >> /etc/caddy/Caddyfile <<EOF
+
+www.${SITE} {
+	redir https://${SITE}{uri} permanent
+}
+EOF
+fi
 systemctl enable caddy >/dev/null
 systemctl reload caddy || systemctl restart caddy
 
