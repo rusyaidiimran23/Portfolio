@@ -7,7 +7,7 @@ and sends you a test email.
 Get the App Password first: Google Account > Security > 2-Step Verification (must be on)
 > App passwords > create one called "Portfolio". It's 16 letters.
 The password is typed here hidden, sent over SSH, and only stored in /etc/portfolio.env
-on the server — never in this repo.
+on the server - never in this repo.
 #>
 param(
   [Parameter(Mandatory)] [string] $Server,
@@ -20,7 +20,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $secure = Read-Host 'Gmail App Password (16 letters, hidden)' -AsSecureString
 $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try { $pw = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
-if (($pw -replace '\s', '').Length -ne 16) { throw 'An App Password is 16 letters — check it and run again.' }
+if (($pw -replace '\s', '').Length -ne 16) { throw 'An App Password is 16 letters - check it and run again.' }
 
 Write-Host '==> uploading helper (enter the server password if asked)' -ForegroundColor Cyan
 scp "$root\deploy\set-email.sh" "${Server}:/tmp/set-email.sh"

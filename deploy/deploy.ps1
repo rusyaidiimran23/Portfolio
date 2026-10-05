@@ -37,7 +37,7 @@ $code = $LASTEXITCODE
 Pop-Location
 if ($code) { throw 'Build failed.' }
 if (Select-String -Path "$root\port_frontend\dist\_astro\*.js" -Pattern 'localhost:8001' -Quiet) {
-  throw 'Build still points at localhost:8001 — aborting.'
+  throw 'Build still points at localhost:8001 - aborting.'
 }
 
 Write-Host '==> packing release' -ForegroundColor Cyan
