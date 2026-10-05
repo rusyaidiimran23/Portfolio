@@ -13,7 +13,7 @@ import os
 import threading
 from pathlib import Path
 
-from .data import GARAGE
+from .data import GARAGE, TRACKDAY
 
 # GARAGE_FILE lets the server keep the data outside the app folder (so deploys never touch it)
 PATH = Path(os.environ.get("GARAGE_FILE") or Path(__file__).with_name("garage.json"))
@@ -23,7 +23,11 @@ _lock = threading.Lock()
 def _load() -> dict:
     if not PATH.exists():
         _save(copy.deepcopy(GARAGE))
-    return json.loads(PATH.read_text(encoding="utf-8"))
+    data = json.loads(PATH.read_text(encoding="utf-8"))
+    if "trackday" not in data:  # older garage.json (e.g. the live server): add Track Day once
+        data["trackday"] = copy.deepcopy(TRACKDAY)
+        _save(data)
+    return data
 
 
 def _save(data: dict) -> None:
@@ -70,3 +74,32 @@ def delete_log(build_id: str, date: str, time: str, note: str) -> dict | None:
                 _save(data)
                 break
         return build
+
+
+# --- Track Day sessions ---------------------------------------------------------
+
+def add_session(track_id: str, entry: dict) -> dict | None:
+    """Add a track-day session; returns the updated trackday block, or None if no such track."""
+    with _lock:
+        data = _load()
+        td = data["trackday"]
+        if not any(t["id"] == track_id for t in td["tracks"]):
+            return None
+        td["sessions"].append({"track": track_id, **entry})
+        _save(data)
+        return td
+
+
+def delete_session(track_id: str, entry: dict) -> dict | None:
+    """Remove the first session matching track/date/best/vehicle; returns the trackday block."""
+    with _lock:
+        data = _load()
+        td = data["trackday"]
+        if not any(t["id"] == track_id for t in td["tracks"]):
+            return None
+        for i, s in enumerate(td["sessions"]):
+            if s.get("track") == track_id and all(s.get(k, "") == entry.get(k, "") for k in ("date", "best", "vehicle")):
+                del td["sessions"][i]
+                _save(data)
+                break
+        return td

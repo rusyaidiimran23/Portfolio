@@ -218,3 +218,30 @@ GARAGE = {
         },
     ],
 }
+
+# ---- TRACK DAY (inside the Garage, behind the same password) ---------------
+# Seeded into garage.json once (also merged into an existing garage.json).
+# After that, sessions are added on the site. To add a track, add it here AND
+# to garage.json (or delete "trackday" from garage.json to re-seed).
+#   status: "active" (you ride it) | "planned" (not ridden yet)
+#   map:    "sepang" = built-in drawn layout; "" = trace pending (until a GPS
+#           session is uploaded, which will provide the real line)
+TRACKDAY = {
+    "tracks": [
+        {
+            "id": "sgk", "name": "SGK", "alias": "RUD", "kind": "Go-kart circuit",
+            "location": "", "status": "active", "map": "", "color": "#ff2bd6",
+        },
+        {
+            "id": "horizon", "name": "Horizon Go-Kart", "alias": "", "kind": "Go-kart circuit",
+            "location": "Beranang, Selangor", "status": "active", "map": "", "color": "#00d2be",
+        },
+        {
+            "id": "sepang", "name": "Sepang International Circuit", "alias": "SIC", "kind": "F1 circuit",
+            "location": "Sepang, Selangor", "length_km": 5.543, "turns": 15,
+            "status": "planned", "map": "sepang", "color": "#ffb000",
+        },
+    ],
+    # each: {"track": id, "date": "YYYY-MM-DD", "vehicle": "...", "best": "m:ss.sss", "notes": "..."}
+    "sessions": [],
+}

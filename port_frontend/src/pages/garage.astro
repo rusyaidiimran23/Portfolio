@@ -44,6 +44,17 @@ import Base from '../layouts/Base.astro';
         <div class="fz-grid" id="fz-grid"></div>
       </section>
       <div id="builds" class="builds"></div>
+
+      <!-- TRACK DAY: personal bests per track, ghost lap on the map -->
+      <section class="td" id="trackday" aria-label="Track day">
+        <div class="kerb"></div>
+        <div class="td-head">
+          <div><p class="eyebrow">Track day — personal bests</p><h2 class="td-title display">Track Day</h2></div>
+          <span class="td-count lcd-text" id="td-count"></span>
+        </div>
+        <div class="td-tabs" id="td-tabs" role="tablist" aria-label="Tracks"></div>
+        <div class="td-stage" id="td-stage"></div>
+      </section>
     </section>
   </main>
 </Base>
@@ -141,6 +152,101 @@ import Base from '../layouts/Base.astro';
   .builds :global(.tile > *) { position: relative; z-index: 1; }
   .builds :global(.tile span) { display: block; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.22em; color: var(--muted); margin-bottom: 0.3rem; }
   .builds :global(.tile b) { --c2: var(--c); display: block; font-size: 1rem; color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 50%, transparent); }
+
+  /* --- Track Day ------------------------------------------------------------------- */
+  .td { margin-top: 4rem; scroll-margin-top: 90px; }
+  .td-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin: 1.6rem 0 1.2rem; }
+  .td-title { font-size: clamp(2.4rem, 6vw, 4rem); font-style: italic; text-transform: uppercase; margin-top: 0.35rem; }
+  .td-count { --c: var(--purple); font-size: 1rem; letter-spacing: 0.1em; }
+
+  .td-tabs { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.2rem; }
+  .td-tabs::-webkit-scrollbar { display: none; }
+  .td-tabs :global(.td-tab) {
+    flex: 1 0 auto; display: grid; gap: 0.15rem; text-align: left; cursor: pointer; padding: 0.7rem 1.2rem 0.75rem 1rem;
+    color: var(--muted); background: #0b0b10; border: 1px solid #1f1f28; border-bottom: 3px solid #1f1f28;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .td-tabs :global(.tt-name) { font-family: var(--display); font-weight: 700; font-style: italic; text-transform: uppercase; font-size: 1rem; white-space: nowrap; }
+  .td-tabs :global(.tt-sub) { font-size: 0.62rem; letter-spacing: 0.2em; }
+  .td-tabs :global(.td-tab:hover) { color: var(--ink); }
+  .td-tabs :global(.td-tab[aria-selected="true"]) { color: #fff; background: color-mix(in srgb, var(--c) 14%, #0b0b10); border-bottom-color: var(--c); }
+
+  .td-stage {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); margin-top: 0.8rem;
+    background: linear-gradient(180deg, #0d0d12, #08080b); border: 1px solid #1c1c24; border-top: 3px solid var(--c);
+  }
+  .td-stage :global(.td-mapwrap) {
+    position: relative; min-height: 380px; display: grid; place-items: center; padding: 1rem;
+    background: radial-gradient(70% 70% at 50% 50%, color-mix(in srgb, var(--c) 12%, transparent), transparent 70%), #050507;
+  }
+  .td-stage :global(.td-map) { width: 100%; height: auto; display: block; }
+  .td-stage :global(.td-map .dot) { fill: rgba(255, 255, 255, 0.06); }
+  .td-stage :global(.tarmac) { fill: none; stroke: #16161d; stroke-width: 30; stroke-linejoin: round; }
+  .td-stage :global(.kerbline) { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 34; stroke-linejoin: round; stroke-dasharray: 10 10; opacity: 0.5; }
+  .td-stage :global(.race-line) {
+    fill: none; stroke: var(--c); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 1000; animation: draw-line 2.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  @keyframes draw-line { from { stroke-dashoffset: 1000; } }
+  .td-stage :global(.start) { stroke: #fff; stroke-width: 5; stroke-dasharray: 5 5; }
+  .td-stage :global(.lbl) { font-family: var(--mono); font-size: 16px; letter-spacing: 0.2em; fill: #8b8b98; }
+  .td-stage :global(.lbl.dim) { fill: #4a4a56; }
+  .td-stage :global(.ghost-dot) { fill: #fff; }
+  .td-stage :global(.ghost-halo) { fill: var(--c); opacity: 0.45; filter: blur(5px); }
+  .td-stage :global(.ghost-tag) {
+    position: absolute; left: 1rem; bottom: 0.9rem; font-size: 0.66rem; letter-spacing: 0.2em; color: var(--c);
+  }
+  /* trace pending placeholder */
+  .td-stage :global(.pend-line) { fill: none; stroke: var(--c); stroke-width: 4; stroke-dasharray: 14 16; opacity: 0.55; animation: pend 3s linear infinite; }
+  @keyframes pend { to { stroke-dashoffset: -60; } }
+  .td-stage :global(.pend-big) { font-family: var(--display); font-weight: 900; font-style: italic; font-size: 58px; text-anchor: middle; fill: transparent; stroke: var(--c); stroke-width: 1.5; letter-spacing: 2px; }
+  .td-stage :global(.pend-small) { font-family: var(--mono); font-size: 17px; text-anchor: middle; fill: #8b8b98; letter-spacing: 1px; }
+  .td-stage :global(.scan) { stroke: var(--c); stroke-width: 2; opacity: 0.35; animation: scan-x 3.5s ease-in-out infinite alternate; }
+  @keyframes scan-x { to { transform: translateX(1000px); } }
+
+  .td-stage :global(.td-info) { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.5rem 1.6rem; min-width: 0; }
+  .td-stage :global(.td-top) { display: flex; align-items: center; gap: 0.7rem; }
+  .td-stage :global(.td-chip) { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.2rem 0.6rem; color: #000; background: var(--c); }
+  .td-stage :global(.td-chip.planned) { color: var(--c); background: none; border: 1px dashed var(--c); }
+  .td-stage :global(.td-alias) { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.2em; }
+  .td-stage :global(.td-name) { font-size: clamp(1.6rem, 3vw, 2.3rem); font-style: italic; text-transform: uppercase; line-height: 1; }
+  .td-stage :global(.td-facts) { margin: 0; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .td-stage :global(.td-pb) { display: grid; gap: 0.25rem; padding: 0.9rem 1rem; }
+  .td-stage :global(.td-pb > *) { position: relative; z-index: 1; }
+  .td-stage :global(.td-pb span) { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.24em; color: var(--muted); }
+  .td-stage :global(.td-pb b) { --c2: var(--purple); color: var(--purple); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1; }
+  .td-stage :global(.td-pb em) { font-style: normal; font-size: 0.72rem; color: #b9b9c4; }
+  .td-stage :global(.td-bar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .td-stage :global(.td-bar .eyebrow) { margin: 0; }
+  .td-stage :global(.td-form) { display: grid; gap: 0.5rem; padding: 0.8rem; background: #050507; border: 1px solid color-mix(in srgb, var(--c) 45%, #1c1c24); }
+  .td-stage :global(.td-form[hidden]) { display: none; }
+  .td-stage :global(.tf-row) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .td-stage :global(.td-form input), .td-stage :global(.td-form select) {
+    width: 100%; padding: 0.65rem 0.8rem; font-family: var(--mono); font-size: 0.92rem; color: var(--lime);
+    background: #030304; border: 1px solid #1f1f28; color-scheme: dark;
+  }
+  .td-stage :global(.td-form input:focus), .td-stage :global(.td-form select:focus) { outline: none; border-color: var(--lime); }
+  .td-stage :global(.td-sessions) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; max-height: 18rem; overflow-y: auto; }
+  .td-stage :global(.td-sessions li) {
+    display: grid; grid-template-columns: auto auto auto 1fr auto; gap: 0.9rem; align-items: baseline;
+    padding: 0.6rem 0.6rem 0.6rem 0.9rem; background: #060608; border-left: 3px solid #2a2a33;
+  }
+  .td-stage :global(.td-sessions li.pb) { border-left-color: var(--purple); background: color-mix(in srgb, var(--purple) 10%, #060608); }
+  .td-stage :global(.td-sessions li.empty) { grid-template-columns: 1fr; color: var(--muted); border-left-style: dashed; }
+  .td-stage :global(.ts-date) { --c2: var(--amber); color: var(--amber); font-size: 0.9rem; }
+  .td-stage :global(.ts-lap) { --c2: var(--ink); color: var(--ink); font-size: 1rem; }
+  .td-stage :global(.ts-delta) { font-size: 0.72rem; color: var(--muted); }
+  .td-stage :global(li.pb .ts-delta) { color: var(--purple); }
+  .td-stage :global(.ts-meta) { color: #b9b9c4; font-size: 0.85rem; min-width: 0; overflow-wrap: anywhere; }
+  .td-stage :global(.del) { border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem; }
+  .td-stage :global(.del.armed) { color: #fff; background: var(--f1red); }
+
+  @media (max-width: 900px) {
+    .td-stage { grid-template-columns: 1fr; }
+    .td-stage :global(.td-mapwrap) { min-height: 0; }
+    .td-stage :global(.td-sessions li) { grid-template-columns: auto auto 1fr auto; }
+    .td-stage :global(.ts-meta) { grid-column: 1 / -1; }
+  }
 
   /* --- Forza-style garage grid ----------------------------------------------------- */
   .fz { margin: 2.2rem 0 3rem; scroll-margin-top: 90px; }
@@ -298,12 +404,12 @@ import Base from '../layouts/Base.astro';
 
   .builds :global(.log-bar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; }
   .builds :global(.log-head) { margin: 0; }
-  .builds :global(.add-btn) {
+  .builds :global(.add-btn), .td-stage :global(.add-btn) {
     font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 0.45rem 0.95rem; border: 0; cursor: pointer; color: #000; background: var(--c);
     clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); transition: transform 0.2s, filter 0.2s;
   }
-  .builds :global(.add-btn:hover) { transform: translateX(3px); filter: brightness(1.15); }
+  .builds :global(.add-btn:hover), .td-stage :global(.add-btn:hover) { transform: translateX(3px); filter: brightness(1.15); }
 
   /* inline add-log form */
   .builds :global(.log-form) {
@@ -318,9 +424,9 @@ import Base from '../layouts/Base.astro';
   }
   .builds :global(.log-form textarea) { resize: vertical; }
   .builds :global(.log-form input:focus), .builds :global(.log-form textarea:focus) { outline: none; border-color: var(--lime); }
-  .builds :global(.lf-actions) { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-  .builds :global(.lf-actions .btn) { padding: 0.55rem 1.1rem; font-size: 0.82rem; }
-  .builds :global(.lf-msg) { --c: var(--amber); font-size: 0.9rem; margin-left: auto; }
+  .builds :global(.lf-actions), .td-stage :global(.lf-actions) { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .builds :global(.lf-actions .btn), .td-stage :global(.lf-actions .btn) { padding: 0.55rem 1.1rem; font-size: 0.82rem; }
+  .builds :global(.lf-msg), .td-stage :global(.lf-msg) { --c: var(--amber); font-size: 0.9rem; margin-left: auto; }
 
   @media (max-width: 900px) {
     .builds :global(.build) { grid-template-columns: 1fr; }
@@ -366,10 +472,11 @@ import Base from '../layouts/Base.astro';
   async function loadGarage(token: string, keepScroll = false): Promise<boolean> {
     const res = await fetch(`${API_BASE}/api/garage`, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) return false;
-    const data: { builds: Build[] } = await res.json();
+    const data: { builds: Build[]; trackday?: TrackDay } = await res.json();
     const photos: Record<string, Photo[]> =
       await fetch('/work/photos.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
     render(data.builds ?? [], photos);
+    renderTrackday(data.trackday, data.builds ?? []);
     gate.hidden = true;
     content.hidden = false;
     if (!keepScroll) window.scrollTo({ top: 0 });
@@ -528,6 +635,213 @@ import Base from '../layouts/Base.astro';
     setupSelect(builds, photos);
     scrollFx(wrap);
   }
+
+  // --- TRACK DAY -------------------------------------------------------------------
+  type Track = {
+    id: string; name: string; alias?: string; kind?: string; location?: string;
+    length_km?: number; turns?: number; status: 'active' | 'planned'; map?: string; color: string;
+  };
+  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string };
+  type TrackDay = { tracks: Track[]; sessions: Session[] };
+
+  // drawn layouts (viewBox 0 0 1000 620). Only real, known layouts live here —
+  // tracks without one show "trace pending" until a GPS session provides the line.
+  const MAPS: Record<string, { d: string; start: [number, number]; labels: [string, number, number][] }> = {
+    sepang: {
+      d: 'M 230 430 L 700 430 C 760 430 790 470 760 505 C 735 535 690 520 690 560 C 690 610 780 615 850 580 C 920 545 930 470 880 430 L 860 400 C 835 380 845 340 880 330 C 930 315 940 240 890 205 C 850 180 820 210 780 190 C 740 170 760 120 710 105 C 660 90 610 120 600 160 C 590 200 540 215 500 190 C 460 165 430 120 380 120 C 320 120 300 175 330 210 C 360 245 420 240 440 280 C 455 320 420 345 380 345 L 150 345 C 80 345 70 430 150 430 Z',
+      start: [230, 430],
+      labels: [['T1', 772, 470], ['T15', 60, 395], ['BACK STRAIGHT', 175, 335]],
+    },
+  };
+
+  const lapSecs = (t: string) => {
+    const [m, s] = t.includes(':') ? t.split(':') : ['0', t];
+    return Number(m) * 60 + Number(s);
+  };
+  const fmtDelta = (d: number) => (d === 0 ? 'PB' : `+${d.toFixed(3)}`);
+
+  let tdData: TrackDay | null = null;
+  let tdBuilds: Build[] = [];
+  let tdSel = '';
+  let ghostRaf = 0;
+
+  function renderTrackday(td: TrackDay | undefined, builds: Build[]) {
+    if (!td) return;
+    // a planned track counts as ridden as soon as it has a session
+    td.tracks.forEach((t) => { if (td.sessions.some((s) => s.track === t.id)) t.status = 'active'; });
+    tdData = td; tdBuilds = builds;
+    if (!tdSel || !td.tracks.some((t) => t.id === tdSel)) tdSel = td.tracks[0]?.id ?? '';
+    const ridden = td.tracks.filter((t) => t.status === 'active').length;
+    document.getElementById('td-count')!.textContent = `${String(ridden).padStart(2, '0')} TRACKS · ${String(td.sessions.length).padStart(2, '0')} SESSIONS`;
+    document.getElementById('td-tabs')!.innerHTML = td.tracks.map((t) => {
+      const best = bestOf(t.id);
+      return `<button class="td-tab" type="button" role="tab" data-track="${esc(t.id)}" style="--c: ${esc(t.color)}" aria-selected="${t.id === tdSel}">
+        <span class="tt-name">${esc(t.alias ? `${t.name} · ${t.alias}` : t.name)}</span>
+        <span class="tt-sub mono">${t.status === 'planned' ? 'UPCOMING' : best ? `PB ${esc(best.best)}` : 'NO LAPS YET'}</span>
+      </button>`;
+    }).join('');
+    showTrack(tdSel);
+  }
+
+  function bestOf(trackId: string): Session | undefined {
+    return (tdData?.sessions ?? []).filter((s) => s.track === trackId)
+      .sort((a, b) => lapSecs(a.best) - lapSecs(b.best))[0];
+  }
+
+  function mapSvg(t: Track): string {
+    const m = t.map ? MAPS[t.map] : undefined;
+    if (!m) {
+      // no known layout yet: an honest placeholder, clearly not a real track
+      return `<svg class="td-map pending" viewBox="0 0 1000 620" role="img" aria-label="Track map pending">
+        <defs><pattern id="g-${t.id}" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" class="dot"/></pattern></defs>
+        <rect width="1000" height="620" fill="url(#g-${t.id})"/>
+        <rect x="170" y="150" width="660" height="320" rx="160" class="pend-line"/>
+        <line x1="0" y1="0" x2="0" y2="620" class="scan"/>
+        <text x="500" y="300" class="pend-big">TRACE PENDING</text>
+        <text x="500" y="345" class="pend-small">the real layout is drawn from your first GPS session</text>
+      </svg>`;
+    }
+    return `<svg class="td-map" viewBox="0 0 1000 620" role="img" aria-label="${esc(t.name)} layout">
+      <defs>
+        <filter id="glow-${t.id}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <pattern id="g-${t.id}" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" class="dot"/></pattern>
+      </defs>
+      <rect width="1000" height="620" fill="url(#g-${t.id})"/>
+      <path d="${m.d}" class="tarmac"/>
+      <path d="${m.d}" class="kerbline"/>
+      <path d="${m.d}" class="race-line" filter="url(#glow-${t.id})" pathLength="1000"/>
+      <line x1="${m.start[0]}" y1="${m.start[1] - 22}" x2="${m.start[0]}" y2="${m.start[1] + 22}" class="start"/>
+      <text x="${m.start[0] + 8}" y="${m.start[1] + 48}" class="lbl">START / FINISH</text>
+      ${m.labels.map(([s, x, y]) => `<text x="${x}" y="${y}" class="lbl dim">${s}</text>`).join('')}
+      <g class="ghost" style="display: none"><circle r="20" class="ghost-halo"/><circle r="8" class="ghost-dot"/></g>
+    </svg>`;
+  }
+
+  function showTrack(id: string) {
+    if (!tdData) return;
+    tdSel = id;
+    const t = tdData.tracks.find((x) => x.id === id)!;
+    const best = bestOf(id);
+    const pbSecs = best ? lapSecs(best.best) : 0;
+    const sessions = tdData.sessions.filter((s) => s.track === id).sort((a, b) => b.date.localeCompare(a.date));
+    document.querySelectorAll<HTMLElement>('.td-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.track === id)));
+    const vehicles = tdBuilds.filter((b) => !b.sold).map((b) => b.name);
+    const facts = [
+      t.kind, t.location, t.length_km ? `${t.length_km} km` : '', t.turns ? `${t.turns} turns` : '',
+    ].filter(Boolean);
+
+    const stage = document.getElementById('td-stage')!;
+    stage.style.setProperty('--c', t.color);
+    stage.innerHTML = `
+      <div class="td-mapwrap">${mapSvg(t)}
+        ${best ? `<span class="ghost-tag mono">GHOST LAP · ${esc(best.best)}</span>` : ''}
+      </div>
+      <div class="td-info">
+        <div class="td-top">
+          <span class="td-chip ${t.status}">${t.status === 'planned' ? 'Upcoming' : 'Ridden'}</span>
+          ${t.alias ? `<span class="td-alias mono">${esc(t.alias)}</span>` : ''}
+        </div>
+        <h3 class="td-name display">${esc(t.name)}</h3>
+        <p class="td-facts mono">${facts.map(esc).join(' · ')}</p>
+        <div class="td-pb lcd">
+          <span>PERSONAL BEST</span>
+          <b class="lcd-text">${best ? esc(best.best) : '-:--.---'}</b>
+          <em class="mono">${best ? `${esc(best.vehicle || '')}${best.vehicle ? ' · ' : ''}${esc(best.date)}` : t.status === 'planned' ? 'Not ridden yet — on the list' : 'Log your first session below'}</em>
+        </div>
+        <div class="td-bar">
+          <p class="eyebrow">Sessions — latest first</p>
+          <button class="add-btn" type="button" data-td-add>+ Add session</button>
+        </div>
+        <form class="td-form" hidden>
+          <div class="tf-row">
+            <input name="date" type="date" required />
+            <input name="best" placeholder="Best lap  1:02.345" pattern="^(\\d{1,2}:)?\\d{1,2}\\.\\d{1,3}$" required />
+          </div>
+          <select name="vehicle"><option>Rental kart</option>${vehicles.map((v) => `<option>${esc(v)}</option>`).join('')}</select>
+          <input name="notes" maxlength="300" placeholder="Notes — conditions, tyres, setup…" />
+          <div class="lf-actions">
+            <button class="btn btn-primary" type="submit">Save ▸</button>
+            <button class="btn" type="button" data-td-cancel>Cancel</button>
+            <span class="lf-msg lcd-text"></span>
+          </div>
+        </form>
+        <ol class="td-sessions">${sessions.length ? sessions.map((s) => {
+          const d = lapSecs(s.best) - pbSecs;
+          return `<li class="${d === 0 ? 'pb' : ''}">
+            <span class="ts-date lcd-text">${esc(s.date)}</span>
+            <span class="ts-lap lcd-text">${esc(s.best)}</span>
+            <span class="ts-delta mono">${fmtDelta(d)}</span>
+            <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}</span>
+            <button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify(s))}'>✕</button>
+          </li>`;
+        }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
+      </div>`;
+    startGhost(pbSecs);
+  }
+
+  // ghost dot laps the map in exactly the PB time
+  function startGhost(pbSecs: number) {
+    cancelAnimationFrame(ghostRaf);
+    const path = document.querySelector<SVGPathElement>('#td-stage .race-line');
+    const ghost = document.querySelector<SVGGElement>('#td-stage .ghost');
+    if (!path || !ghost || !pbSecs) return;
+    ghost.style.display = ''; // SVG ignores the hidden attribute
+    const len = path.getTotalLength();
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const p = reduced ? 0 : (((now - t0) / 1000) % pbSecs) / pbSecs;
+      const pt = path.getPointAtLength(p * len);
+      ghost.setAttribute('transform', `translate(${pt.x} ${pt.y})`);
+      if (!reduced) ghostRaf = requestAnimationFrame(step);
+    };
+    ghostRaf = requestAnimationFrame(step);
+  }
+
+  const tdEl = document.getElementById('trackday')!;
+  tdEl.addEventListener('click', async (e) => {
+    const el = e.target as HTMLElement;
+    const tab = el.closest<HTMLElement>('[data-track]');
+    if (tab) { showTrack(tab.dataset.track!); return; }
+    const form = tdEl.querySelector<HTMLFormElement>('.td-form');
+    if (el.closest('[data-td-add]') && form) {
+      form.hidden = !form.hidden;
+      if (!form.hidden) (form.elements.namedItem('date') as HTMLInputElement).value = localNow().slice(0, 10);
+      return;
+    }
+    if (el.closest('[data-td-cancel]') && form) { form.hidden = true; return; }
+    const del = el.closest<HTMLButtonElement>('[data-td-del]');
+    if (del) {
+      if (!del.classList.contains('armed')) {
+        del.classList.add('armed'); del.textContent = 'Delete?';
+        setTimeout(() => { del.classList.remove('armed'); del.textContent = '✕'; }, 3000);
+        return;
+      }
+      const s: Session = JSON.parse(del.dataset.tdDel!);
+      const res = await fetch(`${API_BASE}/api/garage/trackday/${encodeURIComponent(tdSel)}/session`, {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle ?? '', notes: s.notes ?? '' }),
+      });
+      if (res.ok) renderTrackday(await res.json(), tdBuilds);
+    }
+  });
+  tdEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const msg = form.querySelector('.lf-msg')!;
+    const body = Object.fromEntries(new FormData(form) as any);
+    msg.textContent = 'SAVING…';
+    try {
+      const res = await fetch(`${API_BASE}/api/garage/trackday/${encodeURIComponent(tdSel)}/session`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) { localStorage.removeItem(KEY); location.reload(); return; }
+      if (!res.ok) { msg.textContent = 'CHECK THE LAP TIME FORMAT'; return; }
+      renderTrackday(await res.json(), tdBuilds);
+    } catch {
+      msg.textContent = 'NO SIGNAL — BACKEND OFFLINE?';
+    }
+  });
 
   // --- build log editing: + Add log / Save / Cancel / delete (✕, tap twice) ----
   const buildsEl = document.getElementById('builds')!;

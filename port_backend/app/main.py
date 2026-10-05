@@ -223,6 +223,55 @@ def add_log(build_id: str, entry: LogEntry) -> dict:
     return build
 
 
+_LAP_RE = re.compile(r"^(\d{1,2}:)?\d{1,2}\.\d{1,3}$")  # 1:02.345 or 58.12
+
+
+class TrackSession(BaseModel):
+    date: str
+    vehicle: str = ""
+    best: str          # best lap, e.g. "1:02.345"
+    notes: str = ""
+
+    @field_validator("date")
+    @classmethod
+    def valid_date(cls, v: str) -> str:
+        if not _DATE_RE.match(v.strip()):
+            raise ValueError("date must be YYYY-MM-DD")
+        return v.strip()
+
+    @field_validator("best")
+    @classmethod
+    def valid_best(cls, v: str) -> str:
+        v = v.strip()
+        if not _LAP_RE.match(v):
+            raise ValueError("lap time must look like 1:02.345 or 58.12")
+        return v
+
+    @field_validator("vehicle", "notes")
+    @classmethod
+    def short(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) > 300:
+            raise ValueError("too long")
+        return v
+
+
+@app.post("/api/garage/trackday/{track_id}/session", dependencies=[Depends(require_auth)])
+def add_session(track_id: str, s: TrackSession) -> dict:
+    td = garage_store.add_session(track_id, s.model_dump())
+    if td is None:
+        raise HTTPException(status_code=404, detail="No such track.")
+    return td
+
+
+@app.delete("/api/garage/trackday/{track_id}/session", dependencies=[Depends(require_auth)])
+def delete_session(track_id: str, s: TrackSession) -> dict:
+    td = garage_store.delete_session(track_id, s.model_dump())
+    if td is None:
+        raise HTTPException(status_code=404, detail="No such track.")
+    return td
+
+
 @app.delete("/api/garage/{build_id}/log", dependencies=[Depends(require_auth)])
 def delete_log(build_id: str, entry: LogEntry) -> dict:
     build = garage_store.delete_log(build_id, entry.date, entry.time, entry.note)
