@@ -398,8 +398,6 @@ import Base from '../layouts/Base.astro';
   }
   /* going back: the wipe comes in from the right */
   .cases :global(.slides.rev .slide:not(.on):not(.prev)) { clip-path: polygon(120% 0, 120% 0, 100% 100%, 100% 100%); }
-  /* swipe / drag: the photo follows the pointer a little */
-  .cases :global(.slides.dragging .slide.on) { transform: translateX(var(--drag, 0px)); transition: none; }
   .cases :global(.slide img) { display: block; width: 100%; height: 100%; }
 
   /* field photos: full bleed, slow push-in */
