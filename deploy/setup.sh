@@ -32,7 +32,8 @@ chown -R portfolio:portfolio /opt/portfolio /var/lib/portfolio
 
 echo "==> secrets (/etc/portfolio.env)"
 if [ ! -f /etc/portfolio.env ]; then
-  [ -n "$PASS" ] || PASS="$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16)"
+  # python, not 'tr </dev/urandom | head': that pipe exits with SIGPIPE, which pipefail treats as a failure
+  [ -n "$PASS" ] || PASS="$(python3 -c 'import secrets; print(secrets.token_urlsafe(12))')"
   cat > /etc/portfolio.env <<EOF
 GARAGE_PASSWORD=${PASS}
 GARAGE_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
