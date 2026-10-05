@@ -394,8 +394,12 @@ import Base from '../layouts/Base.astro';
   .cases :global(.slide.prev) { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 2; }
   .cases :global(.slide.on) {
     clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 3;
-    transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1);
+    transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1), transform 0.35s ease;
   }
+  /* going back: the wipe comes in from the right */
+  .cases :global(.slides.rev .slide:not(.on):not(.prev)) { clip-path: polygon(120% 0, 120% 0, 100% 100%, 100% 100%); }
+  /* swipe / drag: the photo follows the pointer a little */
+  .cases :global(.slides.dragging .slide.on) { transform: translateX(var(--drag, 0px)); transition: none; }
   .cases :global(.slide img) { display: block; width: 100%; height: 100%; }
 
   /* field photos: full bleed, slow push-in */
@@ -530,6 +534,7 @@ import Base from '../layouts/Base.astro';
 <script>
   import { initBlueprint } from '../scripts/blueprint';
   import { scrollFx } from '../scripts/scrollfx';
+  import { swipeable } from '../scripts/swipe';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
   import { initMap, type MapApi } from '../scripts/deploymap';
@@ -671,10 +676,12 @@ import Base from '../layouts/Base.astro';
       const num = show.querySelector('.show-num')!;
       show.style.setProperty('--slide-ms', `${SLIDE_MS}ms`);
       let at = 0, timer = 0, visible = false, hover = false;
-      const go = (i: number) => {
+      const box = show.querySelector<HTMLElement>('.slides')!;
+      const go = (i: number, dir: 1 | -1 = 1) => {
         const from = at;
         at = (i + slides.length) % slides.length;
         if (at === from) return;
+        box.classList.toggle('rev', dir < 0); void box.offsetWidth;
         // the outgoing slide stays underneath while the new one wipes in over it
         slides.forEach((s, j) => { s.classList.toggle('prev', j === from); s.classList.toggle('on', j === at); });
         num.textContent = two(at + 1);
@@ -687,7 +694,8 @@ import Base from '../layouts/Base.astro';
         show.classList.toggle('paused', !visible || hover);
         if (visible && !hover && !reduced && slides.length > 1) timer = window.setInterval(() => go(at + 1), SLIDE_MS);
       };
-      dots.forEach((d) => d.addEventListener('click', () => { go(Number(d.dataset.go)); tick(); }));
+      dots.forEach((d) => d.addEventListener('click', () => { const i = Number(d.dataset.go); go(i, i < at ? -1 : 1); tick(); }));
+      if (slides.length > 1) swipeable(box, (dir) => { go(at + dir, dir); tick(); });
       show.addEventListener('pointerenter', () => { hover = true; tick(); });
       show.addEventListener('pointerleave', () => { hover = false; tick(); });
       new IntersectionObserver(([e]) => { visible = e.isIntersecting; tick(); }, { threshold: 0.4 }).observe(show);
