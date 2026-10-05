@@ -4,10 +4,28 @@ import Base from '../layouts/Base.astro';
 <Base title="Rusyaidi Yeng — Environmental monitoring & IoT" description="I set up environmental monitoring systems in the field and build the software behind them.">
   <!-- LIGHTS OUT intro: five reds, a held breath, then go (once per session) -->
   <div class="lights" id="lights" aria-hidden="true">
-    <div class="pods">
-      {[0, 1, 2, 3, 4].map(() => <div class="pod"><i></i><i class="red"></i></div>)}
+    <div class="ls-scene">
+      <i class="ls-haze"></i>
+      <div class="ls-tarmac"><i class="ls-grid"></i></div>
+      <div class="ls-refls">{[0, 1, 2, 3, 4].map(() => <i class="refl"></i>)}</div>
+      <!-- start gantry: truss beam, five hanging modules, 4 LED lamps each (bottom two are the reds) -->
+      <div class="gantry">
+        <div class="beam"><span class="beam-tag mono">START</span></div>
+        <div class="pods">
+          {[0, 1, 2, 3, 4].map(() => (
+            <div class="pod">
+              <span class="lamp"></span><span class="lamp"></span>
+              <span class="lamp red"></span><span class="lamp red"></span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p class="lights-txt" id="lights-txt">ENGINES ON</p>
     </div>
-    <p class="lights-txt lcd-text" id="lights-txt">ENGINES ON</p>
+    <div class="ls-hud">
+      <span class="mono">RACE START</span>
+      <b class="display">Grid P1 · Rusyaidi Yeng</b>
+    </div>
     <button class="lights-skip" type="button" id="lights-skip">SKIP ▸</button>
   </div>
 
@@ -166,30 +184,114 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
-  /* --- lights-out intro ---------------------------------------------------- */
+  /* --- lights-out intro: F1 start gantry ------------------------------------ */
   .lights {
-    position: fixed; inset: 0; z-index: 100; background: #040405;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4rem;
-    transition: clip-path 0.75s cubic-bezier(0.76, 0, 0.24, 1);
-    clip-path: inset(0 0 0 0);
+    --l: clamp(22px, 4.6vw, 52px);                  /* lamp size */
+    --dot: calc(var(--l) / 11);                     /* LED pitch: ~11 LEDs across */
+    --pw: calc(var(--l) + 1.2rem);                  /* module width */
+    --gap: clamp(0.5rem, 2.2vw, 1.5rem);
+    --heat: 0;                                      /* 0..1, how many reds are on */
+    position: fixed; inset: 0; z-index: 100; overflow: hidden;
+    background: radial-gradient(120% 80% at 50% 0%, #0d0d12, #030304 70%);
+    transition: opacity 0.5s 0.3s, visibility 0s 0.8s;
   }
-  .lights.go { clip-path: inset(0 0 100% 0); }
+  .lights.go { opacity: 0; visibility: hidden; pointer-events: none; }
   .lights.gone { display: none; }
-  .pods { display: flex; gap: clamp(0.6rem, 2.5vw, 1.6rem); }
+  .ls-scene {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(1.6rem, 4vh, 2.6rem); animation: cam-push 5s cubic-bezier(0.3, 0, 0.3, 1) forwards;
+  }
+  @keyframes cam-push { from { transform: scale(1); } to { transform: scale(1.07); } }
+  /* launch: the camera rushes through the gantry */
+  .lights.go .ls-scene { animation: launch 0.75s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
+  @keyframes launch { from { transform: scale(1.07); } to { transform: scale(2.6) translateY(6%); filter: blur(8px); } }
+
+  /* red haze that builds as the lights come on */
+  .ls-haze {
+    position: absolute; inset: 0; pointer-events: none; opacity: var(--heat); transition: opacity 0.15s;
+    background: radial-gradient(55% 40% at 50% 38%, rgba(255, 30, 10, 0.26), transparent 70%);
+  }
+  /* tarmac + grid lines receding, red reflections under each module */
+  .ls-tarmac { position: absolute; left: -30%; right: -30%; bottom: 0; height: 33%; perspective: 420px; pointer-events: none; }
+  .ls-grid {
+    position: absolute; inset: 0; transform: rotateX(64deg); transform-origin: 50% 0%;
+    background:
+      linear-gradient(90deg, transparent calc(50% - 3px), rgba(255, 255, 255, 0.14) calc(50% - 3px) calc(50% + 3px), transparent calc(50% + 3px)),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 70px),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 140px),
+      linear-gradient(#0b0b0e, #050506);
+    -webkit-mask: linear-gradient(transparent, #000 35%); mask: linear-gradient(transparent, #000 35%);
+  }
+  .ls-refls { position: absolute; left: 0; right: 0; bottom: 4%; height: 34%; display: flex; justify-content: center; gap: var(--gap); pointer-events: none; }
+  .refl {
+    width: var(--pw); height: 100%; opacity: 0; filter: blur(10px); transition: opacity 0.08s;
+    background: radial-gradient(40% 70% at 50% 0%, rgba(255, 40, 20, 0.55), transparent 70%);
+  }
+  .refl.on { opacity: 1; }
+
+  .gantry { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; transform: perspective(900px) rotateX(9deg); }
+  .beam {
+    position: relative; width: calc(5 * var(--pw) + 4 * var(--gap) + clamp(3rem, 14vw, 9rem)); height: clamp(16px, 2.4vw, 26px);
+    display: grid; place-items: center;
+    background:
+      repeating-linear-gradient(60deg, transparent 0 12px, rgba(255, 255, 255, 0.05) 12px 14px),
+      linear-gradient(#34343c, #15151a 45%, #08080a);
+    border-top: 1px solid #4a4a55; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
+  }
+  .beam-tag { font-size: 0.56rem; letter-spacing: 0.5em; color: #6a6a76; }
+  .pods { display: flex; gap: var(--gap); margin-top: 14px; }
   .pod {
-    display: grid; gap: 0.6rem; padding: 0.8rem; border-radius: 14px;
-    background: #111116; border: 1px solid #1f1f27; box-shadow: inset 0 0 20px #000;
+    position: relative; width: var(--pw); display: grid; justify-items: center; gap: calc(var(--l) * 0.24);
+    padding: calc(var(--l) * 0.32) 0 calc(var(--l) * 0.28); border-radius: 7px;
+    background: linear-gradient(180deg, #1b1b21, #0b0b0e 70%);
+    border: 1px solid #26262e;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 -10px 20px rgba(0, 0, 0, 0.6), 0 20px 34px rgba(0, 0, 0, 0.7);
   }
-  .pod i {
-    display: block; width: clamp(34px, 7vw, 64px); aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #2a2a30, #121215 60%);
-    transition: background 0.05s, box-shadow 0.05s;
+  /* hanger bracket up to the beam */
+  .pod::before {
+    content: ''; position: absolute; left: 32%; right: 32%; top: -15px; height: 15px;
+    background: linear-gradient(90deg, #0d0d10, #2a2a31 50%, #0d0d10);
   }
-  .pod.on i.red {
-    background: radial-gradient(circle at 35% 30%, #ff8a80, #ff1a0a 45%, #a30000);
-    box-shadow: 0 0 30px #ff1a0a, 0 0 80px rgba(255, 26, 10, 0.5);
+  /* LED lamp: a disc of tiny LEDs in a bezel, shaded by a visor */
+  .lamp {
+    position: relative; display: block; width: var(--l); aspect-ratio: 1; border-radius: 50%;
+    background:
+      radial-gradient(circle closest-side, #2b0a08 0 50%, transparent 75%) 0 0 / var(--dot) var(--dot),
+      radial-gradient(circle at 50% 45%, #170707, #050303 72%);
+    box-shadow: inset 0 0 0 2px #050506, 0 0 0 2px #1d1d23, 0 0 0 3px #08080a;
   }
-  .lights-txt { --c: var(--amber); font-size: clamp(1.2rem, 3.5vw, 2rem); letter-spacing: 0.25em; margin: 0; }
+  .lamp:not(.red) { opacity: 0.55; }                 /* upper rows stay dark at the start */
+  .lamp::before {                                     /* visor lip */
+    content: ''; position: absolute; z-index: 2; left: -14%; right: -14%; top: -12%; height: 36%;
+    border-radius: 50% 50% 18% 18% / 100% 100% 20% 20%;
+    background: linear-gradient(#2a2a31, #0c0c0f 70%, #050506);
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.85);
+  }
+  .lamp::after {                                      /* bloom */
+    content: ''; position: absolute; inset: -70%; border-radius: 50%; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle, rgba(255, 70, 40, 0.6), rgba(255, 20, 0, 0.18) 38%, transparent 62%);
+    mix-blend-mode: screen;
+  }
+  .pod.on .lamp.red {
+    background:
+      radial-gradient(circle closest-side, #ffe0d6 0 35%, #ff3418 50% 72%, transparent 90%) 0 0 / var(--dot) var(--dot),
+      radial-gradient(circle at 50% 50%, #ff4a2a, #c81000 58%, #520400);
+    box-shadow: inset 0 0 0 2px #050506, 0 0 0 2px #1d1d23, 0 0 0 3px #08080a, 0 0 16px 3px rgba(255, 40, 20, 0.8);
+    animation: lamp-on 0.12s steps(3);
+  }
+  .pod.on .lamp.red::after { opacity: 1; }
+  @keyframes lamp-on { 0% { filter: brightness(0.4); } 50% { filter: brightness(1.6); } }
+
+  .lights-txt {
+    position: relative; z-index: 1; margin: 0; color: #f3f3f5; text-transform: uppercase;
+    font-family: var(--display); font-style: italic; font-weight: 900; letter-spacing: 0.12em;
+    font-size: clamp(1.1rem, 3vw, 1.9rem); text-shadow: 0 0 24px rgba(255, 40, 20, calc(var(--heat) * 0.8));
+  }
+  .lights.go .lights-txt { color: #fff; letter-spacing: 0.2em; }
+  .ls-hud { position: absolute; left: 1.4rem; bottom: 1.3rem; display: grid; gap: 0.2rem; }
+  .ls-hud span { font-size: 0.62rem; letter-spacing: 0.3em; color: var(--amber); }
+  .ls-hud b { font-size: clamp(0.95rem, 2vw, 1.25rem); font-style: italic; text-transform: uppercase; color: #e6e6ec; }
+  @media (max-width: 620px) { .ls-hud { bottom: 4.2rem; } }
   .lights-skip {
     position: absolute; right: 1.4rem; bottom: 1.4rem; background: none; border: 1px solid #2a2a33;
     color: var(--muted); font-family: var(--mono); letter-spacing: 0.2em; padding: 0.4rem 0.8rem; cursor: pointer;
@@ -555,12 +657,15 @@ import Base from '../layouts/Base.astro';
     if (seen || location.hash || reduced) { done(); return Promise.resolve(); }
 
     const pods = Array.from(el.querySelectorAll('.pod'));
+    const refls = Array.from(el.querySelectorAll('.refl'));
     const txt = document.getElementById('lights-txt')!;
     const timers: number[] = [];
     return new Promise((resolve) => {
       const finish = () => {
         timers.forEach(clearTimeout);
         pods.forEach((p) => p.classList.remove('on'));
+        refls.forEach((r) => r.classList.remove('on'));
+        el.style.setProperty('--heat', '0');
         txt.textContent = 'LIGHTS OUT';
         el.classList.add('go');
         resolve();
@@ -569,6 +674,8 @@ import Base from '../layouts/Base.astro';
       document.getElementById('lights-skip')!.addEventListener('click', finish, { once: true });
       pods.forEach((p, i) => timers.push(window.setTimeout(() => {
         p.classList.add('on');
+        refls[i]?.classList.add('on');
+        el.style.setProperty('--heat', String((i + 1) / 5));
         if (i === 0) txt.textContent = 'STAND BY';
       }, 500 + i * 650)));
       // the hold after the fifth light is random, like the real thing
