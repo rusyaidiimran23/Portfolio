@@ -34,27 +34,47 @@ import Base from '../layouts/Base.astro';
         </div>
         <button class="btn" id="lock-out" type="button">Lock again</button>
       </header>
+      <!-- Forza-style menu: GARAGE <-> TRACK DAY screens -->
+      <nav class="fzm" id="fzm" aria-label="Garage screens">
+        <span class="fzm-key mono" aria-hidden="true">Q</span>
+        <button class="fzm-tab" type="button" data-pane-go="garage" aria-selected="true">Garage</button>
+        <button class="fzm-tab" type="button" data-pane-go="track" aria-selected="false">Track Day</button>
+        <span class="fzm-key mono" aria-hidden="true">E</span>
+        <i class="fzm-ink" aria-hidden="true"></i>
+      </nav>
       <div class="kerb"></div>
-      <!-- Forza-style garage: pick a vehicle, its card opens below -->
-      <section class="fz" id="select" aria-label="Choose a vehicle">
-        <div class="fz-head">
-          <p class="eyebrow">My garage — choose a vehicle</p>
-          <span class="fz-count lcd-text" id="fz-count"></span>
-        </div>
-        <div class="fz-grid" id="fz-grid"></div>
-      </section>
-      <div id="builds" class="builds"></div>
 
-      <!-- TRACK DAY: personal bests per track, ghost lap on the map -->
-      <section class="td" id="trackday" aria-label="Track day">
-        <div class="kerb"></div>
-        <div class="td-head">
-          <div><p class="eyebrow">Track day — personal bests</p><h2 class="td-title display">Track Day</h2></div>
-          <span class="td-count lcd-text" id="td-count"></span>
+      <div class="panes" id="panes">
+        <div class="pane on" data-pane="garage">
+        <!-- Forza-style garage: pick a vehicle, its card opens below -->
+        <section class="fz" id="select" aria-label="Choose a vehicle">
+          <div class="fz-head">
+            <p class="eyebrow">My garage — choose a vehicle</p>
+            <span class="fz-count lcd-text" id="fz-count"></span>
+          </div>
+          <div class="fz-grid" id="fz-grid"></div>
+        </section>
+        <div id="builds" class="builds"></div>
+
         </div>
-        <div class="td-tabs" id="td-tabs" role="tablist" aria-label="Tracks"></div>
-        <div class="td-stage" id="td-stage"></div>
-      </section>
+
+        <div class="pane" data-pane="track" hidden>
+        <!-- TRACK DAY: personal bests per track, ghost lap on the map -->
+        <section class="td" id="trackday" aria-label="Track day">
+          <div class="td-head">
+            <div><p class="eyebrow">Track day — personal bests</p><h2 class="td-title display">Track Day</h2></div>
+            <span class="td-count lcd-text" id="td-count"></span>
+          </div>
+          <div class="td-tabs" id="td-tabs" role="tablist" aria-label="Tracks"></div>
+          <div class="td-stage" id="td-stage"></div>
+        </section>
+        </div>
+      </div>
+
+      <!-- edge arrows + the slash that sweeps across on a screen change -->
+      <button class="edge edge-next" type="button" data-pane-go="track" aria-label="Go to Track Day"><span>Track Day</span><b>▸</b></button>
+      <button class="edge edge-prev" type="button" data-pane-go="garage" aria-label="Back to Garage" hidden><b>◂</b><span>Garage</span></button>
+      <div class="slash" id="slash" aria-hidden="true"><span id="slash-label"></span></div>
     </section>
   </main>
 </Base>
@@ -154,7 +174,7 @@ import Base from '../layouts/Base.astro';
   .builds :global(.tile b) { --c2: var(--c); display: block; font-size: 1rem; color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 50%, transparent); }
 
   /* --- Track Day ------------------------------------------------------------------- */
-  .td { margin-top: 4rem; scroll-margin-top: 90px; }
+  .td { margin-top: 2.2rem; scroll-margin-top: 90px; }
   .td-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin: 1.6rem 0 1.2rem; }
   .td-title { font-size: clamp(2.4rem, 6vw, 4rem); font-style: italic; text-transform: uppercase; margin-top: 0.35rem; }
   .td-count { --c: var(--purple); font-size: 1rem; letter-spacing: 0.1em; }
@@ -438,6 +458,93 @@ import Base from '../layouts/Base.astro';
     .builds :global(.tiles) { grid-template-columns: 1fr 1fr; }
     .builds :global(.log li) { grid-template-columns: 1fr; gap: 0.2rem; }
   }
+  /* --- Forza-style screens: GARAGE <-> TRACK DAY ------------------------------- */
+  .fzm { position: relative; display: flex; align-items: center; gap: clamp(0.9rem, 3vw, 2rem); margin: 1.6rem 0 0.9rem; }
+  .fzm-tab {
+    padding: 0.2rem 0; background: none; border: 0; cursor: pointer; color: var(--muted);
+    font-family: var(--display); font-style: italic; font-weight: 900; text-transform: uppercase;
+    font-size: clamp(1.25rem, 3.2vw, 2.1rem); letter-spacing: 0.02em; line-height: 1; transition: color 0.25s;
+  }
+  .fzm-tab:hover { color: #c9c9d2; }
+  .fzm-tab[aria-selected='true'] { color: var(--ink); text-shadow: 0 0 22px rgba(255, 43, 214, 0.45); }
+  .fzm-tab:focus-visible { outline: 2px solid var(--pink); outline-offset: 4px; }
+  .fzm-key {
+    display: grid; place-items: center; min-width: 1.7rem; height: 1.7rem; padding: 0 0.35rem;
+    font-size: 0.8rem; color: var(--muted); border: 1px solid #2c2c36; border-radius: 4px; background: #0b0b10;
+  }
+  .fzm-ink {
+    position: absolute; left: 0; bottom: -0.55rem; width: 0; height: 4px; background: var(--pink);
+    transform: skewX(-24deg); box-shadow: 0 0 14px rgba(255, 43, 214, 0.8);
+    transition: left 0.5s cubic-bezier(0.7, 0, 0.2, 1), width 0.5s cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  @media (pointer: coarse) { .fzm-key { display: none; } }
+
+  .pane { will-change: transform, opacity; }
+  .pane.out-fwd  { animation: pane-out 0.3s cubic-bezier(0.55, 0, 0.8, 0.3) forwards; --dx: -9%; }
+  .pane.out-back { animation: pane-out 0.3s cubic-bezier(0.55, 0, 0.8, 0.3) forwards; --dx: 9%; }
+  .pane.in-fwd   { animation: pane-in 0.5s cubic-bezier(0.15, 0.85, 0.25, 1) both; --dx: 11%; }
+  .pane.in-back  { animation: pane-in 0.5s cubic-bezier(0.15, 0.85, 0.25, 1) both; --dx: -11%; }
+  @keyframes pane-out { to { transform: translateX(var(--dx)) skewX(-7deg); opacity: 0; filter: blur(6px); } }
+  @keyframes pane-in  { from { transform: translateX(var(--dx)) skewX(-7deg); opacity: 0; filter: blur(6px); } }
+
+  /* the diagonal slash that sweeps the screen (covers the swap at its midpoint) */
+  .slash { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; visibility: hidden; }
+  .slash::before, .slash::after, .slash span { position: absolute; top: -10%; bottom: -10%; left: 0; }
+  .slash::before {
+    content: ''; width: 140vw;
+    background:
+      repeating-linear-gradient(-70deg, transparent 0 46px, rgba(255, 255, 255, 0.07) 46px 50px),
+      linear-gradient(100deg, #ff2bd6, #b14cff 55%, #ff2bd6);
+  }
+  .slash::after { content: ''; width: 3vw; background: var(--lime); box-shadow: 0 0 30px var(--lime); }
+  .slash span {
+    width: 140vw; display: grid; place-items: center; color: #fff; white-space: nowrap;
+    font-family: var(--display); font-style: italic; font-weight: 900; text-transform: uppercase;
+    font-size: clamp(3rem, 12vw, 10rem); letter-spacing: -0.02em; text-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+  }
+  .slash.fwd, .slash.back { visibility: visible; }
+  .slash.fwd::before, .slash.fwd span  { animation: slash-fwd 0.66s cubic-bezier(0.75, 0, 0.25, 1) both; }
+  .slash.fwd::after                    { animation: slash-fwd-edge 0.66s cubic-bezier(0.75, 0, 0.25, 1) both; }
+  .slash.back::before, .slash.back span { animation: slash-back 0.66s cubic-bezier(0.75, 0, 0.25, 1) both; }
+  .slash.back::after                    { animation: slash-back-edge 0.66s cubic-bezier(0.75, 0, 0.25, 1) both; }
+  @keyframes slash-fwd  { from { transform: translateX(100vw) skewX(-18deg); } to { transform: translateX(-140vw) skewX(-18deg); } }
+  @keyframes slash-back { from { transform: translateX(-140vw) skewX(-18deg); } to { transform: translateX(100vw) skewX(-18deg); } }
+  /* lime edge rides just ahead of the band */
+  @keyframes slash-fwd-edge  { from { transform: translateX(96vw) skewX(-18deg); } to { transform: translateX(-144vw) skewX(-18deg); } }
+  @keyframes slash-back-edge { from { transform: translateX(0vw) skewX(-18deg); } to { transform: translateX(240vw) skewX(-18deg); } }
+
+  /* edge arrows */
+  .edge {
+    position: fixed; top: 50%; z-index: 30; display: flex; align-items: center; gap: 0.6rem;
+    padding: 1rem 1.3rem; border: 0; cursor: pointer; color: #fff; background: var(--pink);
+    font-family: var(--display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1rem;
+    letter-spacing: 0.04em; box-shadow: 0 0 30px -4px rgba(255, 43, 214, 0.7); transition: padding 0.25s, filter 0.25s;
+  }
+  .edge b { font-size: 1.5rem; line-height: 0.6; }
+  /* desktop: slim vertical tabs that live in the side margin */
+  .edge-next, .edge-prev { writing-mode: vertical-rl; padding: 1.4rem 0.75rem; transform: translateY(-50%); }
+  .edge-next { right: 0; clip-path: polygon(0 12px, 100% 0, 100% 100%, 0 calc(100% - 12px)); }
+  .edge-prev { left: 0; clip-path: polygon(0 0, 100% 12px, 100% calc(100% - 12px), 0 100%); }
+  .edge-prev span { transform: rotate(180deg); }
+  .edge-prev b { order: -1; }
+  .edge-next:hover { padding-right: 1.05rem; filter: brightness(1.15); }
+  .edge-prev:hover { padding-left: 1.05rem; filter: brightness(1.15); }
+  .edge-next b, .edge-prev b { writing-mode: horizontal-tb; }
+  .edge-next b { animation: nudge-r 1.4s ease-in-out infinite; }
+  .edge-prev b { animation: nudge-l 1.4s ease-in-out infinite; }
+  @keyframes nudge-r { 50% { transform: translateX(5px); } }
+  @keyframes nudge-l { 50% { transform: translateX(-5px); } }
+  .edge[hidden] { display: none; }
+  @media (max-width: 1240px) {
+    /* phones/tablets: compact pills at the bottom so they never cover the content column */
+    .edge, .edge-next, .edge-prev { writing-mode: horizontal-tb; top: auto; bottom: 14px; transform: none; padding: 0.7rem 1rem; font-size: 0.85rem; }
+    .edge-prev span { transform: none; }
+    .edge b { font-size: 1.3rem; }
+    .edge-next { right: 12px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding-left: 1.2rem; }
+    .edge-prev { left: 12px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding-right: 1.2rem; }
+    .edge-next:hover, .edge-prev:hover { padding: 0.7rem 1rem 0.7rem 1.2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .edge b { animation: none; } }
 </style>
 
 <script>
@@ -479,7 +586,7 @@ import Base from '../layouts/Base.astro';
     renderTrackday(data.trackday, data.builds ?? []);
     gate.hidden = true;
     content.hidden = false;
-    if (!keepScroll) window.scrollTo({ top: 0 });
+    if (!keepScroll) { window.scrollTo({ top: 0 }); setPane(paneFromHash(), false); }
     return true;
   }
 
@@ -935,6 +1042,98 @@ import Base from '../layouts/Base.astro';
       err.textContent = 'NO SIGNAL — IS THE BACKEND RUNNING?';
     }
   });
+
+  // --- Forza-style screens: GARAGE <-> TRACK DAY ------------------------------------
+  type Pane = 'garage' | 'track';
+  const PANES: Pane[] = ['garage', 'track'];
+  const LABEL: Record<Pane, string> = { garage: 'Garage', track: 'Track Day' };
+  const fzm = document.getElementById('fzm')!;
+  const ink = fzm.querySelector<HTMLElement>('.fzm-ink')!;
+  const slash = document.getElementById('slash')!;
+  let pane: Pane = 'garage';
+  let switching = false;
+  const paneFromHash = (): Pane => (location.hash === '#track' ? 'track' : 'garage');
+  const paneEl = (p: Pane) => document.querySelector<HTMLElement>(`.pane[data-pane="${p}"]`)!;
+
+  function moveInk() {
+    const tab = fzm.querySelector<HTMLElement>(`.fzm-tab[data-pane-go="${pane}"]`);
+    if (!tab || !tab.offsetWidth) return;
+    ink.style.left = `${tab.offsetLeft}px`;
+    ink.style.width = `${tab.offsetWidth}px`;
+  }
+
+  function chrome() { // tabs, underline and edge arrows follow the current screen
+    fzm.querySelectorAll<HTMLElement>('.fzm-tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.paneGo === pane)));
+    (document.querySelector('.edge-next') as HTMLElement).hidden = pane === 'track';
+    (document.querySelector('.edge-prev') as HTMLElement).hidden = pane === 'garage';
+    moveInk();
+  }
+
+  function swap(to: Pane) {
+    PANES.forEach((p) => { paneEl(p).hidden = p !== to; paneEl(p).classList.toggle('on', p === to); });
+    pane = to;
+    if (to === 'track' && tdSel) showTrack(tdSel); // replay the race-line draw + ghost
+    // keep the tab bar in view (the jump happens under the slash)
+    const top = fzm.getBoundingClientRect().top + window.scrollY - 90;
+    if (window.scrollY > top) window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+    window.dispatchEvent(new Event('scroll')); // let the scroll animations notice the new screen
+  }
+
+  function setPane(to: Pane, animate = true, push = false) {
+    if (switching || (to === pane && !paneEl(to).hidden && paneEl(to).classList.contains('on'))) { chrome(); return; }
+    if (push) history.pushState(null, '', to === 'track' ? '#track' : location.pathname + location.search);
+    const from = pane;
+    if (!animate || reduced || from === to) { swap(to); chrome(); return; }
+    switching = true;
+    const dir = PANES.indexOf(to) > PANES.indexOf(from) ? 'fwd' : 'back';
+    const out = paneEl(from), inn = paneEl(to);
+    document.getElementById('slash-label')!.textContent = LABEL[to];
+    slash.classList.remove('fwd', 'back'); void slash.offsetWidth; slash.classList.add(dir);
+    out.classList.add(`out-${dir}`);
+    pane = to; chrome(); // underline starts gliding with the slash
+    setTimeout(() => {
+      out.classList.remove(`out-${dir}`);
+      swap(to);
+      inn.classList.add(`in-${dir}`);
+    }, 330);
+    setTimeout(() => {
+      inn.classList.remove(`in-${dir}`);
+      slash.classList.remove(dir);
+      switching = false;
+    }, 860);
+  }
+
+  const go = (to: Pane) => setPane(to, true, true);
+  content.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-pane-go]');
+    if (b) go(b.dataset.paneGo as Pane);
+  });
+  // Q / E like a controller's bumpers (arrow keys too) — not while typing
+  window.addEventListener('keydown', (e) => {
+    if (content.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable]')) return;
+    const k = e.key.toLowerCase();
+    if (k === 'q' || k === 'arrowleft') go('garage');
+    else if (k === 'e' || k === 'arrowright') go('track');
+  });
+  // swipe left / right on phones
+  let sx = 0, sy = 0, sOk = false;
+  const panes = document.getElementById('panes')!;
+  panes.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    sx = t.clientX; sy = t.clientY;
+    // things that scroll sideways themselves keep their swipe
+    sOk = e.touches.length === 1 && !(e.target as HTMLElement).closest('.td-tabs, .fz-grid, .slides, .show, input, textarea, .td-mapwrap');
+  }, { passive: true });
+  panes.addEventListener('touchend', (e) => {
+    if (!sOk) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) go(dx < 0 ? 'track' : 'garage');
+  }, { passive: true });
+  window.addEventListener('popstate', () => { if (!content.hidden) setPane(paneFromHash()); });
+  window.addEventListener('resize', moveInk);
+  document.fonts?.ready.then(moveInk);
 
   document.getElementById('lock-out')!.addEventListener('click', () => {
     localStorage.removeItem(KEY);
