@@ -35,7 +35,7 @@ if [ ! -f /etc/portfolio.env ]; then
   [ -n "$PASS" ] || PASS="$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16)"
   cat > /etc/portfolio.env <<EOF
 GARAGE_PASSWORD=${PASS}
-GARAGE_SECRET=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 64)
+GARAGE_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
 GARAGE_FILE=/var/lib/portfolio/garage.json
 ALLOWED_ORIGINS=https://${SITE},http://${SITE}
 
