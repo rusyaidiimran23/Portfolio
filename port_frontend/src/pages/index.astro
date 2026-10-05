@@ -29,6 +29,39 @@ import Base from '../layouts/Base.astro';
     <button class="lights-skip" type="button" id="lights-skip">SKIP ▸</button>
   </div>
 
+  <!-- EASTER EGG: lights-out reaction game (tap the 5-dot icon in the header 5 times) -->
+  <div class="rx" id="rx" hidden role="dialog" aria-modal="true" aria-label="Lights Out reaction game">
+    <div class="rx-box">
+      <header class="rx-head">
+        <div><p class="eyebrow">Easter egg — you found it</p><h2 class="rx-title display">Lights Out</h2></div>
+        <button class="rx-close" type="button" aria-label="Close">✕</button>
+      </header>
+      <div class="rx-board"><canvas id="rx-cv" tabindex="0" aria-label="LED board: tap when the lights go out"></canvas></div>
+      <div class="rx-bar">
+        <div class="rx-pick" role="group" aria-label="Pick your ride">
+          <button type="button" data-veh="bike">ZX-4RR</button>
+          <button type="button" data-veh="f1">F1 car</button>
+        </div>
+        <p class="rx-help mono">Tap the board or press <kbd>Space</kbd>. Go when the lights go <b>out</b>.</p>
+      </div>
+      <div class="rx-low">
+        <div class="rx-me">
+          <div class="rx-stat"><span class="mono">Last</span><b class="lcd-text" id="rx-last">-.---</b></div>
+          <div class="rx-stat pb"><span class="mono">Your PB</span><b class="lcd-text" id="rx-pb">-.---</b></div>
+          <form class="rx-form" id="rx-form" hidden>
+            <input id="rx-code" maxlength="3" placeholder="ABC" autocomplete="off" aria-label="Your 3-letter code" />
+            <button class="btn btn-primary" type="submit">Post time ▸</button>
+            <span class="rx-msg lcd-text" id="rx-msg"></span>
+          </form>
+        </div>
+        <div class="rx-lb">
+          <p class="eyebrow">Leaderboard — top 10</p>
+          <ol class="rx-top" id="rx-top"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- NAV -->
   <nav class="titlebar">
     <div class="wrap tb-inner">
@@ -38,6 +71,7 @@ import Base from '../layouts/Base.astro';
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
         <a class="lock" href="/garage" title="Private">▣ Garage</a>
+        <button class="egg" id="egg" type="button" aria-label="Start lights" title="Start lights"><i></i><i></i><i></i><i></i><i></i></button>
       </div>
     </div>
   </nav>
@@ -315,6 +349,74 @@ import Base from '../layouts/Base.astro';
   .links a { color: var(--muted); transition: color 0.2s; }
   .links a:hover { color: var(--ink); }
   .links .lock { color: var(--amber); }
+  /* easter-egg trigger: a tiny start-light gantry */
+  .egg {
+    display: flex; gap: 3px; padding: 5px 6px; cursor: pointer; background: #0b0b0f;
+    border: 1px solid #24242c; border-radius: 3px;
+  }
+  .egg i { width: 5px; height: 5px; border-radius: 50%; background: #3a1210; transition: background 0.08s, box-shadow 0.08s; }
+  .egg i.on { background: #ff2a1a; box-shadow: 0 0 6px #ff2a1a; }
+  .egg:hover { border-color: #3a3a46; }
+  .egg:not(:hover) i:first-child { animation: egg-blink 6s steps(1) infinite; } /* one occasional blink */
+  @keyframes egg-blink { 0%, 96% { background: #3a1210; } 97%, 100% { background: #ff2a1a; box-shadow: 0 0 6px #ff2a1a; } }
+
+  /* --- easter egg: Lights Out reaction game --------------------------------- */
+  .rx {
+    position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem;
+    background: rgba(3, 3, 4, 0.88); backdrop-filter: blur(6px); overflow-y: auto;
+  }
+  .rx[hidden] { display: none; }
+  .rx-box {
+    width: min(900px, 100%); display: grid; gap: 1rem; padding: clamp(1rem, 3vw, 1.6rem);
+    background: linear-gradient(180deg, #0f0f14, #08080b); border: 1px solid #22222b; border-top: 3px solid var(--f1red);
+    animation: rx-in 0.4s cubic-bezier(0.15, 0.85, 0.25, 1);
+  }
+  @keyframes rx-in { from { opacity: 0; transform: translateY(20px) scale(0.97); } }
+  .rx-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .rx-head .eyebrow { margin: 0; }
+  .rx-title { font-size: clamp(2rem, 6vw, 3.2rem); font-style: italic; text-transform: uppercase; line-height: 1; margin-top: 0.3rem; }
+  .rx-close { background: none; border: 1px solid #2a2a33; color: var(--muted); font-size: 1rem; width: 2.4rem; height: 2.4rem; cursor: pointer; }
+  .rx-close:hover { color: var(--ink); border-color: var(--muted); }
+  .rx-board { padding: 10px; background: #020203; border: 1px solid #1b1b22; border-radius: 6px; box-shadow: inset 0 0 30px #000, 0 0 40px -10px rgba(255, 42, 26, 0.35); }
+  .rx-board canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-action: none; outline: none; }
+  .rx-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .rx-pick { display: flex; }
+  .rx-pick button {
+    padding: 0.5rem 1rem; cursor: pointer; background: #0b0b10; color: var(--muted); border: 1px solid #26262e;
+    font-family: var(--display); font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .rx-pick button + button { border-left: 0; }
+  .rx-pick button[aria-pressed='true'] { color: #fff; background: var(--f1red); border-color: var(--f1red); }
+  .rx-help { margin: 0; font-size: 0.78rem; color: var(--muted); }
+  .rx-help b { color: var(--ink); }
+  .rx-help kbd { font-family: var(--mono); padding: 0 0.35rem; border: 1px solid #2c2c36; border-radius: 3px; color: var(--ink); }
+  .rx-low { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1.2rem; }
+  .rx-me { display: grid; gap: 0.7rem; align-content: start; }
+  .rx-stat { display: flex; align-items: baseline; justify-content: space-between; padding: 0.6rem 0.9rem; background: #060608; border-left: 3px solid #2a2a33; }
+  .rx-stat span { font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .rx-stat b { --c: var(--ink); color: var(--ink); font-size: 1.8rem; line-height: 1; }
+  .rx-stat.pb { border-left-color: var(--purple); }
+  .rx-stat.pb b { --c: var(--purple); color: var(--purple); }
+  .rx-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .rx-form[hidden] { display: none; }
+  .rx-form input {
+    width: 5.2rem; padding: 0.55rem 0.7rem; font-family: var(--lcd); font-size: 1.3rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--amber); caret-color: var(--amber); background: #030304; border: 1px solid #2a2a33;
+  }
+  .rx-form input:focus { outline: none; border-color: var(--amber); }
+  .rx-form .btn { padding: 0.55rem 1rem; font-size: 0.85rem; }
+  .rx-msg { --c: var(--amber); font-size: 0.85rem; }
+  .rx-lb .eyebrow { margin: 0 0 0.5rem; }
+  .rx-top { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; max-height: 15rem; overflow-y: auto; }
+  .rx-top :global(li) { display: grid; grid-template-columns: 2.4rem 3.2rem 1fr auto; align-items: baseline; gap: 0.6rem; padding: 0.35rem 0.7rem; background: #060608; }
+  .rx-top :global(li.p1) { background: color-mix(in srgb, var(--purple) 14%, #060608); box-shadow: inset 3px 0 0 var(--purple); }
+  .rx-top :global(.rk) { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .rx-top :global(b) { font-family: var(--display); font-style: italic; letter-spacing: 0.08em; }
+  .rx-top :global(.tm) { --c: var(--ink); color: var(--ink); font-size: 1.05rem; }
+  .rx-top :global(li.p1 .tm) { --c: var(--purple); color: var(--purple); }
+  .rx-top :global(em) { font-style: normal; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--muted); }
+  .rx-top :global(li.empty) { grid-template-columns: 1fr; color: var(--muted); font-size: 0.85rem; }
+  @media (max-width: 700px) { .rx-low { grid-template-columns: 1fr; } .rx { place-items: start center; } }
 
   /* --- hero: name + one line + the map ---------------------------------------- */
   .hero {
@@ -639,6 +741,7 @@ import Base from '../layouts/Base.astro';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
+  import { initReaction } from '../scripts/reaction';
 
   initBlueprint(); // reveal-on-scroll
   scrollFx();      // scroll choreography (titles, wipes, parallax, hero exit)
@@ -712,6 +815,7 @@ import Base from '../layouts/Base.astro';
       return { projects: [], offline: true };
     }
   }
+  initReaction(); // easter egg: 5 taps on the start-light icon in the header
   const contentReady = loadContent();
 
   /** Scroll to a project's case study and flash it in its colour. */

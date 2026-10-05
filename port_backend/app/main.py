@@ -11,6 +11,10 @@ Private (Cefiro / ZX-4RR) — saved in app/garage.json:
     GET  /api/garage         -> requires header  Authorization: Bearer <token>
     POST   /api/garage/{id}/log -> {date, time?, note}  add a build-log entry (auth)
     DELETE /api/garage/{id}/log -> {date, time?, note}  remove that entry (auth)
+Easter-egg reaction game (game.py, SQLite):
+    GET  /api/game/top       -> top 10 reaction times
+    POST /api/game/start     -> {ticket}  one per run
+    POST /api/game/score     -> {ticket, code, ms, vehicle}
 """
 from __future__ import annotations
 
@@ -26,7 +30,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
 from .data import CONTENT
-from . import garage_store, mailer
+from . import game, garage_store, mailer
 
 # --- config -----------------------------------------------------------------
 # Change the garage password by setting GARAGE_PASSWORD in the environment.
@@ -278,3 +282,65 @@ def delete_log(build_id: str, entry: LogEntry) -> dict:
     if build is None:
         raise HTTPException(status_code=404, detail="No such build.")
     return build
+
+
+# --- easter egg: lights-out reaction game ---------------------------------------
+
+_GAME_LIMIT, _GAME_WINDOW = 30, 3600   # score submissions per IP per hour
+_game_hits: dict[str, list[float]] = {}
+
+
+class GameScore(BaseModel):
+    ticket: str
+    code: str
+    ms: int
+    vehicle: str
+
+    @field_validator("code")
+    @classmethod
+    def valid_code(cls, v: str) -> str:
+        v = v.strip().upper()
+        if not re.fullmatch(r"[A-Z]{3}", v):
+            raise ValueError("code must be 3 letters")
+        if not game.code_ok(v):
+            raise ValueError("pick another code")
+        return v
+
+    @field_validator("ms")
+    @classmethod
+    def valid_ms(cls, v: int) -> int:
+        if not game.MIN_MS <= v <= game.MAX_MS:
+            raise ValueError("reaction time out of range")
+        return v
+
+    @field_validator("vehicle")
+    @classmethod
+    def valid_vehicle(cls, v: str) -> str:
+        if v not in game.VEHICLES:
+            raise ValueError("unknown vehicle")
+        return v
+
+
+@app.get("/api/game/top")
+def game_top() -> list[dict]:
+    return game.top()
+
+
+@app.post("/api/game/start")
+def game_start() -> dict:
+    return {"ticket": game.new_ticket()}
+
+
+@app.post("/api/game/score")
+def game_score(s: GameScore, request: Request) -> list[dict]:
+    ip = request.client.host if request.client else ""
+    now = time.time()
+    hits = [t for t in _game_hits.get(ip, []) if now - t < _GAME_WINDOW]
+    if len(hits) >= _GAME_LIMIT:
+        raise HTTPException(status_code=429, detail="Too many runs — cool the tyres and try later.")
+    _game_hits[ip] = hits + [now]
+    reason = game.redeem_ticket(s.ticket)
+    if reason:
+        raise HTTPException(status_code=400, detail=reason)
+    game.add_score(s.code, s.ms, s.vehicle, ip)
+    return game.top()

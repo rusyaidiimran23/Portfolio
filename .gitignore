@@ -20,3 +20,6 @@ port_backend/app/garage.tmp
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# easter-egg leaderboard database
+port_backend/app/scores.db
