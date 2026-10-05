@@ -38,7 +38,7 @@ npm run dev
 Secrets (garage password, SMTP for the contact form) live on the server in
 `/etc/portfolio.env` — never in this repo.
 
-Turn on contact-form email (asks for a Gmail App Password, hidden, then sends a test email):
+Turn on contact-form email (via Resend - DigitalOcean blocks outgoing SMTP; asks for the API key, hidden, then sends a test email):
 ```powershell
 .\deploy\set-email.ps1 -Server root@SERVER_IP -Gmail you@gmail.com
 ```
