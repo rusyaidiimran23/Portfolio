@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /garage
+
+Sitemap: https://rusyaidi.is-a.dev/sitemap.xml

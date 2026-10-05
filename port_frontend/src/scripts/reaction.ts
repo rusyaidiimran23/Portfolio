@@ -3,6 +3,7 @@
 // Times go to a global top 10 (port_backend/app/game.py).
 
 import { API_BASE } from '../lib/api';
+import { track } from './track';
 
 const W = 96, H = 36;                          // board size in LEDs
 const PAL: Record<string, string> = {
@@ -313,6 +314,7 @@ export function initReaction() {
 
   function openGame() {
     box.hidden = false; open = true;
+    track('game');
     document.documentElement.style.overflow = 'hidden';
     pbEl.textContent = pb ? (pb / 1000).toFixed(3) : '-.---';
     size(); go('idle'); loadTop();

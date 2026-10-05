@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Garage — Rusyaidi Yeng" description="Private build logs.">
+<Base title="Garage — Rusyaidi Yeng" description="Private build logs." noindex>
   <nav class="titlebar">
     <div class="wrap tb-inner">
       <a class="brand display" href="/"><span class="num">07</span><span>RUSYAIDI <b>YENG</b></span></a>
@@ -39,6 +39,7 @@ import Base from '../layouts/Base.astro';
         <span class="fzm-key mono" aria-hidden="true">Q</span>
         <button class="fzm-tab" type="button" data-pane-go="garage" aria-selected="true">Garage</button>
         <button class="fzm-tab" type="button" data-pane-go="track" aria-selected="false">Track Day</button>
+        <button class="fzm-tab" type="button" data-pane-go="stats" aria-selected="false">Stats</button>
         <span class="fzm-key mono" aria-hidden="true">E</span>
         <i class="fzm-ink" aria-hidden="true"></i>
       </nav>
@@ -67,6 +68,17 @@ import Base from '../layouts/Base.astro';
           </div>
           <div class="td-tabs" id="td-tabs" role="tablist" aria-label="Tracks"></div>
           <div class="td-stage" id="td-stage"></div>
+        </section>
+        </div>
+
+        <div class="pane" data-pane="stats" hidden>
+        <!-- STATS: who's been visiting the public site (private, from /api/stats) -->
+        <section class="st" id="stats" aria-label="Visitor stats">
+          <div class="td-head">
+            <div><p class="eyebrow">Telemetry — who's watching</p><h2 class="td-title display">Stats</h2></div>
+            <span class="td-count lcd-text" id="st-upd">--</span>
+          </div>
+          <div class="st-body" id="st-body"><p class="st-empty mono">Loading telemetry…</p></div>
         </section>
         </div>
       </div>
@@ -365,6 +377,36 @@ import Base from '../layouts/Base.astro';
     .td-stage :global(.ts-meta) { grid-column: 1 / -1; }
   }
 
+  /* --- Stats ---------------------------------------------------------------------- */
+  .st-body :global(.st-kpis) { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; }
+  .st-body :global(.st-kpi) {
+    display: grid; gap: 0.3rem; padding: 0.9rem 1rem; background: #08080b; border: 1px solid #1c1c24; border-top: 3px solid var(--c);
+  }
+  .st-body :global(.st-kpi span) { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .st-body :global(.st-kpi b) { color: var(--c); font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1; }
+  .st-body :global(.st-chart) { margin-top: 1rem; padding: 1rem; background: #08080b; border: 1px solid #1c1c24; }
+  .st-body :global(.st-chart-head) { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .st-body :global(.st-chart-head .eyebrow) { margin: 0; }
+  .st-body :global(.st-chart-head span), .st-body :global(.st-axis) { font-size: 0.66rem; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; }
+  .st-body :global(.st-chart svg) { display: block; width: 100%; height: 170px; margin-top: 0.8rem; }
+  .st-body :global(.st-chart rect) { fill: color-mix(in srgb, var(--pink) 55%, #1c1c24); }
+  .st-body :global(.st-chart rect.best) { fill: var(--purple); }
+  .st-body :global(.st-chart rect.today) { fill: var(--green); }
+  .st-body :global(.st-chart rect:hover) { fill: #fff; }
+  .st-body :global(.st-axis) { display: flex; justify-content: space-between; margin-top: 0.4rem; }
+  .st-body :global(.st-cols) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .st-body :global(.st-cols .eyebrow) { margin: 0 0 0.5rem; }
+  .st-body :global(.st-list) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+  .st-body :global(.st-list li) { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0.8rem; background: #060608; border-left: 3px solid #2a2a33; }
+  .st-body :global(.st-list li:first-child) { border-left-color: var(--purple); }
+  .st-body :global(.st-list span) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .st-body :global(.st-list b) { --c: var(--ink); color: var(--ink); }
+  .st-body :global(.st-empty) { color: var(--muted); font-size: 0.8rem; margin: 0; }
+  @media (max-width: 760px) {
+    .st-body :global(.st-kpis) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .st-body :global(.st-cols) { grid-template-columns: 1fr; }
+  }
+
   /* --- Forza-style garage grid ----------------------------------------------------- */
   .fz { margin: 2.2rem 0 3rem; scroll-margin-top: 90px; }
   .fz-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
@@ -651,6 +693,7 @@ import Base from '../layouts/Base.astro';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { swipeable } from '../scripts/swipe';
   import { spinner } from '../scripts/spin';
+  import { OWNER_KEY } from '../scripts/track';
 
   type Photo = { src: string; caption?: string };
   type LogItem = { date: string; time?: string; note: string };
@@ -685,6 +728,7 @@ import Base from '../layouts/Base.astro';
     renderTrackday(data.trackday, data.builds ?? []);
     gate.hidden = true;
     content.hidden = false;
+    try { localStorage.setItem(OWNER_KEY, '1'); } catch { /* storage blocked */ }
     if (!keepScroll) { window.scrollTo({ top: 0 }); setPane(paneFromHash(), false); }
     return true;
   }
@@ -1258,15 +1302,16 @@ import Base from '../layouts/Base.astro';
   });
 
   // --- Forza-style screens: GARAGE <-> TRACK DAY ------------------------------------
-  type Pane = 'garage' | 'track';
-  const PANES: Pane[] = ['garage', 'track'];
-  const LABEL: Record<Pane, string> = { garage: 'Garage', track: 'Track Day' };
+  type Pane = 'garage' | 'track' | 'stats';
+  const PANES: Pane[] = ['garage', 'track', 'stats'];
+  const LABEL: Record<Pane, string> = { garage: 'Garage', track: 'Track Day', stats: 'Stats' };
   const fzm = document.getElementById('fzm')!;
   const ink = fzm.querySelector<HTMLElement>('.fzm-ink')!;
   const slash = document.getElementById('slash')!;
   let pane: Pane = 'garage';
   let switching = false;
-  const paneFromHash = (): Pane => (location.hash === '#track' ? 'track' : 'garage');
+  const paneFromHash = (): Pane => (PANES.find((p) => p !== 'garage' && location.hash === `#${p}`) ?? 'garage');
+  const step = (d: 1 | -1): Pane | undefined => PANES[PANES.indexOf(pane) + d];
   const paneEl = (p: Pane) => document.querySelector<HTMLElement>(`.pane[data-pane="${p}"]`)!;
 
   function moveInk() {
@@ -1278,8 +1323,14 @@ import Base from '../layouts/Base.astro';
 
   function chrome() { // tabs, underline and edge arrows follow the current screen
     fzm.querySelectorAll<HTMLElement>('.fzm-tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.paneGo === pane)));
-    (document.querySelector('.edge-next') as HTMLElement).hidden = pane === 'track';
-    (document.querySelector('.edge-prev') as HTMLElement).hidden = pane === 'garage';
+    ([['.edge-next', step(1)], ['.edge-prev', step(-1)]] as const).forEach(([sel, to]) => {
+      const b = document.querySelector<HTMLElement>(sel)!;
+      b.hidden = !to;
+      if (!to) return;
+      b.dataset.paneGo = to;
+      b.querySelector('span')!.textContent = LABEL[to];
+      b.setAttribute('aria-label', `Go to ${LABEL[to]}`);
+    });
     moveInk();
   }
 
@@ -1287,6 +1338,7 @@ import Base from '../layouts/Base.astro';
     PANES.forEach((p) => { paneEl(p).hidden = p !== to; paneEl(p).classList.toggle('on', p === to); });
     pane = to;
     if (to === 'track' && tdSel) showTrack(tdSel); // replay the race-line draw + ghost
+    if (to === 'stats') loadStats();
     // keep the tab bar in view (the jump happens under the slash)
     const top = fzm.getBoundingClientRect().top + window.scrollY - 90;
     if (window.scrollY > top) window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
@@ -1295,7 +1347,7 @@ import Base from '../layouts/Base.astro';
 
   function setPane(to: Pane, animate = true, push = false) {
     if (switching || (to === pane && !paneEl(to).hidden && paneEl(to).classList.contains('on'))) { chrome(); return; }
-    if (push) history.pushState(null, '', to === 'track' ? '#track' : location.pathname + location.search);
+    if (push) history.pushState(null, '', to === 'garage' ? location.pathname + location.search : `#${to}`);
     const from = pane;
     if (!animate || reduced || from === to) { swap(to); chrome(); return; }
     switching = true;
@@ -1327,8 +1379,8 @@ import Base from '../layouts/Base.astro';
     if (content.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
     if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable]')) return;
     const k = e.key.toLowerCase();
-    if (k === 'q' || k === 'arrowleft') go('garage');
-    else if (k === 'e' || k === 'arrowright') go('track');
+    const to = k === 'q' || k === 'arrowleft' ? step(-1) : k === 'e' || k === 'arrowright' ? step(1) : undefined;
+    if (to) go(to);
   });
   // swipe left / right on phones
   let sx = 0, sy = 0, sOk = false;
@@ -1343,9 +1395,55 @@ import Base from '../layouts/Base.astro';
     if (!sOk) return;
     const t = e.changedTouches[0];
     const dx = t.clientX - sx, dy = t.clientY - sy;
-    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) go(dx < 0 ? 'track' : 'garage');
+    const to = Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8 ? step(dx < 0 ? 1 : -1) : undefined;
+    if (to) go(to);
   }, { passive: true });
   window.addEventListener('popstate', () => { if (!content.hidden) setPane(paneFromHash()); });
+
+  // --- STATS: private telemetry ------------------------------------------------------
+  type Row = { name: string; count: number };
+  type Report = {
+    today: number; month: number; total: number; online: number;
+    days: { day: string; visitors: number; views: number }[]; refs: Row[]; projects: Row[]; events: Row[];
+  };
+  let projectNames: Record<string, string> | null = null;
+  async function loadStats() {
+    const body = document.getElementById('st-body')!;
+    const res = await fetch(`${API_BASE}/api/stats`, { headers: { Authorization: `Bearer ${token()}` } }).catch(() => null);
+    if (!res || !res.ok) { body.innerHTML = '<p class="st-empty mono">No telemetry — is the backend running?</p>'; return; }
+    const r: Report = await res.json();
+    projectNames ??= await fetch(`${API_BASE}/api/content`).then((x) => x.json())
+      .then((c) => Object.fromEntries((c.projects ?? []).map((p: { id: string; tag: string }) => [p.id, p.tag]))).catch(() => ({}));
+    const fmt = (n: number) => n.toLocaleString('en-US');
+    const peak = Math.max(1, ...r.days.map((d) => d.visitors));
+    const best = r.days.reduce((a, d) => (d.visitors > a.visitors ? d : a), r.days[0]);
+    const bars = r.days.map((d, i) => {
+      const h = Math.max(2, (d.visitors / peak) * 100);
+      const cls = i === r.days.length - 1 ? 'today' : d === best && d.visitors ? 'best' : '';
+      return `<rect x="${i * 10 + 1}" y="${100 - h}" width="8" height="${h}" class="${cls}"><title>${d.day}: ${d.visitors} visitors, ${d.views} views</title></rect>`;
+    }).join('');
+    const list = (rows: Row[], empty: string, name = (n: string) => n) => rows.length
+      ? `<ol class="st-list">${rows.map((x) => `<li><span>${esc(name(x.name))}</span><b class="lcd-text">${fmt(x.count)}</b></li>`).join('')}</ol>`
+      : `<p class="st-empty mono">${empty}</p>`;
+    const EV: Record<string, string> = { game: 'Lights Out games', contact: 'Messages sent' };
+    body.innerHTML = `
+      <div class="st-kpis">
+        ${[['On track now', r.online, 'green'], ['Today', r.today, 'amber'], ['This month', r.month, 'pink'], ['All time', r.total, 'purple']]
+          .map(([k, v, c]) => `<div class="st-kpi" style="--c: var(--${c})"><span class="mono">${k}</span><b class="lcd-text">${fmt(Number(v))}</b></div>`).join('')}
+      </div>
+      <div class="st-chart">
+        <div class="st-chart-head"><p class="eyebrow">Visitors — last 30 days</p>
+          <span class="mono">best day ${best && best.visitors ? `${esc(best.day)} · ${best.visitors}` : '—'}</span></div>
+        <svg viewBox="0 0 300 100" preserveAspectRatio="none" role="img" aria-label="Daily visitors, last 30 days">${bars}</svg>
+        <div class="st-axis mono"><span>${esc(r.days[0]?.day ?? '')}</span><span>today</span></div>
+      </div>
+      <div class="st-cols">
+        <div><p class="eyebrow">Projects people looked at</p>${list(r.projects, 'No project views yet.', (n) => projectNames?.[n] ?? n.toUpperCase())}</div>
+        <div><p class="eyebrow">Where they came from</p>${list(r.refs, 'Mostly direct visits so far.')}</div>
+        <div><p class="eyebrow">Actions</p>${list(r.events.filter((e) => EV[e.name]), 'No games or messages yet.', (n) => EV[n] ?? n)}</div>
+      </div>`;
+    document.getElementById('st-upd')!.textContent = `UPDATED ${new Date().toTimeString().slice(0, 5)}`;
+  }
   window.addEventListener('resize', moveInk);
   document.fonts?.ready.then(moveInk);
 

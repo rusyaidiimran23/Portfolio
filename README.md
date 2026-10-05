@@ -37,3 +37,12 @@ npm run dev
 ```
 Secrets (garage password, SMTP for the contact form) live on the server in
 `/etc/portfolio.env` — never in this repo.
+
+Turn on contact-form email (asks for a Gmail App Password, hidden, then sends a test email):
+```powershell
+.\deploy\set-email.ps1 -Server root@SERVER_IP -Gmail you@gmail.com
+```
+
+Visitor stats: counted on your own server (no cookies, bots and Do-Not-Track skipped),
+shown publicly as the LIVE ticker on the homepage and in detail under **Garage → Stats**.
+Your own browser stops being counted once you've unlocked the Garage on it.

@@ -15,6 +15,10 @@ Easter-egg reaction game (game.py, SQLite):
     GET  /api/game/top       -> top 10 reaction times
     POST /api/game/start     -> {ticket}  one per run
     POST /api/game/score     -> {ticket, code, ms, vehicle}
+Visitor stats (stats.py, SQLite, no cookies):
+    POST /api/hit            -> {kind, path, label?, ref?}  page view / event
+    GET  /api/stats/live     -> public numbers for the homepage LED ticker
+    GET  /api/stats          -> private dashboard (auth)
 """
 from __future__ import annotations
 
@@ -30,7 +34,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
 from .data import CONTENT
-from . import game, garage_store, mailer
+from . import game, garage_store, mailer, stats
 
 # --- config -----------------------------------------------------------------
 # Change the garage password by setting GARAGE_PASSWORD in the environment.
@@ -344,3 +348,42 @@ def game_score(s: GameScore, request: Request) -> list[dict]:
         raise HTTPException(status_code=400, detail=reason)
     game.add_score(s.code, s.ms, s.vehicle, ip)
     return game.top()
+
+
+# --- visitor stats ----------------------------------------------------------------
+
+_HIT_LIMIT, _HIT_WINDOW = 300, 3600
+_hit_hits: dict[str, list[float]] = {}
+
+
+class Hit(BaseModel):
+    kind: str = "view"
+    path: str = "/"
+    label: str = ""
+    ref: str = ""
+
+
+@app.post("/api/hit")
+def hit(h: Hit, request: Request) -> dict:
+    ip = request.client.host if request.client else ""
+    hd = request.headers
+    if h.kind not in stats.EVENTS or stats.skip(hd.get("user-agent", ""), hd.get("dnt", ""), hd.get("sec-gpc", "")):
+        return {"ok": True}
+    now = time.time()
+    hits = [t for t in _hit_hits.get(ip, []) if now - t < _HIT_WINDOW]
+    if len(hits) >= _HIT_LIMIT:
+        return {"ok": True}  # quietly drop floods
+    _hit_hits[ip] = hits + [now]
+    stats.record(h.kind, h.path, h.label, h.ref, ip, hd.get("user-agent", ""), hd.get("host", ""))
+    return {"ok": True}
+
+
+@app.get("/api/stats/live")
+def stats_live() -> dict:
+    best = game.top(1)
+    return {**stats.live(), "fastest": best[0] if best else None}
+
+
+@app.get("/api/stats", dependencies=[Depends(require_auth)])
+def stats_report() -> dict:
+    return stats.report()

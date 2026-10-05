@@ -108,6 +108,11 @@ import Base from '../layouts/Base.astro';
     </figure>
   </header>
 
+  <!-- live LED ticker: visitors + the reaction-game record, from /api/stats/live -->
+  <div class="live wrap" id="live" hidden>
+    <canvas id="live-board" role="img" aria-label="Live site stats"></canvas>
+  </div>
+
   <div class="kerb wrap"></div>
 
   <!-- 01 WORK: featured screen, then the case studies -->
@@ -349,6 +354,13 @@ import Base from '../layouts/Base.astro';
   .links a { color: var(--muted); transition: color 0.2s; }
   .links a:hover { color: var(--ink); }
   .links .lock { color: var(--amber); }
+  /* live ticker */
+  .live { position: relative; z-index: 2; margin-bottom: 1.4rem; }
+  .live[hidden] { display: none; }
+  .live canvas {
+    display: block; width: 100%; aspect-ratio: 200 / 11; border-radius: 3px; background: #030304;
+    box-shadow: 0 0 0 1px #1b1b22, 0 0 40px -14px rgba(57, 255, 106, 0.45);
+  }
   /* easter-egg trigger: a tiny start-light gantry */
   .egg {
     display: flex; gap: 3px; padding: 5px 6px; cursor: pointer; background: #0b0b0f;
@@ -742,6 +754,7 @@ import Base from '../layouts/Base.astro';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
+  import { track } from '../scripts/track';
 
   initBlueprint(); // reveal-on-scroll
   scrollFx();      // scroll choreography (titles, wipes, parallax, hero exit)
@@ -816,6 +829,33 @@ import Base from '../layouts/Base.astro';
     }
   }
   initReaction(); // easter egg: 5 taps on the start-light icon in the header
+  track('view');
+
+  // --- live LED ticker -------------------------------------------------------------
+  (() => {
+    const box = document.getElementById('live')!;
+    const item = { scene: 'static', tag: 'LIVE', color: '#39ff6a', line: '', light: 'green' as const };
+    const fmt = (n: number) => n.toLocaleString('en-US');
+    let board: BoardApi | null = null;
+    const refresh = () => fetch(`${API_BASE}/api/stats/live`).then((r) => (r.ok ? r.json() : null)).then((s) => {
+      if (!s) return;
+      item.line = [
+        s.online > 1 ? `${s.online} ON TRACK NOW` : '',
+        `VISITORS TODAY ${fmt(s.today)}`,
+        `THIS MONTH ${fmt(s.month)}`,
+        `ALL TIME ${fmt(s.total)}`,
+        s.fastest ? `FASTEST REACTION ${(s.fastest.ms / 1000).toFixed(3)}S ${s.fastest.code}` : 'FASTEST REACTION - NOBODY YET',
+        'CAN YOU FIND THE START LIGHTS?',
+      ].filter(Boolean).join('   *   ');
+      if (!board) {
+        box.hidden = false;
+        board = initBoard(document.getElementById('live-board') as HTMLCanvasElement, [item], undefined, { banner: true });
+        board.show(0);
+      }
+    }).catch(() => { /* offline: no ticker */ });
+    setTimeout(refresh, 800); // after this visit is counted
+    setInterval(refresh, 60_000);
+  })();
   const contentReady = loadContent();
 
   /** Scroll to a project's case study and flash it in its colour. */
@@ -980,6 +1020,12 @@ import Base from '../layouts/Base.astro';
       : c.about ?? '';
     document.getElementById('skills')!.innerHTML = (c.skills ?? []).map((s) => `<li>${esc(s)}</li>`).join('');
     renderCases(c.projects);
+    const seen = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      seen.unobserve(e.target);
+      track('project', (e.target as HTMLElement).id.replace(/^project-/, ''));
+    }), { threshold: 0.5 });
+    document.querySelectorAll('#projects .case').forEach((el) => seen.observe(el));
     scrollFx(document.getElementById('projects')!); // animate the freshly rendered case studies
   });
 
@@ -1093,6 +1139,7 @@ import Base from '../layouts/Base.astro';
     if (res.ok) {
       status.textContent = (body.message ?? 'Copy that.').toUpperCase();
       form.reset();
+      track('contact');
     } else {
       // 422 = a field failed validation (detail is a list); 429/502 carry a readable message
       const detail = Array.isArray(body.detail) ? 'CHECK YOUR NAME, EMAIL AND MESSAGE.' : body.detail;
