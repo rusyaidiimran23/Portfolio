@@ -65,6 +65,8 @@ const leds = Array.from({ length: 15 }, (_, i) => (i < 5 ? 'g' : i < 10 ? 'r' : 
         --glow: 0 0 24px rgba(255, 43, 214, 0.28);
       }
       * { box-sizing: border-box; }
+      /* never let anything widen the page sideways — on phones that zooms the whole site out */
+      html, body { overflow-x: clip; }
       html { scroll-behavior: smooth; }
       body {
         margin: 0;

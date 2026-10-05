@@ -5,7 +5,7 @@ import Base from '../layouts/Base.astro';
   <nav class="titlebar">
     <div class="wrap tb-inner">
       <a class="brand display" href="/"><span class="num">07</span><span>RUSYAIDI <b>YENG</b></span></a>
-      <a class="back mono" href="/">◂ Back to the paddock</a>
+      <a class="back mono" href="/">◂ <span class="bk-long">Back to the paddock</span><span class="bk-short">Back</span></a>
     </div>
   </nav>
 
@@ -63,7 +63,9 @@ import Base from '../layouts/Base.astro';
   .brand b { color: var(--pink); }
   .back { color: var(--muted); font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
   .back:hover { color: var(--ink); }
-  .page { position: relative; z-index: 2; padding: 7rem 0 6rem; min-height: 100vh; }
+  .bk-short { display: none; }
+  @media (max-width: 620px) { .bk-long { display: none; } .bk-short { display: inline; } }
+  .page { position: relative; z-index: 2; padding: 7rem 0 6rem; min-height: 100vh; overflow-x: clip; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
   /* --- lock screen ----------------------------------------------------------- */

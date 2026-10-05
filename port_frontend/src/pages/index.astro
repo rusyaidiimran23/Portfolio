@@ -294,7 +294,7 @@ import Base from '../layouts/Base.astro';
 
   /* --- sections ------------------------------------------------------------ */
   .kerb.wrap { position: relative; z-index: 2; opacity: 0.9; }
-  .section { position: relative; z-index: 2; padding: 6.5rem 0; }
+  .section { position: relative; z-index: 2; padding: 6.5rem 0; overflow-x: clip; } /* giant words + slide-ins stay inside */
   .sec-head { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 2rem; }
   .sec-no {
     font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; padding: 0.3rem 0.6rem;
@@ -385,7 +385,7 @@ import Base from '../layouts/Base.astro';
   .cases :global(.case-sum) { color: #d6d6de; margin: 0; font-size: 1rem; }
   /* broadcast-style showcase: full-bleed slides with hard edges, a fast diagonal
      wipe between them, a colour slash and a giant outlined slide number */
-  .cases :global(.show) { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; }
+  .cases :global(.show) { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; grid-template-columns: minmax(0, 1fr); } /* column = box width, never the image width */
   .cases :global(.slides) { position: relative; overflow: hidden; background: #060608; }
   .cases :global(.slide) {
     position: absolute; inset: 0; padding: 0; border: 0; background: #060608; cursor: zoom-in; overflow: hidden;
@@ -515,6 +515,10 @@ import Base from '../layouts/Base.astro';
     .pit-body { grid-template-columns: 1fr; padding: 1.6rem; }
   }
   @media (max-width: 620px) {
+    /* billboard chips: one swipeable row instead of three stacked rows */
+    .bb-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.3rem; -webkit-overflow-scrolling: touch; }
+    .bb-nav::-webkit-scrollbar { display: none; }
+    .bb-nav :global(button) { flex: 0 0 auto; }
     .links a:not(.lock) { display: none; }
     .contact .row { flex-direction: column; }
     .cases :global(.case-body) { padding: 1.2rem; }

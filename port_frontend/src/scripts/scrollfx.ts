@@ -21,7 +21,7 @@ let fxEls: HTMLElement[] = [], layerEls: HTMLElement[] = [], driftEls: HTMLEleme
 function collect() {
   fxEls = Array.from(document.querySelectorAll<HTMLElement>('[data-fx]'));
   layerEls = Array.from(document.querySelectorAll<HTMLElement>('[data-speed]'));
-  driftEls = Array.from(document.querySelectorAll<HTMLElement>('.section-title, .case .slide img, .billboard, .case, .bigword'));
+  driftEls = Array.from(document.querySelectorAll<HTMLElement>('.section-title, .case .f-photo img, .billboard, .case, .bigword'));
 }
 
 /** Tag elements that should animate (safe to call again after content renders). */
@@ -89,6 +89,9 @@ function start() {
   const frame = () => {
     ticking = false;
     const vh = window.innerHeight;
+    // phones: shorter sideways moves (a narrow screen clips anything that travels far)
+    const narrow = window.innerWidth < 700;
+    const sx = narrow ? 0.28 : 1;
 
     const fx = fxEls, layers = layerEls, drift = driftEls; // cached — no DOM queries per frame
 
@@ -126,8 +129,8 @@ function start() {
           break;
         }
         case 'rise': s.transform = `translate3d(0, ${(k * 140).toFixed(1)}px, 0)`; s.opacity = e.toFixed(3); break;
-        case 'left': s.transform = `translate3d(${(-k * 220).toFixed(1)}px, 0, 0) skewX(${(-k * 14).toFixed(2)}deg)`; s.opacity = e.toFixed(3); break;
-        case 'right': s.transform = `translate3d(${(k * 220).toFixed(1)}px, 0, 0) skewX(${(-k * 14).toFixed(2)}deg)`; s.opacity = e.toFixed(3); break;
+        case 'left': s.transform = `translate3d(${(-k * 220 * sx).toFixed(1)}px, 0, 0) skewX(${(-k * 14).toFixed(2)}deg)`; s.opacity = e.toFixed(3); break;
+        case 'right': s.transform = `translate3d(${(k * 220 * sx).toFixed(1)}px, 0, 0) skewX(${(-k * 14).toFixed(2)}deg)`; s.opacity = e.toFixed(3); break;
         case 'line': s.transform = `scaleX(${e.toFixed(3)})`; break;
         case 'flick': s.opacity = String(flick(e)); break;
       }
@@ -154,20 +157,23 @@ function start() {
         const dir = el.parentElement!.id === 'about' || el.parentElement!.id === 'contact' ? 1 : -1;
         el.style.transform = `translate3d(${(dir * pos * 55 - 20).toFixed(2)}vw, 0, 0)`;
       } else if (c.contains('section-title')) {
-        el.style.translate = `${(pos * -180).toFixed(1)}px 0`;            // big type slides sideways
+        el.style.translate = `${(pos * -180 * sx).toFixed(1)}px 0`;       // big type slides sideways
       } else if (c.contains('case')) {
         // one card at a time: it slides in from its side while arriving (lower part of
         // the screen), then locks in place — nothing slides back out
         const odd = Array.prototype.indexOf.call(el.parentElement!.children, el) % 2 === 0;
         const k = ease(clamp(1 - (pos - 0.02) / 0.6));      // 0 just below the screen … 1 settled
-        el.style.transform = k < 1 ? `translate3d(${((1 - k) * (odd ? -22 : 22)).toFixed(2)}vw, 0, 0)` : '';
+        el.style.transform = k >= 1 ? '' : narrow
+          ? `translate3d(0, ${((1 - k) * 70).toFixed(1)}px, 0)`             // phone: rise up
+          : `translate3d(${((1 - k) * (odd ? -22 : 22)).toFixed(2)}vw, 0, 0)`; // desktop: slide in from the side
         el.style.opacity = (0.25 + 0.75 * k).toFixed(3);
       } else if (el.tagName === 'IMG') {
         // individual translate/scale props, so they stack with the photo's own push-in animation
-        el.style.translate = `0 ${(pos * -80).toFixed(1)}px`; el.style.scale = '1.25'; // photo drifts inside its frame
+        // field photos only (screenshots must never be zoomed/cropped); gentler on phones
+        el.style.translate = `0 ${(pos * (narrow ? -30 : -80)).toFixed(1)}px`; el.style.scale = narrow ? '1.1' : '1.25';
       } else {
         const k = ease(clamp(1 - (pos - 0.02) / 0.6));      // slides in from the right, then holds
-        el.style.transform = k < 1 ? `translate3d(${((1 - k) * 18).toFixed(2)}vw, 0, 0)` : '';
+        el.style.transform = k < 1 ? `translate3d(${((1 - k) * 18 * sx).toFixed(2)}vw, 0, 0)` : '';
       }
     });
 
