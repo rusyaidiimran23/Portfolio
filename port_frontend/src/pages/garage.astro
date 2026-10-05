@@ -261,6 +261,65 @@ import Base from '../layouts/Base.astro';
   .td-stage :global(.del) { border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem; }
   .td-stage :global(.del.armed) { color: #fff; background: var(--f1red); }
 
+  /* track change ------------------------------------------------------------------- */
+  .td-stage { --dir: 1; overflow: hidden; }
+  .td-stage :global(.td-mapwrap) { overflow: hidden; }
+  .td-stage :global(.td-mapwrap > svg) { position: relative; z-index: 1; }
+  /* pointer spotlight lights up the dot grid */
+  .td-stage :global(.td-mapwrap::before) {
+    content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.35s;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--c) 26%, transparent), transparent 70%);
+  }
+  .td-stage :global(.td-mapwrap:hover::before) { opacity: 1; }
+  .td-stage :global(.td-hud) {
+    position: absolute; top: 0.9rem; left: 1rem; z-index: 2; display: flex; gap: 0.8rem; align-items: center;
+    font-size: 0.66rem; letter-spacing: 0.2em; color: var(--muted); pointer-events: none;
+  }
+  .td-stage :global(.td-hud b) { font-weight: 400; color: var(--c); }
+  .td-stage :global(.td-hud i) { font-style: normal; }
+  .td-stage :global(.hud-lock) { display: none; color: var(--c); }
+  .td-stage :global(.ghost-tag) { z-index: 2; }
+  .td-stage :global(.td-sweep) {
+    position: absolute; top: -10%; bottom: -10%; left: -30%; width: 22%; z-index: 3; pointer-events: none; opacity: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--c) 55%, transparent) 70%, #fff 96%, transparent);
+    transform: skewX(-14deg); mix-blend-mode: screen;
+  }
+
+  /* leaving */
+  .td-stage.td-out :global(.td-mapwrap > svg) { animation: map-out 0.26s cubic-bezier(0.5, 0, 0.75, 0) forwards; }
+  .td-stage.td-out :global(.td-info > *), .td-stage.td-out :global(.ghost-tag), .td-stage.td-out :global(.td-hud) { animation: info-out 0.22s ease-in forwards; }
+  @keyframes map-out { to { transform: translateX(calc(var(--dir) * -9%)) scale(0.9); opacity: 0; filter: blur(8px); } }
+  @keyframes info-out { to { transform: translateX(calc(var(--dir) * -28px)); opacity: 0; } }
+
+  /* arriving */
+  .td-stage.td-in :global(.td-mapwrap > svg) { animation: map-in 0.85s cubic-bezier(0.15, 0.85, 0.25, 1) both; }
+  @keyframes map-in {
+    from { transform: translateX(calc(var(--dir) * 9%)) scale(1.2); opacity: 0; filter: blur(10px); clip-path: circle(0% at 50% 50%); }
+    60% { clip-path: circle(60% at 50% 50%); }
+    to { clip-path: circle(100% at 50% 50%); }
+  }
+  .td-stage.td-in :global(.td-sweep) { animation: sweep 0.75s cubic-bezier(0.6, 0, 0.3, 1) both; }
+  @keyframes sweep {
+    0% { opacity: 1; left: calc(50% - var(--dir) * 85% - 11%); }
+    100% { opacity: 1; left: calc(50% + var(--dir) * 85% - 11%); }
+  }
+  .td-stage.td-in :global(.hud-lock) { display: inline; animation: blink 0.18s steps(2) 6, hide 0s 1.1s forwards; }
+  .td-stage.td-in :global(.hud-ok) { animation: hud-ok 0.3s 1.1s both; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes hide { to { display: none; } }
+  @keyframes hud-ok { from { opacity: 0; transform: translateX(-6px); } }
+  .td-stage.td-in :global(.td-info > *) { animation: info-in 0.55s cubic-bezier(0.15, 0.85, 0.25, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 120ms); }
+  .td-stage.td-in :global(.td-name) { animation-name: name-in; }
+  @keyframes info-in { from { transform: translateX(calc(var(--dir) * 34px)); opacity: 0; } }
+  @keyframes name-in { from { clip-path: inset(0 100% 0 0); transform: translateX(calc(var(--dir) * 20px)) skewX(-10deg); } to { clip-path: inset(0 -10% 0 0); } }
+  .td-stage :global(.td-info > :nth-child(2)) { --i: 1; }
+  .td-stage :global(.td-info > :nth-child(3)) { --i: 2; }
+  .td-stage :global(.td-info > :nth-child(4)) { --i: 3; }
+  .td-stage :global(.td-info > :nth-child(5)) { --i: 4; }
+  .td-stage :global(.td-info > :nth-child(n+6)) { --i: 5; }
+  .td-tabs :global(.td-tab[aria-selected="true"]) { animation: tab-pick 0.5s ease-out; }
+  @keyframes tab-pick { from { background: color-mix(in srgb, var(--c) 55%, #0b0b10); } }
+
   @media (max-width: 900px) {
     .td-stage { grid-template-columns: 1fr; }
     .td-stage :global(.td-mapwrap) { min-height: 0; }
@@ -824,10 +883,11 @@ import Base from '../layouts/Base.astro';
     </svg>`;
   }
 
-  function showTrack(id: string) {
+  function showTrack(id: string, dir = 0) {
     if (!tdData) return;
     tdSel = id;
-    const t = tdData.tracks.find((x) => x.id === id)!;
+    const idx = tdData.tracks.findIndex((x) => x.id === id);
+    const t = tdData.tracks[idx];
     const best = bestOf(id);
     const pbSecs = best ? lapSecs(best.best) : 0;
     const sessions = tdData.sessions.filter((s) => s.track === id).sort((a, b) => b.date.localeCompare(a.date));
@@ -841,6 +901,9 @@ import Base from '../layouts/Base.astro';
     stage.style.setProperty('--c', t.color);
     stage.innerHTML = `
       <div class="td-mapwrap">${mapSvg(t)}
+        <span class="td-hud mono"><b>TRACK ${String(idx + 1).padStart(2, '0')}/${String(tdData.tracks.length).padStart(2, '0')}</b>
+          <i class="hud-lock">LOCKING ON…</i><i class="hud-ok">${t.map ? 'GPS LOCKED' : 'AWAITING GPS'}</i></span>
+        <i class="td-sweep" aria-hidden="true"></i>
         ${best ? `<span class="ghost-tag mono">GHOST LAP · ${esc(best.best)}</span>` : ''}
       </div>
       <div class="td-info">
@@ -884,6 +947,46 @@ import Base from '../layouts/Base.astro';
         }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
       </div>`;
     startGhost(pbSecs);
+    if (dir && !reduced) {
+      stage.style.setProperty('--dir', String(dir));
+      stage.classList.remove('td-in'); void stage.offsetWidth; stage.classList.add('td-in');
+      rollPb(stage.querySelector<HTMLElement>('.td-pb b')!, best?.best ?? '');
+    }
+  }
+
+  // --- track change: old map zooms out, scan sweeps, new map locks on --------------
+  let tdSwap = 0;
+  function switchTrack(id: string) {
+    if (!tdData || id === tdSel) return;
+    const ids = tdData.tracks.map((t) => t.id);
+    const dir = ids.indexOf(id) > ids.indexOf(tdSel) ? 1 : -1;
+    if (reduced) { showTrack(id); return; }
+    const n = ++tdSwap;
+    const stage = document.getElementById('td-stage')!;
+    document.querySelectorAll<HTMLElement>('.td-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.track === id)));
+    stage.style.setProperty('--dir', String(dir));
+    stage.classList.remove('td-in'); void stage.offsetWidth; stage.classList.add('td-out');
+    setTimeout(() => {
+      if (n !== tdSwap) return; // a newer click wins
+      stage.classList.remove('td-out');
+      showTrack(id, dir);
+    }, 260);
+  }
+
+  // timing-board roll: digits count up to the PB (or scramble when there's none)
+  function rollPb(el: HTMLElement, best: string) {
+    const fmt = (v: number) => `${Math.floor(v / 60)}:${(v % 60).toFixed(3).padStart(6, '0')}`;
+    const target = best ? lapSecs(best) : 0;
+    const t0 = performance.now(), dur = target ? 900 : 520;
+    const rnd = (n: number, w: number) => String(Math.floor(Math.random() * n)).padStart(w, '0');
+    const step = (now: number) => {
+      if (!el.isConnected) return;
+      const k = Math.min(1, (now - t0) / dur);
+      if (k >= 1) { el.textContent = best || '-:--.---'; return; }
+      el.textContent = target ? fmt(target * (1 - Math.pow(1 - k, 3))) : `${rnd(10, 1)}:${rnd(60, 2)}.${rnd(1000, 3)}`;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   // ghost dot laps the map in exactly the PB time
@@ -905,10 +1008,17 @@ import Base from '../layouts/Base.astro';
   }
 
   const tdEl = document.getElementById('trackday')!;
+  tdEl.addEventListener('pointermove', (e) => {
+    const w = (e.target as HTMLElement).closest<HTMLElement>('.td-mapwrap');
+    if (!w) return;
+    const r = w.getBoundingClientRect();
+    w.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    w.style.setProperty('--my', `${e.clientY - r.top}px`);
+  });
   tdEl.addEventListener('click', async (e) => {
     const el = e.target as HTMLElement;
     const tab = el.closest<HTMLElement>('[data-track]');
-    if (tab) { showTrack(tab.dataset.track!); return; }
+    if (tab) { switchTrack(tab.dataset.track!); return; }
     const form = tdEl.querySelector<HTMLFormElement>('.td-form');
     if (el.closest('[data-td-add]') && form) {
       form.hidden = !form.hidden;
