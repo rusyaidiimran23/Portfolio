@@ -1,0 +1,72 @@
+---
+// Exploded side-profile blueprint of the Nissan Cefiro (A31). Stylized line-art.
+const wheel = (cx: number, cy: number) => {
+  const spokes = [0, 1, 2, 3, 4].map((k) => k * 72);
+  return { cx, cy, spokes };
+};
+const wf = wheel(258, 388);
+const wr = wheel(772, 388);
+const spokeEnd = (w: {cx:number;cy:number}, r: number, aDeg: number) => {
+  const a = (aDeg * Math.PI) / 180;
+  return { x: +(w.cx + r * Math.cos(a)).toFixed(1), y: +(w.cy + r * Math.sin(a)).toFixed(1) };
+};
+---
+<svg class="bp-svg" viewBox="0 0 1020 470" role="img" aria-label="Exploded side view of a Nissan Cefiro A31">
+  <!-- ground / datum line -->
+  <line class="bp-dim" x1="60" y1="436" x2="960" y2="436" stroke-dasharray="2 5" />
+  <text x="62" y="452" class="mono" font-size="11" fill="var(--muted)">DATUM · GROUND PLANE</text>
+
+  <!-- 6 · wheels -->
+  <g class="bp-part" id="c-wheels" data-label="Wheels" data-callout="bom-c-wheels" data-dx="0" data-dy="130">
+    {[wf, wr].map((w) => (
+      <>
+        <circle class="bp-line" cx={w.cx} cy={w.cy} r="46" stroke-width="2" />
+        <circle class="bp-line-2" cx={w.cx} cy={w.cy} r="34" />
+        <circle class="bp-fill" cx={w.cx} cy={w.cy} r="14" />
+        {w.spokes.map((a) => { const e = spokeEnd(w, 34, a); return <line class="bp-line-2" x1={w.cx} y1={w.cy} x2={e.x} y2={e.y} />; })}
+      </>
+    ))}
+    <g class="balloon"><circle cx={wf.cx} cy={wf.cy} r="12" class="bp-line" fill="var(--bg)" /><text x={wf.cx} y={wf.cy + 4} text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">6</text></g>
+  </g>
+
+  <!-- 5 · engine (drops from the bay) -->
+  <g class="bp-part" id="c-engine" data-label="RB Engine" data-callout="bom-c-engine" data-dx="0" data-dy="150">
+    <rect class="bp-fill" x="178" y="352" width="150" height="60" rx="4" />
+    <rect class="bp-line-2" x="190" y="338" width="70" height="16" rx="2" />
+    <circle class="bp-line" cx="210" cy="382" r="14" />
+    <circle class="bp-line" cx="298" cy="386" r="10" />
+    <line class="bp-line-2" x1="178" y1="372" x2="328" y2="372" />
+    <g class="balloon"><circle cx="253" cy="330" r="12" class="bp-line" fill="var(--bg)" /><text x="253" y="334" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">5</text></g>
+  </g>
+
+  <!-- 1 · body tub (anchor) -->
+  <g class="bp-part" id="c-body" data-label="Body Shell" data-callout="bom-c-body" data-dx="0" data-dy="0">
+    <path class="bp-fill" d="M120,414 L122,372 L150,356 L620,346 L900,356 L900,414 Z" />
+    <path class="bp-line-2" d="M198,414 A60,60 0 0 1 318,414 M712,414 A60,60 0 0 1 832,414" />
+    <line class="bp-line-2" x1="150" y1="372" x2="890" y2="372" />
+    <g class="balloon"><circle cx="470" cy="392" r="12" class="bp-line" fill="var(--bg)" /><text x="470" y="396" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">1</text></g>
+  </g>
+
+  <!-- 4 · door -->
+  <g class="bp-part" id="c-door" data-label="Door" data-callout="bom-c-door" data-dx="20" data-dy="96">
+    <path class="bp-fill" d="M508,346 L690,344 L690,406 L508,406 Z" />
+    <path class="bp-line-2" d="M520,352 L672,350 L672,376 L520,378 Z" />
+    <circle class="bp-line-2" cx="660" cy="392" r="4" />
+    <g class="balloon"><circle cx="599" cy="386" r="12" class="bp-line" fill="var(--bg)" /><text x="599" y="390" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">4</text></g>
+  </g>
+
+  <!-- 3 · hood -->
+  <g class="bp-part" id="c-hood" data-label="Hood" data-callout="bom-c-hood" data-dx="-64" data-dy="-70">
+    <path class="bp-fill" d="M150,356 L430,347 L430,358 L152,367 Z" />
+    <line class="bp-line-2" x1="170" y1="357" x2="420" y2="349" />
+    <g class="balloon"><circle cx="290" cy="336" r="12" class="bp-line" fill="var(--bg)" /><text x="290" y="340" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">3</text></g>
+  </g>
+
+  <!-- 2 · greenhouse -->
+  <g class="bp-part" id="c-cabin" data-label="Greenhouse" data-callout="bom-c-cabin" data-dx="0" data-dy="-118" data-rot="0">
+    <path class="bp-fill" d="M430,346 L512,284 L700,278 L778,346 Z" />
+    <line class="bp-line-2" x1="600" y1="281" x2="600" y2="346" />
+    <path class="bp-line-2" d="M446,340 L516,292 L596,289 L596,340 Z M604,289 L694,285 L764,340 L604,340 Z" />
+    <g class="balloon"><circle cx="604" cy="262" r="12" class="bp-line" fill="var(--bg)" /><text x="604" y="266" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">2</text></g>
+  </g>
+</svg>

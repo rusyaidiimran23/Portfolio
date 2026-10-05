@@ -1,0 +1,107 @@
+---
+// Single centerpiece: a concentric wheel/brake assembly that disassembles
+// linearly and in staggered stages into many parts as the page scrolls.
+// Schematic, not a literal vehicle (those live on /garage).
+const cx = 450, cy = 320;
+const P = (r: number, aDeg: number) => {
+  const a = ((aDeg - 90) * Math.PI) / 180;
+  return { x: +(cx + r * Math.cos(a)).toFixed(1), y: +(cy + r * Math.sin(a)).toFixed(1) };
+};
+const ring = (r: number, n: number, off = 0) =>
+  Array.from({ length: n }, (_, k) => P(r, off + (k * 360) / n));
+const hex = (hx: number, hy: number, r: number) =>
+  Array.from({ length: 6 }, (_, k) => {
+    const a = ((k * 60 - 90) * Math.PI) / 180;
+    return `${(hx + r * Math.cos(a)).toFixed(1)},${(hy + r * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+
+const treads = Array.from({ length: 54 }, (_, k) => k * (360 / 54));
+const rimSpokes = [0, 1, 2, 3, 4].map((k) => k * 72);
+const rotorHoles = ring(96, 12);
+const absTeeth = Array.from({ length: 36 }, (_, k) => k * 10);
+const bearingBalls = ring(30, 9);
+const studs = ring(34, 5);
+const lugs = ring(150, 5, 36);
+---
+<svg class="bp-svg" viewBox="0 0 900 640" role="img" aria-label="Exploded wheel and brake assembly that disassembles on scroll">
+  <!-- faint construction crosshair through the assembly centre -->
+  <g class="bp-part" data-static>
+    <line class="bp-line-2" x1="90" y1={cy} x2="810" y2={cy} stroke-dasharray="2 6" opacity="0.4" />
+    <line class="bp-line-2" x1={cx} y1="60" x2={cx} y2="580" stroke-dasharray="2 6" opacity="0.4" />
+  </g>
+
+  <!-- 01 · tire -->
+  <g class="bp-part" id="a-tire" data-label="Tire" data-dx="0" data-dy="-286" data-start="0" data-end="0.42">
+    <circle class="bp-line" cx={cx} cy={cy} r="196" stroke-width="2" />
+    <circle class="bp-line" cx={cx} cy={cy} r="158" />
+    {treads.map((a) => { const i = P(196, a), o = P(206, a); return <line class="bp-line-2" x1={i.x} y1={i.y} x2={o.x} y2={o.y} />; })}
+  </g>
+
+  <!-- 02 · dust shield -->
+  <g class="bp-part" id="a-shield" data-label="Dust Shield" data-dx="-256" data-dy="-150" data-start="0.05" data-end="0.5">
+    <circle class="bp-line-2" cx={cx} cy={cy} r="172" stroke-dasharray="7 5" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="164" stroke-dasharray="7 5" />
+  </g>
+
+  <!-- 03 · rim -->
+  <g class="bp-part" id="a-rim" data-label="Rim" data-dx="252" data-dy="-150" data-rot="34" data-start="0.09" data-end="0.54">
+    <circle class="bp-line" cx={cx} cy={cy} r="150" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="138" />
+    <circle class="bp-fill" cx={cx} cy={cy} r="52" />
+    {rimSpokes.map((a) => { const i = P(52, a), o = P(138, a); return <line class="bp-line" x1={i.x} y1={i.y} x2={o.x} y2={o.y} stroke-width="2" />; })}
+    {rimSpokes.map((a) => { const p = P(100, a + 36); return <circle class="bp-line-2" cx={p.x} cy={p.y} r="15" />; })}
+  </g>
+
+  <!-- 04 · brake rotor -->
+  <g class="bp-part" id="a-rotor" data-label="Rotor" data-dx="300" data-dy="-24" data-rot="-28" data-start="0.13" data-end="0.58">
+    <circle class="bp-fill" cx={cx} cy={cy} r="128" />
+    <circle class="bp-line" cx={cx} cy={cy} r="112" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="48" />
+    {rotorHoles.map((p) => <circle class="bp-line-2" cx={p.x} cy={p.y} r="6" />)}
+  </g>
+
+  <!-- 05 · ABS reluctor ring -->
+  <g class="bp-part" id="a-abs" data-label="ABS Ring" data-dx="-300" data-dy="24" data-rot="52" data-start="0.17" data-end="0.62">
+    <circle class="bp-line" cx={cx} cy={cy} r="92" />
+    {absTeeth.map((a) => { const i = P(92, a), o = P(101, a); return <line class="bp-line-2" x1={i.x} y1={i.y} x2={o.x} y2={o.y} />; })}
+  </g>
+
+  <!-- 06 · spacer -->
+  <g class="bp-part" id="a-spacer" data-label="Spacer" data-dx="196" data-dy="206" data-start="0.21" data-end="0.66">
+    <circle class="bp-line" cx={cx} cy={cy} r="70" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="58" />
+  </g>
+
+  <!-- 07 · wheel bearing -->
+  <g class="bp-part" id="a-bearing" data-label="Bearing" data-dx="-226" data-dy="184" data-rot="90" data-start="0.25" data-end="0.72">
+    <circle class="bp-line" cx={cx} cy={cy} r="46" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="18" />
+    {bearingBalls.map((p) => <circle class="bp-fill" cx={p.x} cy={p.y} r="7" />)}
+  </g>
+
+  <!-- 08 · hub -->
+  <g class="bp-part" id="a-hub" data-label="Hub" data-dx="40" data-dy="286" data-start="0.29" data-end="0.76">
+    <circle class="bp-fill" cx={cx} cy={cy} r="54" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="14" />
+    {studs.map((p) => <circle class="bp-line" cx={p.x} cy={p.y} r="7" />)}
+  </g>
+
+  <!-- 09 · lug bolts -->
+  <g class="bp-part" id="a-lugs" data-label="Lug Bolts" data-dx="-120" data-dy="262" data-start="0.33" data-end="0.82">
+    {lugs.map((p) => <polygon class="bp-line" points={hex(p.x, p.y, 11)} />)}
+  </g>
+
+  <!-- 10 · caliper + pads -->
+  <g class="bp-part" id="a-caliper" data-label="Caliper" data-dx="304" data-dy="150" data-rot="10" data-start="0.37" data-end="0.88">
+    <rect class="bp-fill" x={cx - 34} y={cy - 158} width="68" height="54" rx="8" />
+    <rect class="bp-line-2" x={cx - 26} y={cy - 150} width="16" height="30" rx="2" />
+    <rect class="bp-line-2" x={cx + 10} y={cy - 150} width="16" height="30" rx="2" />
+    <line class="bp-line" x1={cx - 34} y1={cy - 118} x2={cx + 34} y2={cy - 118} />
+  </g>
+
+  <!-- 11 · axle nut (core — stays put) -->
+  <g class="bp-part" id="a-nut" data-label="Axle Nut" data-dx="0" data-dy="0" data-start="0" data-end="1">
+    <polygon class="bp-line" points={hex(cx, cy, 22)} stroke-width="2" />
+    <circle class="bp-line-2" cx={cx} cy={cy} r="9" />
+  </g>
+</svg>

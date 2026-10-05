@@ -1,0 +1,288 @@
+{
+    "cefiro":  [
+                   {
+                       "src":  "/work/cefiro/01.jpg",
+                       "caption":  "The A31 at night under the bridge",
+                       "fit":  "cover",
+                       "w":  810,
+                       "h":  1080,
+                       "frame":  ""
+                   },
+                   {
+                       "src":  "/work/cefiro/02.jpg",
+                       "caption":  "Fuel stop under the Caltex lights",
+                       "fit":  "cover",
+                       "w":  724,
+                       "h":  1280,
+                       "frame":  ""
+                   },
+                   {
+                       "src":  "/work/cefiro/03.jpg",
+                       "caption":  "Caltex in daylight",
+                       "fit":  "cover",
+                       "w":  810,
+                       "h":  1080,
+                       "frame":  ""
+                   },
+                   {
+                       "src":  "/work/cefiro/04.jpg",
+                       "caption":  "Tail light detail",
+                       "fit":  "cover",
+                       "w":  730,
+                       "h":  1280,
+                       "frame":  ""
+                   }
+               ],
+    "lkm":  [
+                {
+                    "src":  "/work/lkm/01.jpg",
+                    "caption":  "DFOMS dashboard with harvest totals and weather",
+                    "fit":  "contain",
+                    "w":  1918,
+                    "h":  987,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/02.jpg",
+                    "caption":  "Solar-powered soil-sensor node in the cocoa farm",
+                    "fit":  "cover",
+                    "w":  858,
+                    "h":  1144,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/03.jpg",
+                    "caption":  "Tree allocation on a satellite map",
+                    "fit":  "contain",
+                    "w":  1894,
+                    "h":  991,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/04.jpg",
+                    "caption":  "Plant soil nutrient readings on the farm map",
+                    "fit":  "contain",
+                    "w":  1888,
+                    "h":  982,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/05.jpg",
+                    "caption":  "Fertigation room with the live monitoring dashboard",
+                    "fit":  "cover",
+                    "w":  1559,
+                    "h":  1169,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/06.jpg",
+                    "caption":  "Nursery irrigation with soil tension and pump control",
+                    "fit":  "contain",
+                    "w":  1887,
+                    "h":  988,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/07.jpg",
+                    "caption":  "Harvest yield trends per block",
+                    "fit":  "contain",
+                    "w":  1890,
+                    "h":  997,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/08.jpg",
+                    "caption":  "Weather module for each estate",
+                    "fit":  "contain",
+                    "w":  1887,
+                    "h":  988,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/lkm/09.jpg",
+                    "caption":  "Logger, modem and power panel built on the bench",
+                    "fit":  "cover",
+                    "w":  756,
+                    "h":  1008,
+                    "frame":  ""
+                }
+            ],
+    "mpob":  [
+                 {
+                     "src":  "/work/mpob/01.jpg",
+                     "caption":  "Completed ET station, fenced and commissioned",
+                     "fit":  "cover",
+                     "w":  650,
+                     "h":  488,
+                     "frame":  ""
+                 },
+                 {
+                     "src":  "/work/mpob/02.jpg",
+                     "caption":  "Erecting the 3 m tripod inside the fenced compound",
+                     "fit":  "cover",
+                     "w":  650,
+                     "h":  487,
+                     "frame":  ""
+                 },
+                 {
+                     "src":  "/work/mpob/03.jpg",
+                     "caption":  "Training and commissioning with the MPOB team",
+                     "fit":  "cover",
+                     "w":  649,
+                     "h":  486,
+                     "frame":  ""
+                 }
+             ],
+    "stars":  [
+                  {
+                      "src":  "/work/stars/01.jpg",
+                      "caption":  "Live dashboard with station locations across Malaysia",
+                      "fit":  "contain",
+                      "w":  1899,
+                      "h":  991,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/stars/02.jpg",
+                      "caption":  "Soil moisture, EC and temperature trends",
+                      "fit":  "contain",
+                      "w":  1893,
+                      "h":  993,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/stars/03.jpg",
+                      "caption":  "Soil station readings with NPK nutrient chart",
+                      "fit":  "contain",
+                      "w":  1567,
+                      "h":  984,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/stars/04.jpg",
+                      "caption":  "STARS system architecture diagram",
+                      "fit":  "contain",
+                      "w":  1361,
+                      "h":  782,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/stars/05.jpg",
+                      "caption":  "Weather station view with wind direction",
+                      "fit":  "contain",
+                      "w":  1918,
+                      "h":  988,
+                      "frame":  ""
+                  }
+              ],
+    "surecam":  [
+                    {
+                        "src":  "/work/surecam/01.jpg",
+                        "caption":  "Live detection on a camera feed",
+                        "fit":  "contain",
+                        "w":  424,
+                        "h":  339,
+                        "frame":  ""
+                    },
+                    {
+                        "src":  "/work/surecam/02.jpg",
+                        "caption":  "Telegram alert - fight detected",
+                        "fit":  "contain",
+                        "w":  262,
+                        "h":  556,
+                        "frame":  ""
+                    },
+                    {
+                        "src":  "/work/surecam/03.jpg",
+                        "caption":  "The edge camera unit",
+                        "fit":  "contain",
+                        "w":  333,
+                        "h":  519,
+                        "frame":  "print"
+                    }
+                ],
+    "trx":  [
+                {
+                    "src":  "/work/trx/01.jpg",
+                    "caption":  "Kunak Air Pro station on its pole at TRX",
+                    "fit":  "cover",
+                    "w":  810,
+                    "h":  1080,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/02.jpg",
+                    "caption":  "Aerial view of the station location on the TRX plaza (drone)",
+                    "fit":  "cover",
+                    "w":  1600,
+                    "h":  1200,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/03.jpg",
+                    "caption":  "Plaza-level view of the installation site",
+                    "fit":  "cover",
+                    "w":  1600,
+                    "h":  1200,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/04.jpg",
+                    "caption":  "TRX skyline from the plaza",
+                    "fit":  "cover",
+                    "w":  810,
+                    "h":  1080,
+                    "frame":  ""
+                }
+            ],
+    "zx4rr":  [
+                  {
+                      "src":  "/work/zx4rr/01.jpg",
+                      "caption":  "Track day with both bikes",
+                      "fit":  "cover",
+                      "w":  4308,
+                      "h":  6457,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/02.jpg",
+                      "caption":  "Parked up on the hill road",
+                      "fit":  "cover",
+                      "w":  863,
+                      "h":  1080,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/03.jpg",
+                      "caption":  "Leaned over through a corner",
+                      "fit":  "cover",
+                      "w":  1080,
+                      "h":  720,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/04.jpg",
+                      "caption":  "Rider and bike at the roadside",
+                      "fit":  "cover",
+                      "w":  863,
+                      "h":  1080,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/05.jpg",
+                      "caption":  "Hairpin on the hill roads",
+                      "fit":  "cover",
+                      "w":  1080,
+                      "h":  720,
+                      "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/06.jpg",
+                      "caption":  "Cornering on the hill roads",
+                      "fit":  "cover",
+                      "w":  1080,
+                      "h":  720,
+                      "frame":  ""
+                  }
+              ]
+}

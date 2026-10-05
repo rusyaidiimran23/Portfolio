@@ -1,0 +1,77 @@
+---
+// Exploded side-profile blueprint of the Kawasaki ZX-4RR (facing right). Stylized.
+const spokes = [0, 30, 60, 90, 120, 150].map((a) => a);
+const spokeEnds = (cx: number, cy: number, r: number) =>
+  spokes.map((aDeg) => {
+    const a = (aDeg * Math.PI) / 180;
+    return {
+      x1: +(cx + r * Math.cos(a)).toFixed(1), y1: +(cy + r * Math.sin(a)).toFixed(1),
+      x2: +(cx - r * Math.cos(a)).toFixed(1), y2: +(cy - r * Math.sin(a)).toFixed(1),
+    };
+  });
+const fw = { cx: 800, cy: 360, r: 66 };
+const rw = { cx: 230, cy: 360, r: 66 };
+---
+<svg class="bp-svg" viewBox="0 0 1020 470" role="img" aria-label="Exploded side view of a Kawasaki ZX-4RR">
+  <line class="bp-dim" x1="60" y1="428" x2="960" y2="428" stroke-dasharray="2 5" />
+  <text x="62" y="444" class="mono" font-size="11" fill="var(--muted)">DATUM · GROUND PLANE</text>
+
+  <!-- 1 · frame (anchor) -->
+  <g class="bp-part" id="z-frame" data-label="Frame" data-callout="bom-z-frame" data-dx="0" data-dy="0">
+    <path class="bp-line" d="M690,258 L470,320 L432,360 M470,320 L360,306" stroke-width="2" fill="none" />
+    <circle class="bp-line-2" cx="690" cy="258" r="8" />
+    <circle class="bp-fill" cx="432" cy="360" r="7" />
+    <g class="balloon"><circle cx="548" cy="292" r="12" class="bp-line" fill="var(--bg)" /><text x="548" y="296" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">1</text></g>
+  </g>
+
+  <!-- 3 · rear wheel + swingarm -->
+  <g class="bp-part" id="z-rwheel" data-label="Rear Wheel" data-callout="bom-z-rwheel" data-dx="-150" data-dy="34">
+    <line class="bp-line" x1="432" y1="360" x2={rw.cx} y2={rw.cy} stroke-width="3" />
+    <circle class="bp-line" cx={rw.cx} cy={rw.cy} r={rw.r} stroke-width="2" />
+    <circle class="bp-line-2" cx={rw.cx} cy={rw.cy} r={rw.r - 12} />
+    <circle class="bp-fill" cx={rw.cx} cy={rw.cy} r="14" />
+    {spokeEnds(rw.cx, rw.cy, rw.r - 12).map((s) => <line class="bp-line-2" x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />)}
+    <g class="balloon"><circle cx={rw.cx} cy={rw.cy} r="12" class="bp-line" fill="var(--bg)" /><text x={rw.cx} y={rw.cy + 4} text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">3</text></g>
+  </g>
+
+  <!-- 2 · front wheel + forks -->
+  <g class="bp-part" id="z-fwheel" data-label="Front Wheel" data-callout="bom-z-fwheel" data-dx="152" data-dy="30">
+    <line class="bp-line" x1="690" y1="258" x2={fw.cx} y2={fw.cy} stroke-width="3" />
+    <line class="bp-line-2" x1="704" y1="258" x2={fw.cx + 14} y2={fw.cy} stroke-width="2" />
+    <circle class="bp-line" cx={fw.cx} cy={fw.cy} r={fw.r} stroke-width="2" />
+    <circle class="bp-line-2" cx={fw.cx} cy={fw.cy} r={fw.r - 12} />
+    <circle class="bp-fill" cx={fw.cx} cy={fw.cy} r="14" />
+    {spokeEnds(fw.cx, fw.cy, fw.r - 12).map((s) => <line class="bp-line-2" x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />)}
+    <g class="balloon"><circle cx={fw.cx} cy={fw.cy} r="12" class="bp-line" fill="var(--bg)" /><text x={fw.cx} y={fw.cy + 4} text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">2</text></g>
+  </g>
+
+  <!-- 4 · engine (inline-four) -->
+  <g class="bp-part" id="z-engine" data-label="Inline-4" data-callout="bom-z-engine" data-dx="0" data-dy="150">
+    <path class="bp-fill" d="M404,332 L470,320 L560,332 L556,400 L430,400 Z" />
+    <path class="bp-line-2" d="M470,320 L520,286 L556,300 L560,332" />
+    <circle class="bp-line" cx="470" cy="378" r="18" />
+    <line class="bp-line-2" x1="430" y1="358" x2="556" y2="358" />
+    <g class="balloon"><circle cx="490" cy="356" r="12" class="bp-line" fill="var(--bg)" /><text x="490" y="360" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">4</text></g>
+  </g>
+
+  <!-- 5 · fuel tank -->
+  <g class="bp-part" id="z-tank" data-label="Fuel Tank" data-callout="bom-z-tank" data-dx="30" data-dy="-128">
+    <path class="bp-fill" d="M436,320 L560,300 Q628,300 636,330 L620,340 L446,340 Z" />
+    <line class="bp-line-2" x1="470" y1="316" x2="600" y2="312" />
+    <g class="balloon"><circle cx="536" cy="300" r="12" class="bp-line" fill="var(--bg)" /><text x="536" y="304" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">5</text></g>
+  </g>
+
+  <!-- 6 · seat + tail -->
+  <g class="bp-part" id="z-tail" data-label="Tail Unit" data-callout="bom-z-tail" data-dx="-84" data-dy="-124">
+    <path class="bp-fill" d="M300,318 L436,316 L436,334 L360,340 L300,336 L272,300 L308,300 Z" />
+    <line class="bp-line-2" x1="320" y1="320" x2="424" y2="320" />
+    <g class="balloon"><circle cx="330" cy="286" r="12" class="bp-line" fill="var(--bg)" /><text x="330" y="290" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">6</text></g>
+  </g>
+
+  <!-- 7 · front fairing + screen -->
+  <g class="bp-part" id="z-fairing" data-label="Fairing" data-callout="bom-z-fairing" data-dx="140" data-dy="-56">
+    <path class="bp-fill" d="M636,300 L706,258 L730,266 L724,322 L648,336 Z" />
+    <path class="bp-line-2" d="M690,270 L716,266 L712,300 L680,306 Z" />
+    <g class="balloon"><circle cx="700" cy="248" r="12" class="bp-line" fill="var(--bg)" /><text x="700" y="252" text-anchor="middle" class="mono" font-size="13" fill="var(--cyan)">7</text></g>
+  </g>
+</svg>

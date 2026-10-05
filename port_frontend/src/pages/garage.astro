@@ -1,0 +1,629 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Garage — Rusyaidi Yeng" description="Private build logs.">
+  <nav class="titlebar">
+    <div class="wrap tb-inner">
+      <a class="brand display" href="/"><span class="num">07</span><span>RUSYAIDI <b>YENG</b></span></a>
+      <a class="back mono" href="/">◂ Back to the paddock</a>
+    </div>
+  </nav>
+
+  <main class="wrap page">
+    <!-- LOCK SCREEN: pit-lane checkpoint -->
+    <section id="gate" class="gate">
+      <div class="gate-word display" aria-hidden="true">PIT LANE</div>
+      <canvas id="gate-board" class="gate-board" role="img" aria-label="Authorised crew only"></canvas>
+      <p class="eyebrow">Pit lane — authorised crew only</p>
+      <h1 class="gate-title display">The Garage</h1>
+      <p class="muted">Build logs for the Cefiro, ZX-4RR &amp; CBR250RR. Crew password required.</p>
+      <form id="auth-form" class="auth">
+        <label class="sr" for="pw">Password</label>
+        <input id="pw" type="password" placeholder="ENTER CREW CODE" autocomplete="current-password" />
+        <button class="btn btn-primary" type="submit">Unlock ▸</button>
+      </form>
+      <p class="err lcd-text" id="auth-err" aria-live="polite"></p>
+    </section>
+
+    <!-- UNLOCKED -->
+    <section id="content" hidden>
+      <header class="g-head">
+        <div>
+          <p class="eyebrow">Pit lane — unlocked</p>
+          <h1 class="g-title display">The Garage</h1>
+        </div>
+        <button class="btn" id="lock-out" type="button">Lock again</button>
+      </header>
+      <div class="kerb"></div>
+      <!-- Forza-style garage: pick a vehicle, its card opens below -->
+      <section class="fz" id="select" aria-label="Choose a vehicle">
+        <div class="fz-head">
+          <p class="eyebrow">My garage — choose a vehicle</p>
+          <span class="fz-count lcd-text" id="fz-count"></span>
+        </div>
+        <div class="fz-grid" id="fz-grid"></div>
+      </section>
+      <div id="builds" class="builds"></div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  /* --- nav ------------------------------------------------------------------- */
+  .titlebar {
+    position: fixed; top: 5px; left: 0; right: 0; z-index: 40;
+    background: rgba(7, 7, 10, 0.78); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+  }
+  .tb-inner { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; }
+  .brand { display: flex; align-items: center; gap: 0.55rem; font-size: 1.35rem; letter-spacing: 0.02em; }
+  .brand .num {
+    font-size: 0.9rem; padding: 0.1rem 0.45rem; background: var(--f1red); color: #fff;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+  .brand b { color: var(--pink); }
+  .back { color: var(--muted); font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
+  .back:hover { color: var(--ink); }
+  .page { position: relative; z-index: 2; padding: 7rem 0 6rem; min-height: 100vh; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* --- lock screen ----------------------------------------------------------- */
+  .gate { position: relative; max-width: 760px; margin: 4vh auto 0; text-align: center; animation: gate-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes gate-in { from { opacity: 0; transform: translateY(40px); } }
+  .gate-word {
+    position: absolute; z-index: -1; left: 50%; top: -3rem; transform: translateX(-50%);
+    font-size: clamp(6rem, 18vw, 15rem); font-style: italic; line-height: 1; white-space: nowrap;
+    color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.07); pointer-events: none;
+  }
+  .gate-board {
+    display: block; width: 100%; aspect-ratio: 128 / 41; margin-bottom: 2.2rem; border-radius: 6px;
+    box-shadow: 0 0 0 1px #1b1b22, 0 0 0 6px #0a0a0d, 0 0 0 7px #1b1b22, 0 40px 90px -40px rgba(255, 30, 45, 0.55);
+  }
+  .gate-title { font-size: clamp(2.6rem, 7vw, 4.6rem); font-style: italic; text-transform: uppercase; margin: 0.4rem 0 0.6rem; }
+  .muted { color: var(--muted); margin: 0; }
+  .auth { display: flex; gap: 0.6rem; max-width: 480px; margin: 1.8rem auto 0; }
+  .auth input {
+    flex: 1; padding: 0.85rem 1rem; font-family: var(--mono); font-size: 1rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--lime); caret-color: var(--lime); background: #030304; border: 1px solid #1f1f28;
+  }
+  .auth input::placeholder { color: #4a4a55; }
+  .auth input:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 1px var(--lime), 0 0 18px rgba(182, 255, 46, 0.2); }
+  .err { --c: var(--f1red); min-height: 1.4em; margin: 1rem 0 0; font-size: 1.1rem; letter-spacing: 0.12em; }
+  .gate.denied .auth { animation: denied 0.4s; }
+  @keyframes denied { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+
+  /* --- unlocked ------------------------------------------------------------- */
+  .g-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+  .g-title { font-size: clamp(2.6rem, 7vw, 4.6rem); font-style: italic; text-transform: uppercase; margin-top: 0.35rem; }
+  .builds { display: grid; gap: 2rem; margin-top: 2.4rem; }
+
+  .builds :global(.build) {
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    background: linear-gradient(180deg, #0d0d12, #08080b); border: 1px solid #1c1c24; border-top: 3px solid var(--c);
+    overflow: hidden; /* entrance animations stay inside the frame */
+  }
+  .builds :global(.build:nth-child(even) .b-media) { order: 2; }
+
+  /* media: broadcast slides (photos) or the LED board */
+  .builds :global(.b-media) { position: relative; min-height: 420px; overflow: hidden; background: #060608; }
+  .builds :global(.b-slide) {
+    position: absolute; inset: 0; margin: 0; clip-path: polygon(0 0, 0 0, -20% 100%, -20% 100%);
+  }
+  .builds :global(.b-slide.prev) { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 1; }
+  .builds :global(.b-slide.on) { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 2; transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1); }
+  .builds :global(.b-slide img) { width: 100%; height: 100%; object-fit: cover; }
+  .builds :global(.b-slide.on img) { animation: push 6.5s ease-out both; }
+  @keyframes push { from { transform: scale(1.1); } to { transform: scale(1); } }
+  .builds :global(.b-cap) {
+    position: absolute; z-index: 3; left: 0; bottom: 0; right: 0; padding: 2.4rem 1.2rem 1rem;
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; color: #e6e6ec;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  }
+  .builds :global(.b-media::before) {
+    content: ''; position: absolute; z-index: 4; left: -3%; bottom: 0; width: 42%; height: 7px;
+    background: var(--c); transform: skewX(-35deg); transform-origin: left bottom;
+  }
+  .builds :global(.b-board) { position: absolute; inset: 0; display: grid; place-items: center; padding: 1.4rem; }
+  .builds :global(.b-board canvas) { width: 100%; aspect-ratio: 128 / 41; border-radius: 4px; }
+
+  .builds :global(.b-body) { display: flex; flex-direction: column; gap: 1rem; padding: 1.8rem 1.8rem 1.6rem; min-width: 0; }
+  .builds :global(.b-top) { display: flex; align-items: center; gap: 0.8rem; }
+  .builds :global(.b-tag) { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; padding: 0.15rem 0.55rem; color: #000; background: var(--c); }
+  .builds :global(.b-status) { margin-left: auto; font-size: 1rem; letter-spacing: 0.08em; }
+  .builds :global(.b-status i) { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; margin-right: 0.5rem; animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .builds :global(.b-body h2) { font-size: clamp(1.8rem, 3.2vw, 2.6rem); font-style: italic; text-transform: uppercase; line-height: 1; }
+
+  /* spec tiles */
+  .builds :global(.tiles) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+  .builds :global(.tile) { padding: 0.7rem 0.8rem; }
+  .builds :global(.tile > *) { position: relative; z-index: 1; }
+  .builds :global(.tile span) { display: block; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.22em; color: var(--muted); margin-bottom: 0.3rem; }
+  .builds :global(.tile b) { --c2: var(--c); display: block; font-size: 1rem; color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 50%, transparent); }
+
+  /* --- Forza-style garage grid ----------------------------------------------------- */
+  .fz { margin: 2.2rem 0 3rem; scroll-margin-top: 90px; }
+  .fz-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .fz-head .eyebrow { margin: 0; }
+  .fz-count { --c: var(--pink); font-size: 1rem; letter-spacing: 0.1em; }
+  .fz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; } /* cards stretch to fill the row */
+
+  .fz-grid :global(.fz-card) {
+    position: relative; display: flex; flex-direction: column; padding: 0; text-align: left; cursor: pointer;
+    color: var(--ink); background: linear-gradient(180deg, #111118, #08080b);
+    border: 1px solid #1f1f28; border-bottom: 4px solid var(--c);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s, border-color 0.25s;
+  }
+  .fz-grid :global(.fz-card:hover), .fz-grid :global(.fz-card:focus-visible) {
+    transform: translateY(-6px); outline: none; border-color: var(--pink);
+    box-shadow: 0 0 0 2px var(--pink), 0 24px 50px -20px rgba(255, 43, 214, 0.6);
+  }
+  .fz-grid :global(.fz-card.on) {
+    border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink), 0 0 40px -6px rgba(255, 43, 214, 0.55);
+  }
+
+  /* photo */
+  .fz-grid :global(.fz-photo) { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #060608; }
+  .fz-grid :global(.fz-photo img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+  .fz-grid :global(.fz-card:hover .fz-photo img) { transform: scale(1.06); }
+  .fz-grid :global(.fz-photo::after) { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(0, 0, 0, 0.6)); }
+  .fz-grid :global(.fz-ph) {
+    position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(2rem, 4vw, 3rem); font-style: italic;
+    color: transparent; -webkit-text-stroke: 1.5px var(--c);
+    background: radial-gradient(60% 70% at 50% 50%, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%);
+  }
+  .fz-grid :global(.fz-sold) {
+    position: absolute; z-index: 2; top: 0.7rem; left: -0.3rem; padding: 0.25rem 0.9rem 0.25rem 0.7rem;
+    font-family: var(--display); font-weight: 900; font-style: italic; letter-spacing: 0.08em; color: #fff; background: var(--f1red);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  /* Forza performance-class badge: coloured letter + PI number */
+  .fz-grid :global(.fz-class) {
+    position: absolute; z-index: 2; top: 0.7rem; right: 0.7rem; display: flex; align-items: stretch;
+    font-family: var(--display); font-weight: 900; font-style: normal; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  }
+  .fz-grid :global(.fz-class b) { padding: 0.15rem 0.45rem; background: var(--k); color: #000; font-size: 0.95rem; }
+  .fz-grid :global(.fz-class em) { padding: 0.15rem 0.5rem; background: #f4f4f6; color: #000; font-style: normal; font-size: 0.95rem; }
+
+  /* text */
+  .fz-grid :global(.fz-body) { display: grid; gap: 0.3rem; padding: 0.9rem 1rem 0.6rem; }
+  .fz-grid :global(.fz-make) { font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+  .fz-grid :global(.fz-model) { font-size: 1.55rem; font-style: italic; text-transform: uppercase; line-height: 1; }
+  .fz-grid :global(.fz-status) { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: #b9b9c4; }
+  .fz-grid :global(.fz-status i) { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.45rem; }
+  .fz-grid :global(.fz-stats) { display: grid; gap: 0.35rem; margin-top: 0.4rem; }
+  .fz-grid :global(.fz-stats > span) { display: grid; grid-template-columns: 5.6rem 1fr; align-items: center; gap: 0.6rem; }
+  .fz-grid :global(.fz-stats em) { font-style: normal; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; color: var(--muted); }
+  .fz-grid :global(.fz-bar) { display: block; height: 5px; background: #1a1a21; overflow: hidden; }
+  .fz-grid :global(.fz-bar i) { display: block; height: 100%; width: calc(var(--v) * 100%); background: var(--c); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .fz-grid :global(.fz-cta) {
+    margin: 0.4rem 1rem 0.9rem; align-self: flex-start; padding: 0.35rem 0.8rem;
+    font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #000; background: var(--ink); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+  .fz-grid :global(.fz-card:hover .fz-cta), .fz-grid :global(.fz-card.on .fz-cta) { background: var(--pink); color: #fff; }
+
+  /* only the chosen vehicle's card is shown */
+  .builds :global(.build[hidden]) { display: none; }
+  .builds :global(.build.arrive) { animation: arrive 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes arrive { from { opacity: 0; transform: translateY(40px) scale(0.98); } }
+  .builds :global(.sel-back) {
+    grid-column: 1 / -1; justify-self: end; margin: 0; padding: 0.5rem 1rem; border: 0; cursor: pointer;
+    background: none; color: var(--muted); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .builds :global(.sel-back:hover) { color: var(--c); }
+
+  /* LED sign: full-width trackside screen across the top of every vehicle card */
+  .builds :global(.b-sign) {
+    grid-column: 1 / -1; padding: 0.55rem 0.7rem; background: #030304;
+    border-bottom: 1px solid color-mix(in srgb, var(--c) 35%, #1c1c24);
+    box-shadow: inset 0 -30px 60px -40px color-mix(in srgb, var(--c) 45%, transparent);
+  }
+  .builds :global(.b-sign canvas) {
+    display: block; width: 100%; aspect-ratio: 200 / 11; border-radius: 3px;
+    box-shadow: 0 0 0 1px #1b1b22, 0 0 40px -12px color-mix(in srgb, var(--c) 45%, transparent);
+  }
+  /* no photos yet: a clean placeholder in the photo slot */
+  .builds :global(.b-empty) {
+    position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.6rem;
+    background:
+      radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 14px), #060608;
+  }
+  .builds :global(.b-empty span) {
+    font-size: clamp(3rem, 7vw, 5.5rem); font-style: italic; line-height: 1;
+    color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--c) 70%, transparent);
+  }
+  .builds :global(.b-empty em) { font-style: normal; font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+
+  /* SOLD: race-control style banner across the top of the photo frame */
+  .builds :global(.sold-banner) {
+    position: absolute; z-index: 6; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1.1rem;
+    background:
+      repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0 12px, transparent 12px 24px),
+      linear-gradient(90deg, #b30000, #e10600 60%, #ff2a1a);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    border-bottom: 3px solid #fff;
+  }
+  .builds :global(.sold-banner span) {
+    --c: #fff; font-size: 1.7rem; line-height: 1; letter-spacing: 0.16em;
+    padding: 0.15rem 0.6rem; background: rgba(0, 0, 0, 0.55);
+  }
+  .builds :global(.sold-banner em) {
+    font-style: italic; font-family: var(--display); font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+  }
+
+  /* rider's notes: collapsed to a few lines, fades out until expanded */
+  .builds :global(.review) { border-left: 3px solid var(--c); padding: 0.2rem 0 0.2rem 1rem; }
+  .builds :global(.review .eyebrow) { margin: 0 0 0.6rem; }
+  .builds :global(.rv-body) {
+    max-height: 7.6em; overflow: hidden; color: #d0d0d8; font-size: 0.97rem; line-height: 1.6;
+    -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent);
+    transition: max-height 0.5s ease;
+  }
+  .builds :global(.review.open .rv-body) { max-height: 60em; -webkit-mask-image: none; mask-image: none; }
+  .builds :global(.rv-body p) { margin: 0 0 0.8rem; }
+  .builds :global(.rv-body p:first-child) { font-size: 1.04rem; color: var(--ink); }
+  .builds :global(.rv-toggle) {
+    margin-top: 0.3rem; padding: 0; border: 0; background: none; cursor: pointer;
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c);
+  }
+  .builds :global(.rv-toggle:hover) { text-decoration: underline; }
+
+  /* build log as timing-board rows — scrolls inside the card so it never spills out */
+  .builds :global(.log) {
+    list-style: none; margin: 0; padding: 0 0.3rem 0 0; display: grid; gap: 0.35rem; align-content: start;
+    max-height: 21rem; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--c) #0a0a0d;
+  }
+  .builds :global(.log li) {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: baseline;
+    padding: 0.65rem 0.6rem 0.65rem 0.9rem; background: #060608; border-left: 3px solid var(--c);
+  }
+  .builds :global(.log li:first-child) { background: color-mix(in srgb, var(--c) 9%, #060608); }
+  .builds :global(.log li.empty) { grid-template-columns: 1fr; border-left-style: dashed; }
+  .builds :global(.log .d) { --c: var(--amber); font-size: 0.95rem; white-space: nowrap; }
+  .builds :global(.log .d em) { font-style: normal; margin-left: 0.6rem; opacity: 0.7; }
+  .builds :global(.log .n) { color: #d0d0d8; font-size: 0.95rem; overflow-wrap: anywhere; }
+  .builds :global(.del) {
+    border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem;
+    padding: 0.1rem 0.3rem; opacity: 0; transition: opacity 0.2s, color 0.2s;
+  }
+  .builds :global(.log li:hover .del), .builds :global(.del:focus-visible), .builds :global(.del.armed) { opacity: 1; }
+  .builds :global(.del:hover) { color: var(--ink); }
+  .builds :global(.del.armed) { color: #fff; background: var(--f1red); letter-spacing: 0.08em; }
+  @media (hover: none) { .builds :global(.del) { opacity: 1; } }
+
+  .builds :global(.log-bar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; }
+  .builds :global(.log-head) { margin: 0; }
+  .builds :global(.add-btn) {
+    font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.45rem 0.95rem; border: 0; cursor: pointer; color: #000; background: var(--c);
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); transition: transform 0.2s, filter 0.2s;
+  }
+  .builds :global(.add-btn:hover) { transform: translateX(3px); filter: brightness(1.15); }
+
+  /* inline add-log form */
+  .builds :global(.log-form) {
+    display: grid; gap: 0.5rem; padding: 0.8rem; background: #050507;
+    border: 1px solid color-mix(in srgb, var(--c) 45%, #1c1c24); animation: form-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .builds :global(.log-form[hidden]) { display: none; }
+  @keyframes form-in { from { opacity: 0; transform: translateY(-8px); } }
+  .builds :global(.log-form input), .builds :global(.log-form textarea) {
+    width: 100%; padding: 0.65rem 0.8rem; font-family: var(--mono); font-size: 0.92rem; color: var(--lime);
+    caret-color: var(--lime); background: #030304; border: 1px solid #1f1f28; color-scheme: dark;
+  }
+  .builds :global(.log-form textarea) { resize: vertical; }
+  .builds :global(.log-form input:focus), .builds :global(.log-form textarea:focus) { outline: none; border-color: var(--lime); }
+  .builds :global(.lf-actions) { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .builds :global(.lf-actions .btn) { padding: 0.55rem 1.1rem; font-size: 0.82rem; }
+  .builds :global(.lf-msg) { --c: var(--amber); font-size: 0.9rem; margin-left: auto; }
+
+  @media (max-width: 900px) {
+    .builds :global(.build) { grid-template-columns: 1fr; }
+    .builds :global(.build:nth-child(even) .b-media) { order: 0; }
+    .builds :global(.b-media) { min-height: 300px; }
+  }
+  @media (max-width: 620px) {
+    .auth { flex-direction: column; }
+    .builds :global(.tiles) { grid-template-columns: 1fr 1fr; }
+    .builds :global(.log li) { grid-template-columns: 1fr; gap: 0.2rem; }
+  }
+</style>
+
+<script>
+  import { API_BASE } from '../lib/api';
+  import { initBoard } from '../scripts/ledboard';
+  import { scrollFx } from '../scripts/scrollfx';
+  import { smoothScroll } from '../scripts/smoothscroll';
+
+  type Photo = { src: string; caption?: string };
+  type LogItem = { date: string; time?: string; note: string };
+  type Build = {
+    id: string; tag: string; color: string; scene: string; name: string;
+    chassis?: string; status?: string; power?: string; log?: LogItem[];
+    review?: { title?: string; body: string[] }; // optional write-up shown under the specs
+    sold?: boolean;  // shows a SOLD banner over the photos
+    short?: string;  // shorter tag for the LED board (max ~7 chars)
+  };
+
+  const KEY = 'garage_token';
+  const gate = document.getElementById('gate')!;
+  const content = document.getElementById('content')!;
+  const err = document.getElementById('auth-err')!;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+  smoothScroll();
+
+  // lock-screen LED board
+  const gb = document.getElementById('gate-board') as HTMLCanvasElement;
+  initBoard(gb, [{ scene: 'track', tag: 'CREW', color: '#ff1e2d', line: 'AUTHORISED CREW ONLY * PIT LANE ACCESS * ENTER CODE', sub: 'PIT LANE' }]).show(0);
+
+  async function loadGarage(token: string, keepScroll = false): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/api/garage`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return false;
+    const data: { builds: Build[] } = await res.json();
+    const photos: Record<string, Photo[]> =
+      await fetch('/work/photos.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+    render(data.builds ?? [], photos);
+    gate.hidden = true;
+    content.hidden = false;
+    if (!keepScroll) window.scrollTo({ top: 0 });
+    return true;
+  }
+
+  // --- Forza-style garage grid ------------------------------------------------------
+  let selectedId = ''; // vehicle whose card is shown below ('' = none yet)
+
+  const hp = (b: Build) => Number((b.power ?? '').match(/(\d+)\s*hp/i)?.[1] ?? 0);
+  const lampOf = (b: Build) => (b.sold ? 'var(--f1red)' : /run|done|complete/i.test(b.status ?? '') ? 'var(--green)' : 'var(--amber)');
+  // Forza-style performance class, derived from horsepower (just for fun)
+  function perfClass(b: Build): { cls: string; pi: string; color: string } {
+    const h = hp(b);
+    if (!h) return { cls: '?', pi: '---', color: '#5a5a66' };
+    const pi = Math.min(999, Math.round(100 + h * 8));
+    const [cls, color] =
+      pi > 900 ? ['S2', '#3d7bff'] : pi > 800 ? ['S1', '#b14cff'] : pi > 700 ? ['A', '#ff2a1a']
+      : pi > 600 ? ['B', '#ff7a1a'] : pi > 500 ? ['C', '#ffd400'] : ['D', '#39c5ff'];
+    return { cls, pi: String(pi), color };
+  }
+
+  function setupSelect(builds: Build[], photos: Record<string, Photo[]>) {
+    document.getElementById('fz-count')!.textContent = `${String(builds.length).padStart(2, '0')} VEHICLES`;
+    const grid = document.getElementById('fz-grid')!;
+    grid.innerHTML = builds.map((b) => {
+      const ph = photos[b.id]?.[0];
+      const pc = perfClass(b);
+      const [make, ...model] = b.name.split(' ');
+      const year = /^\d{4}$/.test(b.chassis ?? '') ? b.chassis : '';
+      const stats: [string, number][] = [
+        ['POWER', Math.min(1, hp(b) / 100)],
+        ['BUILD LOG', Math.min(1, (b.log?.length ?? 0) / 10)],
+      ];
+      return `
+        <button class="fz-card${b.id === selectedId ? ' on' : ''}" type="button" data-pick="${esc(b.id)}" style="--c: ${esc(b.color)}" aria-pressed="${b.id === selectedId}">
+          <span class="fz-photo">${ph ? `<img src="${esc(ph.src.replace(/\.jpg$/, '-t.jpg'))}" alt="" loading="lazy" />` : `<span class="fz-ph display">${esc(b.tag)}</span>`}
+            ${b.sold ? '<span class="fz-sold">SOLD</span>' : ''}
+            <span class="fz-class" style="--k: ${pc.color}"><b>${pc.cls}</b><em>${pc.pi}</em></span>
+          </span>
+          <span class="fz-body">
+            <span class="fz-make mono">${esc(make)}${year ? ` · ${esc(year)}` : ''}</span>
+            <span class="fz-model display">${esc(model.join(' ') || b.name)}</span>
+            <span class="fz-status mono"><i style="background: ${lampOf(b)}"></i>${esc(b.status ?? '')}</span>
+            <span class="fz-stats">${stats.map(([k, v]) => `<span><em>${k}</em><span class="fz-bar"><i style="--v: ${v}"></i></span></span>`).join('')}</span>
+          </span>
+          <span class="fz-cta">${b.id === selectedId ? 'Selected ✓' : 'Open ▸'}</span>
+        </button>`;
+    }).join('');
+  }
+
+  /** Show only the chosen vehicle's card and bring it into view. */
+  function choose(id: string) {
+    selectedId = id;
+    document.querySelectorAll<HTMLElement>('.build').forEach((c) => { c.hidden = c.id !== `build-${id}`; });
+    document.querySelectorAll<HTMLElement>('.fz-card').forEach((c) => {
+      const on = c.dataset.pick === id;
+      c.classList.toggle('on', on); c.setAttribute('aria-pressed', String(on));
+      c.querySelector('.fz-cta')!.textContent = on ? 'Selected ✓' : 'Open ▸';
+    });
+    const card = document.getElementById(`build-${id}`);
+    if (card) {
+      card.classList.remove('arrive'); void card.offsetWidth; card.classList.add('arrive');
+      card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      window.dispatchEvent(new Event('scroll')); // let scroll animations measure the newly shown card
+    }
+  }
+
+  // one listener for the grid (survives re-renders)
+  document.getElementById('fz-grid')!.addEventListener('click', (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>('[data-pick]');
+    if (card) choose(card.dataset.pick!);
+  });
+
+  function render(builds: Build[], photos: Record<string, Photo[]>) {
+    const wrap = document.getElementById('builds')!;
+    wrap.innerHTML = builds.map((b) => {
+      const ph = (photos[b.id] ?? []).slice(0, 6); // private page: up to 6 per build
+      const media = ph.length
+        ? ph.map((p, j) => `<figure class="b-slide${j === 0 ? ' on' : ''}" data-cap="${esc(p.caption)}"><img src="${esc(p.src)}" alt="${esc(p.caption)}" loading="lazy" /></figure>`).join('')
+          + `<span class="b-cap">${esc(ph[0].caption)}</span>`
+        : `<div class="b-empty"><span class="display">${esc(b.short ?? b.tag)}</span><em class="mono">Photos coming soon</em></div>`;
+      const running = /run|done|complete/i.test(b.status ?? '');
+      const stamp = (e: LogItem) => `${e.date} ${e.time ?? ''}`;
+      const log = [...(b.log ?? [])].sort((x, y) => stamp(y).localeCompare(stamp(x))); // newest first
+      return `
+        <article class="build" id="build-${esc(b.id)}" style="--c: ${esc(b.color)}"${b.id === selectedId ? '' : ' hidden'}>
+          <button class="sel-back" type="button" data-back>▲ Change vehicle</button>
+          <div class="b-sign" data-fx="rise"><canvas data-build="${esc(b.id)}" role="img" aria-label="${esc(b.name)} — ${esc(b.status)}"></canvas></div>
+          <div class="b-media" data-fx="wipe">${media}${b.sold ? `<div class="sold-banner" role="note"><span class="lcd-text">SOLD</span><em>Former build — moved on to the next one</em></div>` : ''}</div>
+          <div class="b-body">
+            <div class="b-top" data-fx="rise" data-d="150">
+              <span class="b-tag">${esc(b.tag)}</span>
+              <span class="b-status lcd-text" style="--c: var(${b.sold ? '--f1red' : running ? '--green' : '--amber'})"><i></i>${esc(b.status)}</span>
+            </div>
+            <h2 class="display" data-fx="left" data-d="220">${esc(b.name)}</h2>
+            <div class="tiles" data-fx="rise" data-d="300">
+              <div class="tile lcd"><span>CHASSIS</span><b class="lcd-text">${esc(b.chassis || '—')}</b></div>
+              <div class="tile lcd"><span>POWER</span><b class="lcd-text">${esc(b.power || '—')}</b></div>
+              <div class="tile lcd"><span>LOG ENTRIES</span><b class="lcd-text">${String(log.length).padStart(2, '0')}</b></div>
+            </div>
+            ${b.review?.body?.length ? `
+            <div class="review" data-fx="rise" data-d="330">
+              <p class="eyebrow">Rider's notes${b.review.title ? ` — ${esc(b.review.title)}` : ''}</p>
+              <div class="rv-body">${b.review.body.map((para) => `<p>${esc(para)}</p>`).join('')}</div>
+              ${b.review.body.length > 1 ? `<button class="rv-toggle" type="button" data-review>Read full review ▸</button>` : ''}
+            </div>` : ''}
+            <div class="log-bar" data-fx="rise" data-d="360">
+              <p class="eyebrow log-head">Build log — latest first</p>
+              <button class="add-btn" type="button" data-add="${esc(b.id)}">+ Add log</button>
+            </div>
+            <form class="log-form" data-build="${esc(b.id)}" hidden>
+              <input name="when" type="datetime-local" required />
+              <textarea name="note" rows="2" maxlength="600" placeholder="What did you do to it?" required></textarea>
+              <div class="lf-actions">
+                <button class="btn btn-primary" type="submit">Save ▸</button>
+                <button class="btn" type="button" data-cancel>Cancel</button>
+                <span class="lf-msg lcd-text"></span>
+              </div>
+            </form>
+            <ol class="log" data-native-scroll>${log.length ? log.map((e, j) => `
+              <li data-fx="rise" data-d="${400 + Math.min(j, 5) * 80}">
+                <span class="d lcd-text">${esc(e.date)}${e.time ? `<em>${esc(e.time)}</em>` : ''}</span>
+                <span class="n">${esc(e.note)}</span>
+                <button class="del" type="button" title="Delete entry" aria-label="Delete entry"
+                  data-del="${esc(b.id)}" data-date="${esc(e.date)}" data-time="${esc(e.time ?? '')}" data-note="${esc(e.note)}">✕</button>
+              </li>`).join('') : '<li class="empty"><span class="n">No entries yet — add the first one.</span></li>'}
+            </ol>
+          </div>
+        </article>`;
+    }).join('');
+
+    // LED sign on top of every vehicle: pixel art, name, chassis, scrolling status + specs
+    wrap.querySelectorAll<HTMLCanvasElement>('canvas[data-build]').forEach((cv) => {
+      const b = builds.find((x) => x.id === cv.dataset.build);
+      if (b) initBoard(cv, [{
+        scene: b.scene, tag: b.tag, color: b.color,
+        light: b.sold ? 'red' : /run|done|complete/i.test(b.status ?? '') ? 'green' : 'amber',
+        line: [b.name, b.chassis && `CHASSIS ${b.chassis}`, b.status, b.power, b.log?.length ? `${b.log.length} LOG ENTRIES` : ''].filter(Boolean).join(' * ').toUpperCase(),
+      }], undefined, { banner: true }).show(0);
+    });
+
+    // photo slides: diagonal wipe every 5s
+    wrap.querySelectorAll<HTMLElement>('.b-media').forEach((m) => {
+      const slides = Array.from(m.querySelectorAll<HTMLElement>('.b-slide'));
+      const cap = m.querySelector('.b-cap');
+      if (slides.length < 2 || reduced) return;
+      let at = 0;
+      setInterval(() => {
+        const from = at; at = (at + 1) % slides.length;
+        slides.forEach((s, j) => { s.classList.toggle('prev', j === from); s.classList.toggle('on', j === at); });
+        if (cap) cap.textContent = slides[at].dataset.cap ?? '';
+      }, 5000);
+    });
+
+    setupSelect(builds, photos);
+    scrollFx(wrap);
+  }
+
+  // --- build log editing: + Add log / Save / Cancel / delete (✕, tap twice) ----
+  const buildsEl = document.getElementById('builds')!;
+  const token = () => localStorage.getItem(KEY) ?? '';
+  const localNow = () => {
+    const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM in local time
+  };
+  async function logRequest(method: 'POST' | 'DELETE', id: string, body: LogItem): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/api/garage/${encodeURIComponent(id)}/log`, {
+      method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify(body),
+    });
+    if (res.status === 401) { localStorage.removeItem(KEY); location.reload(); } // session expired → lock screen
+    return res.ok;
+  }
+
+  buildsEl.addEventListener('click', async (e) => {
+    const t = e.target as HTMLElement;
+    const add = t.closest<HTMLElement>('[data-add]');
+    if (add) {
+      const form = buildsEl.querySelector<HTMLFormElement>(`.log-form[data-build="${add.dataset.add}"]`)!;
+      form.hidden = !form.hidden;
+      if (!form.hidden) {
+        (form.elements.namedItem('when') as HTMLInputElement).value = localNow();
+        (form.elements.namedItem('note') as HTMLTextAreaElement).focus();
+      }
+      return;
+    }
+    if (t.closest('[data-cancel]')) { (t.closest('form') as HTMLFormElement).hidden = true; return; }
+    if (t.closest('[data-back]')) { document.getElementById('select')!.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }); return; }
+    const rv = t.closest<HTMLButtonElement>('[data-review]');
+    if (rv) {
+      const open = rv.closest('.review')!.classList.toggle('open');
+      rv.textContent = open ? 'Show less ▴' : 'Read full review ▸';
+      return;
+    }
+    const del = t.closest<HTMLButtonElement>('[data-del]');
+    if (del) {
+      if (!del.classList.contains('armed')) {           // first tap arms it, second tap deletes
+        del.classList.add('armed'); del.textContent = 'Delete?';
+        setTimeout(() => { del.classList.remove('armed'); del.textContent = '✕'; }, 3000);
+        return;
+      }
+      del.disabled = true;
+      const ok = await logRequest('DELETE', del.dataset.del!, { date: del.dataset.date!, time: del.dataset.time ?? '', note: del.dataset.note! });
+      if (ok) await loadGarage(token(), true);
+    }
+  });
+
+  buildsEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const msg = form.querySelector('.lf-msg')!;
+    const when = (form.elements.namedItem('when') as HTMLInputElement).value; // YYYY-MM-DDTHH:MM
+    const note = (form.elements.namedItem('note') as HTMLTextAreaElement).value.trim();
+    if (!when || !note) { msg.textContent = 'DATE + NOTE NEEDED'; return; }
+    msg.textContent = 'SAVING…';
+    const [date, time = ''] = when.split('T');
+    try {
+      const ok = await logRequest('POST', form.dataset.build!, { date, time: time.slice(0, 5), note });
+      if (!ok) { msg.textContent = 'COULD NOT SAVE'; return; }
+      await loadGarage(token(), true);
+    } catch {
+      msg.textContent = 'NO SIGNAL — BACKEND OFFLINE?';
+    }
+  });
+
+  // auto-unlock if a valid token is stored
+  const saved = localStorage.getItem(KEY);
+  if (saved) loadGarage(saved).then((ok) => { if (!ok) localStorage.removeItem(KEY); }).catch(() => {});
+
+  document.getElementById('auth-form')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.textContent = '';
+    gate.classList.remove('denied');
+    const pw = (document.getElementById('pw') as HTMLInputElement).value;
+    try {
+      const res = await fetch(`${API_BASE}/api/auth`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }),
+      });
+      if (!res.ok) {
+        err.textContent = 'ACCESS DENIED';
+        void gate.offsetWidth; gate.classList.add('denied');
+        return;
+      }
+      const { token } = await res.json();
+      localStorage.setItem(KEY, token);
+      await loadGarage(token);
+    } catch {
+      err.textContent = 'NO SIGNAL — IS THE BACKEND RUNNING?';
+    }
+  });
+
+  document.getElementById('lock-out')!.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    content.hidden = true;
+    gate.hidden = false;
+    (document.getElementById('pw') as HTMLInputElement).value = '';
+  });
+</script>

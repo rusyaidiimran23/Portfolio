@@ -1,0 +1,22 @@
+# dependencies / build output
+node_modules/
+port_frontend/dist/
+port_frontend/.astro/
+.venv/
+__pycache__/
+*.pyc
+
+# live garage data (build logs added on the site) — private, never commit
+port_backend/app/garage.json
+port_backend/app/garage.tmp
+
+# secrets / local tooling
+.env
+*.env
+.claude/settings.local.json
+*.code-workspace
+
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store

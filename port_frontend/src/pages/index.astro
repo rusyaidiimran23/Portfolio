@@ -1,0 +1,882 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Rusyaidi Yeng — Environmental monitoring & IoT" description="I set up environmental monitoring systems in the field and build the software behind them.">
+  <!-- LIGHTS OUT intro: five reds, a held breath, then go (once per session) -->
+  <div class="lights" id="lights" aria-hidden="true">
+    <div class="pods">
+      {[0, 1, 2, 3, 4].map(() => <div class="pod"><i></i><i class="red"></i></div>)}
+    </div>
+    <p class="lights-txt lcd-text" id="lights-txt">ENGINES ON</p>
+    <button class="lights-skip" type="button" id="lights-skip">SKIP ▸</button>
+  </div>
+
+  <!-- NAV -->
+  <nav class="titlebar">
+    <div class="wrap tb-inner">
+      <a class="brand display" href="/"><span class="num">07</span><span>RUSYAIDI <b>YENG</b></span></a>
+      <div class="links mono">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a class="lock" href="/garage" title="Private">▣ Garage</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO: who you are + where your work runs. Nothing else. -->
+  <header class="hero wrap">
+    <div class="hero-copy">
+      <p class="eyebrow reveal in">IoT · Environmental monitoring · Malaysia</p>
+      <h1 class="hero-title display reveal in">
+        <span class="ht-1">Rusyaidi</span>
+        <span class="ht-2">Yeng</span>
+      </h1>
+      <p class="lead reveal in d1" id="tagline">
+        I set up environmental monitoring systems in the field and build the
+        software behind them — from sensors and dataloggers to dashboards and alerts.
+      </p>
+      <div class="cta reveal in d2">
+        <a class="btn btn-primary" href="#work">See the work ▸</a>
+        <a class="btn" href="#contact">Box, box ▸</a>
+      </div>
+    </div>
+
+    <!-- deployment map under a searchlight: where each project runs -->
+    <figure class="spot reveal in d1" id="spot">
+      <canvas id="deploy-map" class="spot-canvas" role="img" aria-label="Map of project deployment sites in Malaysia"></canvas>
+      <figcaption class="spot-caption">
+        <span class="sc-tag lcd-text" id="spot-tag">--</span>
+        <span class="sc-text">
+          <b id="spot-title">Where my systems run</b>
+          <span class="mono" id="spot-place">Across Malaysia</span>
+        </span>
+        <a class="sc-link mono" id="spot-link" href="#work">Case study ▸</a>
+      </figcaption>
+    </figure>
+  </header>
+
+  <div class="kerb wrap"></div>
+
+  <!-- 01 WORK: featured screen, then the case studies -->
+  <section id="work" class="section wrap">
+    <header class="sec-head reveal">
+      <span class="sec-no lcd-text" style="--c: var(--purple)">01</span>
+      <div><p class="eyebrow">Race results — selected work</p><h2 class="section-title display">The work</h2></div>
+    </header>
+
+    <div class="billboard reveal d1" id="billboard">
+      <canvas id="board" class="bb-screen" role="img" aria-label="Featured project"></canvas>
+      <div class="bb-nav" id="pj-nav" role="tablist" aria-label="Choose a project"></div>
+    </div>
+
+    <div class="filters mono reveal d1" id="filters" role="tablist" aria-label="Filter projects"></div>
+    <div class="cases" id="projects"></div>
+  </section>
+
+  <!-- 02 ABOUT + SKILLS -->
+  <section id="about" class="section wrap">
+    <header class="sec-head reveal">
+      <span class="sec-no lcd-text" style="--c: var(--green)">02</span>
+      <div><p class="eyebrow">Driver profile — about me</p><h2 class="section-title display">Field + code</h2></div>
+    </header>
+    <!-- driver card: portrait with an angled cut + giant race number, then bio + toolkit -->
+    <div class="driver">
+      <figure class="driver-photo reveal d1">
+        <img src="/about/profile.jpg" alt="Rusyaidi Yeng at a track day with his Kawasaki ZX-4RR" loading="lazy" />
+        <span class="driver-num" aria-hidden="true" data-speed="-0.04">07</span>
+        <figcaption class="mono">Track day · ZX-4RR</figcaption>
+      </figure>
+      <div class="driver-info">
+        <p class="driver-name display reveal">Rusyaidi <b>Yeng</b></p>
+        <p class="driver-role mono reveal">Environmental monitoring · Field + software · Malaysia</p>
+        <p class="big reveal d1" id="about-text">Loading…</p>
+        <div class="reveal d2" id="stack">
+          <p class="eyebrow">Setup sheet — toolkit</p>
+          <ul class="chiplist" id="skills"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- off the clock: slanted strip of riding shots -->
+    <div class="offclock reveal d1">
+      <p class="eyebrow">Off the clock — gym, track days &amp; hill roads</p>
+      <p class="big oc-text">Outside of work, I like to keep moving. Most days start or end at the gym, and weekends are for the track or for the winding hill roads up to Bukit Tinggi and Genting on two wheels. It's the same thing that pulls me into my work: I like taking a machine apart, understanding how it behaves, and getting the most out of it, whether that's a motorcycle through a hairpin or a monitoring system out in the field.</p>
+      <div class="oc-strip">
+        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-1.jpg" alt="Cornering on the ZX-4RR" loading="lazy" /></figure>
+        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-2.jpg" alt="Leaning into a hairpin on the ZX-4RR" loading="lazy" /></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- GARAGE teaser + its own little LED board -->
+  <section id="garage-teaser" class="section wrap">
+    <div class="pit">
+      <div class="kerb"></div>
+      <div class="pit-body">
+        <div class="pit-copy">
+          <p class="eyebrow">Pit lane — the builds</p>
+          <h2 class="section-title display">The garage</h2>
+          <p class="big">A Nissan Cefiro (A31) and a Kawasaki ZX-4RR.
+            Build logs live behind the pit wall — crew only.</p>
+          <a class="btn btn-primary" href="/garage">Enter the garage ▸</a>
+        </div>
+        <canvas id="garage-board" class="bb-screen pit-board" role="img" aria-label="Cefiro and ZX-4RR"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 CONTACT -->
+  <section id="contact" class="section wrap">
+    <header class="sec-head reveal">
+      <span class="sec-no lcd-text" style="--c: var(--pink)">03</span>
+      <div><p class="eyebrow">Team radio — channel open</p><h2 class="section-title display">Box, box — get in touch</h2></div>
+    </header>
+    <form id="contact-form" class="contact lcd">
+      <div class="row">
+        <input name="name" placeholder="Your name" required />
+        <input name="email" type="email" placeholder="you@email.com" required />
+      </div>
+      <textarea name="message" rows="4" maxlength="5000" placeholder="Message to the pit wall — what are you working on?" required></textarea>
+      <!-- honeypot: invisible to people, bots fill it in and get silently ignored -->
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <button class="btn btn-primary" type="submit">Transmit ▸</button>
+      <p class="form-status lcd-text" id="form-status"></p>
+    </form>
+  </section>
+
+  <!-- photo viewer for the case studies -->
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Project photo">
+    <button class="lb-btn lb-close" type="button" aria-label="Close">✕</button>
+    <button class="lb-btn lb-prev" type="button" aria-label="Previous photo">◂</button>
+    <figure class="lb-fig">
+      <img id="lb-img" alt="" />
+      <figcaption><span class="lcd-text" id="lb-count"></span><span id="lb-cap"></span></figcaption>
+    </figure>
+    <button class="lb-btn lb-next" type="button" aria-label="Next photo">▸</button>
+  </div>
+
+  <footer class="footer">
+    <div class="checker" aria-hidden="true"></div>
+    <div class="wrap foot-inner mono">
+      <span>© <span id="year"></span> RUSYAIDI YENG · CHEQUERED FLAG</span>
+      <span>ASTRO · CANVAS · FASTAPI</span>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  /* --- lights-out intro ---------------------------------------------------- */
+  .lights {
+    position: fixed; inset: 0; z-index: 100; background: #040405;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4rem;
+    transition: clip-path 0.75s cubic-bezier(0.76, 0, 0.24, 1);
+    clip-path: inset(0 0 0 0);
+  }
+  .lights.go { clip-path: inset(0 0 100% 0); }
+  .lights.gone { display: none; }
+  .pods { display: flex; gap: clamp(0.6rem, 2.5vw, 1.6rem); }
+  .pod {
+    display: grid; gap: 0.6rem; padding: 0.8rem; border-radius: 14px;
+    background: #111116; border: 1px solid #1f1f27; box-shadow: inset 0 0 20px #000;
+  }
+  .pod i {
+    display: block; width: clamp(34px, 7vw, 64px); aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #2a2a30, #121215 60%);
+    transition: background 0.05s, box-shadow 0.05s;
+  }
+  .pod.on i.red {
+    background: radial-gradient(circle at 35% 30%, #ff8a80, #ff1a0a 45%, #a30000);
+    box-shadow: 0 0 30px #ff1a0a, 0 0 80px rgba(255, 26, 10, 0.5);
+  }
+  .lights-txt { --c: var(--amber); font-size: clamp(1.2rem, 3.5vw, 2rem); letter-spacing: 0.25em; margin: 0; }
+  .lights-skip {
+    position: absolute; right: 1.4rem; bottom: 1.4rem; background: none; border: 1px solid #2a2a33;
+    color: var(--muted); font-family: var(--mono); letter-spacing: 0.2em; padding: 0.4rem 0.8rem; cursor: pointer;
+  }
+  .lights-skip:hover { color: var(--ink); border-color: var(--muted); }
+
+  /* --- nav ------------------------------------------------------------------- */
+  .titlebar {
+    position: fixed; top: 5px; left: 0; right: 0; z-index: 40;
+    background: rgba(7, 7, 10, 0.78); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .tb-inner { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; }
+  .brand { display: flex; align-items: center; gap: 0.55rem; font-size: 1.35rem; letter-spacing: 0.02em; }
+  .brand .num {
+    font-size: 0.9rem; padding: 0.1rem 0.45rem; background: var(--f1red); color: #fff;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+  .brand b { color: var(--pink); }
+  .links { display: flex; gap: 1.3rem; align-items: center; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
+  .links a { color: var(--muted); transition: color 0.2s; }
+  .links a:hover { color: var(--ink); }
+  .links .lock { color: var(--amber); }
+
+  /* --- hero: name + one line + the map ---------------------------------------- */
+  .hero {
+    position: relative; z-index: 2; min-height: 100vh;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center; gap: 2rem 3rem; padding: 6.5rem 0 3rem;
+  }
+  .hero-title { display: grid; margin: 0.7rem 0 0; }
+  .ht-1, .ht-2 { font-size: clamp(2.8rem, 7.2vw, 6rem); line-height: 0.9; }
+  .ht-2 {
+    background: var(--sunset); -webkit-background-clip: text; background-clip: text; color: transparent;
+    padding-right: 0.2em;
+  }
+  .lead { color: #c9c9d2; font-size: clamp(1rem, 1.6vw, 1.15rem); max-width: 42ch; margin: 1.2rem 0 0; }
+  .cta { display: flex; gap: 0.7rem; margin-top: 1.6rem; flex-wrap: wrap; }
+
+  /* deployment map under a searchlight (frameless — just light and dots) */
+  .spot { --accent: #ff2bd6; position: relative; margin: 0; transition: --accent 0.9s ease, opacity 0.6s ease, transform 0.6s ease; }
+  .spot-canvas {
+    display: block; width: 100%; aspect-ratio: 1.55;
+    /* feather the edges so the light dissolves into the page instead of showing a box */
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+      linear-gradient(180deg, transparent, #000 12%, #000 86%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+      linear-gradient(180deg, transparent, #000 12%, #000 86%, transparent);
+    mask-composite: intersect;
+  }
+  .spot-caption { display: flex; align-items: center; gap: 0.9rem; padding-top: 0.7rem; border-top: 1px dashed #24242d; }
+  .sc-tag { --c: var(--accent); font-size: 1.3rem; min-width: 4.6ch; }
+  .sc-text { display: grid; gap: 0.15rem; min-width: 0; }
+  .sc-text b {
+    font-family: var(--display); font-style: italic; font-weight: 700; text-transform: uppercase;
+    font-size: 0.95rem; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sc-text span { font-size: 0.64rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .sc-link { margin-left: auto; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+  .sc-link:hover { text-decoration: underline; }
+
+  /* --- featured LED screen (top of the work section) -------------------------- */
+  /* --accent is registered so the per-project colour can transition */
+  @property --accent { syntax: '<color>'; inherits: true; initial-value: #00d2be; }
+  .billboard {
+    --accent: #00d2be; margin-bottom: 2.6rem;
+    transition: --accent 0.9s ease, opacity 0.6s ease, transform 0.6s ease;
+  }
+  .bb-screen {
+    display: block; width: 100%; aspect-ratio: 128 / 41; cursor: pointer;
+    border-radius: 6px; background: #050507;
+    box-shadow:
+      0 0 0 1px #1b1b22, 0 0 0 6px #0a0a0d, 0 0 0 7px #1b1b22,
+      0 40px 90px -40px color-mix(in srgb, var(--accent) 55%, transparent),
+      0 0 70px -20px color-mix(in srgb, var(--accent) 30%, transparent);
+    -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgba(255, 255, 255, 0.1));
+  }
+
+  /* timing-tower chips (created in JS, hence :global) with auto-advance bar */
+  .bb-nav { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 1.1rem; }
+  .bb-nav :global(button) {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.45rem 1rem 0.5rem 0.55rem; cursor: pointer; color: var(--muted);
+    border: 0; background: #101016;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    transition: color 0.25s, background 0.25s, transform 0.25s;
+  }
+  .bb-nav :global(button em) {
+    font-style: normal; font-family: var(--mono); font-size: 0.64rem; padding: 0.1rem 0.35rem; color: #000; background: #4a4a55;
+  }
+  .bb-nav :global(button:hover) { color: var(--ink); transform: translateY(-1px); }
+  .bb-nav :global(button[aria-selected="true"]) { color: #fff; background: color-mix(in srgb, var(--accent) 22%, #101016); }
+  .bb-nav :global(button[aria-selected="true"] em) { background: var(--accent); }
+  .bb-nav :global(.bar) { position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  .bb-nav :global(button[aria-selected="true"] .bar) { animation: chip-progress var(--dur, 6s) linear forwards; }
+  .billboard.manual .bb-nav :global(.bar) { animation: none; transform: scaleX(0); }
+  @keyframes chip-progress { to { transform: scaleX(1); } }
+
+  /* --- sections ------------------------------------------------------------ */
+  .kerb.wrap { position: relative; z-index: 2; opacity: 0.9; }
+  .section { position: relative; z-index: 2; padding: 6.5rem 0; }
+  .sec-head { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 2rem; }
+  .sec-no {
+    font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; padding: 0.3rem 0.6rem;
+    background: #050507; border: 1px solid #1c1c24; border-radius: 6px;
+  }
+  .section-title { font-size: clamp(2.2rem, 5vw, 3.6rem); font-style: italic; text-transform: uppercase; margin-top: 0.35rem; }
+  .big { font-size: clamp(1.15rem, 2.2vw, 1.55rem); font-weight: 600; max-width: 38ch; color: var(--ink); }
+  /* driver card — athlete-campaign style: hard angled cut, accent slash, outlined number */
+  .driver { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 3.2rem; align-items: center; }
+  .driver-photo { position: relative; margin: 0; aspect-ratio: 4 / 5; }
+  .driver-photo::before {                                   /* lime slash behind the photo */
+    content: ''; position: absolute; inset: 6% -5% -4% 12%; z-index: 0;
+    background: var(--lime); clip-path: polygon(22% 0, 100% 0, 78% 100%, 0 100%); opacity: 0.9;
+  }
+  .driver-photo img {
+    position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; object-position: center 30%;
+    clip-path: polygon(0 0, 100% 0, 100% 86%, 84% 100%, 0 100%);
+  }
+  .driver-num {
+    position: absolute; z-index: 2; right: -0.4rem; bottom: -1.4rem;
+    font-family: var(--display); font-weight: 900; font-style: italic; font-size: clamp(5rem, 11vw, 9rem); line-height: 1;
+    color: transparent; -webkit-text-stroke: 2px #fff; text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+  .driver-photo figcaption {
+    position: absolute; z-index: 2; left: 0; top: 1.1rem; padding: 0.3rem 0.7rem;
+    background: #000; color: var(--lime); font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase;
+  }
+  .driver-name { font-size: clamp(2.4rem, 5vw, 4.2rem); font-style: italic; text-transform: uppercase; line-height: 0.95; margin: 0; }
+  .driver-name b { background: var(--sunset); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.15em; }
+  .driver-role { margin: 0.6rem 0 1.4rem; font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+  .driver-info .big { margin: 0 0 1.8rem; }
+  .driver-info .eyebrow { margin: 0 0 1rem; }
+
+  /* off the clock: slanted strip */
+  .offclock { margin-top: 4rem; }
+  .offclock .eyebrow { margin-bottom: 0.9rem; }
+  .oc-text { max-width: 62ch; margin: 0 0 1.8rem; font-size: clamp(1.05rem, 1.8vw, 1.3rem); font-weight: 500; line-height: 1.6; color: #d6d6de; }
+  .oc-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .oc-strip figure { margin: 0; aspect-ratio: 16 / 9; overflow: hidden; clip-path: polygon(7% 0, 100% 0, 93% 100%, 0 100%); }
+  .oc-strip figure:first-child { clip-path: polygon(0 0, 100% 0, 93% 100%, 0 100%); }
+  .oc-strip figure:last-child { clip-path: polygon(7% 0, 100% 0, 100% 100%, 0 100%); }
+  .oc-strip img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.18); will-change: transform; } /* scaled up so parallax drift never shows an edge */
+
+  .chiplist { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0; list-style: none; }
+  .chiplist :global(li) {
+    font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.55rem 0.95rem; color: var(--lime); background: #060608;
+    border: 1px solid #1c1c24; border-left: 3px solid var(--lime);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--lime) 55%, transparent);
+  }
+  .chiplist :global(li:nth-child(3n + 2)) { color: var(--amber); border-left-color: var(--amber); text-shadow: 0 0 8px rgba(255, 176, 0, 0.5); }
+  .chiplist :global(li:nth-child(3n)) { color: var(--pink); border-left-color: var(--pink); text-shadow: 0 0 8px rgba(255, 43, 214, 0.5); }
+
+  /* case studies (cards are created in JS, hence :global) */
+  .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+  .filters :global(button) {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.45rem 0.85rem; border: 1px solid #23232c; background: #0a0a0e; color: var(--muted); cursor: pointer;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .filters :global(button:hover) { color: var(--ink); border-color: #3a3a46; }
+  .filters :global(button[aria-selected="true"]) { color: #000; background: var(--amber); border-color: var(--amber); }
+  /* each case study is a full-width showcase row: media one side, story the other */
+  .cases { display: grid; gap: 1.6rem; }
+  .cases :global(.case) {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    background: linear-gradient(180deg, #0d0d12, #08080b); border: 1px solid #1c1c24; border-top: 3px solid var(--c);
+    scroll-margin-top: 110px; transition: box-shadow 0.25s;
+  }
+  .cases :global(.case:nth-child(even) .case-media) { order: 2; }
+  .cases :global(.case[hidden]) { display: none; }
+  .cases :global(.case:hover) { box-shadow: 0 30px 70px -40px var(--c); }
+  .cases :global(.case-body) { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.6rem 1.7rem 1.5rem; min-width: 0; }
+  .cases :global(.case-media) { position: relative; min-height: 360px; background: #050507; overflow: hidden; }
+  .cases :global(.case.flash) { animation: case-flash 1.4s ease; }
+  @keyframes case-flash { 0%, 45% { box-shadow: 0 0 0 2px var(--c), 0 0 46px -6px var(--c); } }
+  .cases :global(.case-top) { display: flex; align-items: center; gap: 0.8rem; }
+  .cases :global(.case-pos) { font-size: 1.7rem; line-height: 1; }
+  .cases :global(.case-tag) { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; padding: 0.15rem 0.5rem; color: #000; background: var(--c); }
+  .cases :global(.case-status) {
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 0.12rem 0.5rem; color: var(--c); border: 1px dashed var(--c);
+  }
+  .cases :global(.case-cat) { margin-left: auto; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .cases :global(.case h3) { font-size: clamp(1.35rem, 2.4vw, 1.75rem); font-style: italic; text-transform: uppercase; line-height: 1.05; }
+  .cases :global(.case-meta) { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-family: var(--mono); font-size: 0.74rem; color: #b4b4c0; }
+  .cases :global(.case-meta b) { color: var(--muted); font-weight: 400; margin-right: 0.4rem; letter-spacing: 0.18em; font-size: 0.6rem; }
+  .cases :global(.case-sum) { color: #d6d6de; margin: 0; font-size: 1rem; }
+  /* broadcast-style showcase: full-bleed slides with hard edges, a fast diagonal
+     wipe between them, a colour slash and a giant outlined slide number */
+  .cases :global(.show) { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; }
+  .cases :global(.slides) { position: relative; overflow: hidden; background: #060608; }
+  .cases :global(.slide) {
+    position: absolute; inset: 0; padding: 0; border: 0; background: #060608; cursor: zoom-in; overflow: hidden;
+    clip-path: polygon(0 0, 0 0, -20% 100%, -20% 100%); z-index: 1;
+  }
+  .cases :global(.slide.prev) { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 2; }
+  .cases :global(.slide.on) {
+    clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 3;
+    transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1);
+  }
+  .cases :global(.slide img) { display: block; width: 100%; height: 100%; }
+
+  /* field photos: full bleed, slow push-in */
+  .cases :global(.f-photo img) { object-fit: cover; }
+  .cases :global(.f-photo.on img) { animation: push calc(var(--slide-ms, 5s) + 1.5s) ease-out both; }
+  .cases :global(.show.paused .slide.on img) { animation-play-state: paused; }
+  @keyframes push { from { transform: scale(1.1); } to { transform: scale(1); } }
+
+  /* screenshots: float clean on a dark panel lit in the project colour */
+  .cases :global(.f-shot) {
+    background:
+      radial-gradient(80% 70% at 50% 55%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%),
+      linear-gradient(135deg, #0d0d13, #050507);
+  }
+  .cases :global(.f-shot img) {
+    object-fit: contain; padding: 1.6rem 1.6rem 2.2rem;
+    filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.75));
+  }
+
+  /* overlays: colour slash bottom-left, giant outlined number bottom-right */
+  .cases :global(.slides::before) {
+    content: ''; position: absolute; z-index: 6; left: -3%; bottom: 0; width: 42%; height: 7px;
+    background: var(--c); transform: skewX(-35deg); transform-origin: left bottom; pointer-events: none;
+  }
+  .cases :global(.show-num) {
+    position: absolute; z-index: 6; right: 0.9rem; bottom: -0.5rem; pointer-events: none;
+    font-family: var(--display); font-weight: 900; font-style: italic; font-size: clamp(3.5rem, 7vw, 6rem); line-height: 1;
+    color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.85);
+    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+  }
+  .cases :global(.show-bar) {
+    display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 1rem;
+    background: #050507; border-top: 1px solid #1c1c24;
+  }
+  .cases :global(.show-count) { --c: var(--c); font-size: 1rem; flex: 0 0 auto; }
+  .cases :global(.show-cap) {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.05em; color: #c9c9d2;
+    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cases :global(.show-dots) { display: flex; gap: 0.35rem; flex: 0 0 auto; }
+  .cases :global(.dot) { width: 26px; height: 6px; padding: 0; border: 0; cursor: pointer; background: #22222b; overflow: hidden; }
+  .cases :global(.dot i) { display: block; height: 100%; background: var(--c); transform-origin: left; transform: scaleX(0); }
+  .cases :global(.dot.on i) { animation: dot-fill var(--slide-ms, 5s) linear forwards; }
+  .cases :global(.show.paused .dot.on i) { animation-play-state: paused; }
+  @keyframes dot-fill { to { transform: scaleX(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    .cases :global(.slide) { transition: none; }
+    .cases :global(.dot.on i) { animation: none !important; }
+    .cases :global(.dot.on i) { transform: scaleX(1); }
+  }
+  /* no photos yet: the project's LED scene fills the slot */
+  .cases :global(.case-led) { position: absolute; inset: 0; display: grid; place-items: center; padding: 1.4rem; }
+  .cases :global(.case-board) { width: 100%; aspect-ratio: 128 / 41; border-radius: 4px; }
+
+  /* photo viewer */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 1rem;
+    background: rgba(4, 4, 6, 0.94); backdrop-filter: blur(6px); padding: 3rem 1rem;
+  }
+  .lightbox[hidden] { display: none; }
+  .lb-fig { margin: 0; display: grid; gap: 0.7rem; justify-items: center; max-width: min(1200px, 86vw); }
+  .lb-fig img { max-width: 100%; max-height: 78vh; object-fit: contain; border: 1px solid #23232c; box-shadow: 0 30px 80px -30px #000; }
+  .lb-fig figcaption { display: flex; gap: 1rem; align-items: baseline; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; color: #c9c9d2; }
+  .lb-fig .lcd-text { --c: var(--amber); font-size: 1rem; }
+  .lb-btn {
+    border: 1px solid #2a2a33; background: #0d0d12; color: var(--ink); cursor: pointer;
+    width: 2.8rem; height: 2.8rem; font-size: 1.1rem; flex: 0 0 auto;
+  }
+  .lb-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .lb-close { position: absolute; top: 1.2rem; right: 1.2rem; }
+
+  .cases :global(.case ul) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .cases :global(.case li) { position: relative; padding-left: 1.15rem; color: #b9b9c4; font-size: 0.93rem; line-height: 1.45; }
+  .cases :global(.case li::before) { content: ''; position: absolute; left: 0; top: 0.6em; width: 0.55rem; height: 3px; background: var(--c); box-shadow: 0 0 8px var(--c); }
+  .cases :global(.tyres) { display: flex; gap: 0.35rem 0.8rem; flex-wrap: wrap; margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed #1f1f28; }
+  .cases :global(.tyre) { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: #a5a5b2; }
+  .cases :global(.tyre i) {
+    width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+    font-style: normal; font-size: 0.55rem; font-weight: 700; color: #fff;
+    background: #111; border: 3px solid var(--compound);
+  }
+
+  .pit { border: 1px solid #1c1c24; background: linear-gradient(180deg, #0c0c11, #08080b); }
+  .pit-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2.4rem; align-items: center; padding: 2.4rem; }
+  .pit-copy .btn { margin-top: 1.4rem; }
+
+  .contact { max-width: 640px; display: flex; flex-direction: column; gap: 0.8rem; padding: 1.4rem; }
+  .contact > * { position: relative; z-index: 1; }
+  .contact .row { display: flex; gap: 0.8rem; }
+  .contact input, .contact textarea {
+    width: 100%; padding: 0.85rem 1rem; color: var(--lime); font-family: var(--mono); font-size: 1rem; letter-spacing: 0.04em;
+    background: #030304; border: 1px solid #1f1f28; caret-color: var(--lime);
+  }
+  .contact input::placeholder, .contact textarea::placeholder { color: #4a4a55; }
+  .contact input:focus, .contact textarea:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 1px var(--lime), 0 0 18px rgba(182, 255, 46, 0.2); }
+  .contact button { align-self: flex-start; }
+  .contact .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; } /* honeypot */
+  .form-status { --c: var(--lime); font-size: 0.95rem; min-height: 1.3em; margin: 0; }
+
+  .footer { position: relative; z-index: 2; margin-top: 3rem; }
+  .checker {
+    height: 28px;
+    background: conic-gradient(#efefef 25%, #0a0a0c 0 50%, #efefef 0 75%, #0a0a0c 0) 0 0 / 28px 28px;
+    opacity: 0.85;
+  }
+  .foot-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; padding: 1.6rem 0 5rem; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.14em; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 1.2rem; min-height: auto; padding-top: 6rem; }
+    .driver { grid-template-columns: 1fr; gap: 3rem; }
+    .driver-photo { max-width: 420px; }
+    .oc-strip { grid-template-columns: 1fr; }
+    .oc-strip figure, .oc-strip figure:first-child, .oc-strip figure:last-child { clip-path: none; }
+    .cases :global(.case) { grid-template-columns: 1fr; }
+    .cases :global(.case:nth-child(even) .case-media) { order: 0; }
+    .cases :global(.case-media) { min-height: 300px; }
+    .pit-body { grid-template-columns: 1fr; padding: 1.6rem; }
+  }
+  @media (max-width: 620px) {
+    .links a:not(.lock) { display: none; }
+    .contact .row { flex-direction: column; }
+    .cases :global(.case-body) { padding: 1.2rem; }
+    .cases :global(.case-media) { min-height: 240px; }
+    .sc-link { display: none; }
+  }
+</style>
+
+<script>
+  import { initBlueprint } from '../scripts/blueprint';
+  import { scrollFx } from '../scripts/scrollfx';
+  import { smoothScroll } from '../scripts/smoothscroll';
+  import { initBoard, type BoardApi } from '../scripts/ledboard';
+  import { initMap, type MapApi } from '../scripts/deploymap';
+  import { API_BASE } from '../lib/api';
+
+  initBlueprint(); // reveal-on-scroll
+  scrollFx();      // scroll choreography (titles, wipes, parallax, hero exit)
+  smoothScroll();  // eased wheel scrolling so every scroll-driven effect glides
+  document.getElementById('year')!.textContent = String(new Date().getFullYear());
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- lights out: 5 reds one by one, random hold, all out -------------------
+  function lightsOut(): Promise<void> {
+    const el = document.getElementById('lights');
+    if (!el) return Promise.resolve();
+    const done = () => { el.classList.add('gone'); };
+    // skip on repeat visits this session, deep links, or reduced motion
+    let seen = false;
+    try { seen = sessionStorage.getItem('lightsOut') === '1'; sessionStorage.setItem('lightsOut', '1'); } catch {}
+    if (seen || location.hash || reduced) { done(); return Promise.resolve(); }
+
+    const pods = Array.from(el.querySelectorAll('.pod'));
+    const txt = document.getElementById('lights-txt')!;
+    const timers: number[] = [];
+    return new Promise((resolve) => {
+      const finish = () => {
+        timers.forEach(clearTimeout);
+        pods.forEach((p) => p.classList.remove('on'));
+        txt.textContent = 'LIGHTS OUT';
+        el.classList.add('go');
+        resolve();
+        setTimeout(done, 800);
+      };
+      document.getElementById('lights-skip')!.addEventListener('click', finish, { once: true });
+      pods.forEach((p, i) => timers.push(window.setTimeout(() => {
+        p.classList.add('on');
+        if (i === 0) txt.textContent = 'STAND BY';
+      }, 500 + i * 650)));
+      // the hold after the fifth light is random, like the real thing
+      timers.push(window.setTimeout(finish, 500 + 4 * 650 + 700 + Math.random() * 900));
+    });
+  }
+
+  // --- your work: billboard + case studies, all driven by /api/content -------
+  // Edit projects in port_backend/app/data.py — they flow into both.
+  type Project = {
+    id: string; tag: string; scene: string; color: string; title: string;
+    client?: string; location?: string; year?: string; category?: string; role?: string;
+    summary?: string; highlights?: string[]; stack?: string[]; marquee?: string;
+    lat?: number; lon?: number; status?: string;
+    photos?: { src: string; caption?: string; fit?: 'cover' | 'contain'; w?: number; h?: number; frame?: string }[];
+  };
+  type Content = { projects: Project[]; about?: string; skills?: string[]; hero?: { tagline?: string }; offline?: boolean };
+
+  const AUTO_MS = 6000; // auto-advance interval; matches the chip progress bar
+  const COMPOUNDS = [['S', '#e10600'], ['M', '#ffd400'], ['H', '#efefef']];
+  const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+  async function loadContent(): Promise<Content> {
+    // photos come from the photos/ drop folders via update-photos.ps1 -> /work/photos.json
+    const photos: Record<string, Project['photos']> =
+      await fetch('/work/photos.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+    try {
+      const res = await fetch(`${API_BASE}/api/content`);
+      if (!res.ok) throw new Error(String(res.status));
+      const c: Content = await res.json();
+      for (const p of c.projects) p.photos = (photos[p.id] ?? []).slice(0, 3); // spares (4+) stay unpublished
+      return c;
+    } catch {
+      return { projects: [], offline: true };
+    }
+  }
+  const contentReady = loadContent();
+
+  /** Scroll to a project's case study and flash it in its colour. */
+  function openCase(id: string) {
+    const card = document.getElementById(`project-${id}`);
+    if (!card) return;
+    if (card.hidden) document.querySelector<HTMLButtonElement>('#filters button')?.click(); // reset to "All"
+    card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+  }
+
+  function renderCases(projects: Project[]) {
+    const wrap = document.getElementById('projects')!;
+    // showcase media: broadcast-style slides — full-bleed field photos, screenshots
+    // floating on a lit panel, a diagonal wipe between them. LED scene if no photos yet.
+    const two = (n: number) => String(n).padStart(2, '0');
+    // [print] tag = treat as a photo even if it's a .png (e.g. a phone photo saved as png)
+    const kindOf = (ph: NonNullable<Project['photos']>[number]) =>
+      ph.frame === 'print' || ph.fit !== 'contain' ? 'photo' : 'shot';
+    const media = (p: Project) => {
+      const photos = (p.photos ?? []).slice(0, 3);
+      if (!photos.length) return `<div class="case-led"><canvas class="case-board" data-pid="${esc(p.id)}" aria-hidden="true"></canvas></div>`;
+      return `<div class="show" data-n="${photos.length}">
+        <div class="slides">${photos.map((ph, j) => `
+          <button class="ph slide f-${kindOf(ph)}${j === 0 ? ' on' : ''}" type="button"
+            data-pid="${esc(p.id)}" data-i="${j}" data-cap="${esc(ph.caption)}" aria-label="${esc(ph.caption)}">
+            <img src="${esc(ph.src)}" alt="${esc(ph.caption)}" loading="lazy" />
+          </button>`).join('')}
+          <span class="show-num" aria-hidden="true">01</span>
+        </div>
+        <div class="show-bar">
+          <span class="show-count lcd-text">01/${two(photos.length)}</span>
+          <span class="show-cap">${esc(photos[0].caption)}</span>
+          ${photos.length > 1 ? `<span class="show-dots">${photos.map((_, j) =>
+            `<button type="button" class="dot${j === 0 ? ' on' : ''}" data-go="${j}" aria-label="Photo ${j + 1}"><i></i></button>`).join('')}</span>` : ''}
+        </div>
+      </div>`;
+    };
+
+    wrap.innerHTML = projects.map((p, i) => `
+      <article class="case" id="project-${esc(p.id)}" data-cat="${esc(p.category)}" style="--c: ${esc(p.color)}">
+        <div class="case-media">${media(p)}</div>
+        <div class="case-body">
+        <div class="case-top">
+          <span class="case-pos lcd-text">P${i + 1}</span>
+          <span class="case-tag">${esc(p.tag)}</span>
+          ${p.status ? `<span class="case-status">${esc(p.status)}</span>` : ''}
+          <span class="case-cat">${esc(p.category)}</span>
+        </div>
+        <h3>${esc(p.title)}</h3>
+        <div class="case-meta">${[['CLIENT', p.client], ['WHERE', p.location], ['YEAR', p.year], ['ROLE', p.role]]
+          .filter(([, v]) => v).map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join('')}</div>
+        ${p.summary ? `<p class="case-sum">${esc(p.summary)}</p>` : ''}
+        ${p.highlights?.length ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+        <div class="tyres">${(p.stack ?? []).map((t, j) =>
+          `<span class="tyre" style="--compound: ${COMPOUNDS[j % 3][1]}"><i>${COMPOUNDS[j % 3][0]}</i>${esc(t)}</span>`).join('')}</div>
+        </div>
+      </article>`).join('');
+
+    // slideshows: advance every few seconds while on screen, pause on hover, dots jump
+    const SLIDE_MS = 5000;
+    wrap.querySelectorAll<HTMLElement>('.show').forEach((show) => {
+      const slides = Array.from(show.querySelectorAll<HTMLElement>('.slide'));
+      const dots = Array.from(show.querySelectorAll<HTMLElement>('.dot'));
+      const count = show.querySelector('.show-count')!;
+      const cap = show.querySelector('.show-cap')!;
+      const num = show.querySelector('.show-num')!;
+      show.style.setProperty('--slide-ms', `${SLIDE_MS}ms`);
+      let at = 0, timer = 0, visible = false, hover = false;
+      const go = (i: number) => {
+        const from = at;
+        at = (i + slides.length) % slides.length;
+        if (at === from) return;
+        // the outgoing slide stays underneath while the new one wipes in over it
+        slides.forEach((s, j) => { s.classList.toggle('prev', j === from); s.classList.toggle('on', j === at); });
+        num.textContent = two(at + 1);
+        dots.forEach((d, j) => { d.classList.remove('on'); void d.offsetWidth; d.classList.toggle('on', j === at); });
+        count.textContent = `${two(at + 1)}/${two(slides.length)}`;
+        cap.textContent = slides[at].dataset.cap ?? '';
+      };
+      const tick = () => {
+        clearInterval(timer);
+        show.classList.toggle('paused', !visible || hover);
+        if (visible && !hover && !reduced && slides.length > 1) timer = window.setInterval(() => go(at + 1), SLIDE_MS);
+      };
+      dots.forEach((d) => d.addEventListener('click', () => { go(Number(d.dataset.go)); tick(); }));
+      show.addEventListener('pointerenter', () => { hover = true; tick(); });
+      show.addEventListener('pointerleave', () => { hover = false; tick(); });
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; tick(); }, { threshold: 0.4 }).observe(show);
+    });
+
+    // projects without photos show their own LED scene in the media slot
+    wrap.querySelectorAll<HTMLCanvasElement>('.case-board').forEach((cv) => {
+      const i = projects.findIndex((x) => x.id === cv.dataset.pid);
+      const p = projects[i];
+      if (p) initBoard(cv, [{
+        scene: p.scene, tag: p.tag, color: p.color, line: p.marquee || p.title,
+        sub: `P${i + 1} LAP ${two(i + 1)}/${two(projects.length)}`,
+      }]).show(0);
+    });
+
+    // category filters (only worth showing with 2+ categories)
+    const bar = document.getElementById('filters')!;
+    const cats = ['All', ...new Set(projects.map((p) => p.category).filter((c): c is string => !!c))];
+    bar.hidden = cats.length < 3;
+    bar.innerHTML = '';
+    const cards = Array.from(wrap.querySelectorAll<HTMLElement>('.case'));
+    cats.forEach((cat, i) => {
+      const b = document.createElement('button');
+      b.textContent = cat; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(i === 0));
+      b.addEventListener('click', () => {
+        bar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+        cards.forEach((card) => { card.hidden = cat !== 'All' && card.dataset.cat !== cat; });
+      });
+      bar.appendChild(b);
+    });
+  }
+
+  // --- photo viewer: click a case-study thumbnail; arrows to browse, Esc to close
+  (() => {
+    const box = document.getElementById('lightbox')!;
+    const img = document.getElementById('lb-img') as HTMLImageElement;
+    const cap = document.getElementById('lb-cap')!;
+    const count = document.getElementById('lb-count')!;
+    let photos: { src: string; caption?: string }[] = [];
+    let at = 0;
+    const show = (i: number) => {
+      at = (i + photos.length) % photos.length;
+      img.src = photos[at].src; img.alt = photos[at].caption ?? '';
+      cap.textContent = photos[at].caption ?? '';
+      count.textContent = `${at + 1}/${photos.length}`;
+    };
+    const close = () => { box.hidden = true; img.removeAttribute('src'); };
+    document.getElementById('projects')!.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('.ph');
+      if (!btn) return;
+      const c = await contentReady;
+      photos = c.projects.find((p) => p.id === btn.dataset.pid)?.photos ?? [];
+      if (!photos.length) return;
+      box.hidden = false;
+      show(Number(btn.dataset.i));
+    });
+    box.querySelector('.lb-prev')!.addEventListener('click', () => show(at - 1));
+    box.querySelector('.lb-next')!.addEventListener('click', () => show(at + 1));
+    box.querySelector('.lb-close')!.addEventListener('click', close);
+    box.addEventListener('click', (e) => { if (e.target === box) close(); });
+    window.addEventListener('keydown', (e) => {
+      if (box.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(at - 1);
+      else if (e.key === 'ArrowRight') show(at + 1);
+    });
+  })();
+
+  contentReady.then((c) => {
+    if (c.hero?.tagline) document.getElementById('tagline')!.textContent = c.hero.tagline;
+    document.getElementById('about-text')!.textContent = c.offline
+      ? 'No telemetry — start the FastAPI server to load live content.'
+      : c.about ?? '';
+    document.getElementById('skills')!.innerHTML = (c.skills ?? []).map((s) => `<li>${esc(s)}</li>`).join('');
+    renderCases(c.projects);
+    scrollFx(document.getElementById('projects')!); // animate the freshly rendered case studies
+  });
+
+  // --- hero map + featured screen: one shared selection, click through to the case study
+  (() => {
+    const billboard = document.getElementById('billboard');
+    const canvas = document.getElementById('board') as HTMLCanvasElement | null;
+    const nav = document.getElementById('pj-nav');
+    if (!billboard || !canvas || !nav) { lightsOut(); return; }
+
+    const spot = document.getElementById('spot');
+    const mapCanvas = document.getElementById('deploy-map') as HTMLCanvasElement | null;
+    const tagEl = document.getElementById('spot-tag');
+    const titleEl = document.getElementById('spot-title');
+    const placeEl = document.getElementById('spot-place');
+    const linkEl = document.getElementById('spot-link') as HTMLAnchorElement | null;
+
+    let projects: Project[] = [];
+    let board: BoardApi;
+    let map: MapApi | null = null;
+    let buttons: HTMLButtonElement[] = [];
+    let idx = -1, timer = 0;
+
+    function select(i: number) {
+      const n = Math.max(projects.length, 1);
+      const next = (i + n) % n;
+      if (next === idx) return;
+      idx = next;
+      board.show(idx);
+      map?.setActive(idx);
+      const p = projects[idx];
+      if (!p) return;
+      billboard!.style.setProperty('--accent', p.color);
+      spot?.style.setProperty('--accent', p.color);
+      if (tagEl) tagEl.textContent = p.tag;
+      if (titleEl) titleEl.textContent = p.title;
+      if (placeEl) placeEl.textContent = [p.location, p.lat == null ? 'nationwide' : ''].filter(Boolean).join(' · ');
+      if (linkEl) linkEl.href = `#project-${p.id}`;
+      canvas!.setAttribute('aria-label', `${p.tag} — ${p.title}`);
+      buttons.forEach((b, j) => b.setAttribute('aria-selected', String(j === idx)));
+    }
+    function stopAuto() { clearInterval(timer); billboard!.classList.add('manual'); }
+    const openActive = () => { stopAuto(); if (projects[idx]) openCase(projects[idx].id); };
+    linkEl?.addEventListener('click', (e) => { e.preventDefault(); openActive(); });
+
+    // the board powers on once the lights are out and your projects are loaded
+    Promise.all([lightsOut(), contentReady]).then(([, c]) => {
+      projects = c.projects;
+      const screens = projects.length
+        ? projects.map((p) => ({ scene: p.scene, tag: p.tag, color: p.color, line: p.marquee || p.title }))
+        : [{ scene: 'static', tag: 'NO SIG', color: '#ffb000', line: 'NO TELEMETRY * START THE FASTAPI SERVER' }];
+      board = initBoard(canvas, screens, openActive);
+      if (mapCanvas && projects.length) map = initMap(mapCanvas, projects, (i) => { stopAuto(); select(i); });
+
+      nav.style.setProperty('--dur', `${AUTO_MS}ms`);
+      buttons = projects.map((p, i) => {
+        const b = document.createElement('button');
+        b.setAttribute('role', 'tab');
+        const pos = document.createElement('em'); pos.textContent = `P${i + 1}`;
+        const bar = document.createElement('span'); bar.className = 'bar';
+        b.append(pos, p.tag, bar);
+        b.addEventListener('click', () => { stopAuto(); select(i); });
+        nav.appendChild(b);
+        return b;
+      });
+
+      // deep link: #trx, #stars, … (project id or tag)
+      const hash = location.hash.replace('#', '').toLowerCase();
+      const start = projects.findIndex((p) => p.id === hash || p.tag.toLowerCase() === hash);
+      if (start >= 0 || reduced || projects.length < 2) { stopAuto(); select(Math.max(start, 0)); return; }
+      select(0);
+      timer = window.setInterval(() => select(idx + 1), AUTO_MS);
+    });
+  })();
+
+  // --- pit lane: a small board for the garage (identity only — status stays private)
+  (() => {
+    const canvas = document.getElementById('garage-board') as HTMLCanvasElement | null;
+    if (!canvas) return;
+    let gi = 0;
+    const next = () => { gi = (gi + 1) % 2; garage.show(gi); };
+    const garage = initBoard(canvas, [
+      { scene: 'car', tag: 'CEFIRO', color: '#ff1e2d', line: 'NISSAN CEFIRO A31 * BUILD LOG BEHIND THE PIT WALL' },
+      { scene: 'bike', tag: 'ZX-4RR', color: '#7cff2e', line: 'KAWASAKI ZX-4RR * BUILD LOG BEHIND THE PIT WALL' },
+    ], next);
+    garage.show(0);
+    if (!reduced) window.setInterval(next, 7000);
+  })();
+
+
+  // --- team radio (contact form -> backend) ----------------------------------
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const status = document.getElementById('form-status')!;
+  const sendBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = 'TRANSMITTING…';
+    if (sendBtn) sendBtn.disabled = true; // no double-sends
+    const data = Object.fromEntries(new FormData(form) as any);
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
+      });
+    } catch {
+      status.textContent = 'NO SIGNAL — CHECK YOUR CONNECTION AND TRY AGAIN.';
+      if (sendBtn) sendBtn.disabled = false;
+      return;
+    }
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      status.textContent = (body.message ?? 'Copy that.').toUpperCase();
+      form.reset();
+    } else {
+      // 422 = a field failed validation (detail is a list); 429/502 carry a readable message
+      const detail = Array.isArray(body.detail) ? 'CHECK YOUR NAME, EMAIL AND MESSAGE.' : body.detail;
+      status.textContent = String(detail ?? 'COULD NOT SEND — TRY AGAIN.').toUpperCase();
+    }
+    if (sendBtn) sendBtn.disabled = false;
+  });
+</script>

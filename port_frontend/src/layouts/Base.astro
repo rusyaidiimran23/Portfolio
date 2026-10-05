@@ -1,0 +1,245 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'Rusyaidi Yeng', description = 'Environmental monitoring systems — field installs and the software behind them.' } = Astro.props;
+// shift-light strip: 5 green, 5 red, 5 blue — like an F1 steering wheel
+const leds = Array.from({ length: 15 }, (_, i) => (i < 5 ? 'g' : i < 10 ? 'r' : 'b'));
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@600;900&family=Share+Tech+Mono&family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700&display=swap" />
+  </head>
+  <body>
+    <!-- Race chrome: shift lights that react to scroll speed + asphalt/sunset ground -->
+    <div class="revs" id="revs" aria-hidden="true">{leds.map((c) => <i class={c}></i>)}</div>
+    <div class="asphalt" aria-hidden="true"></div>
+    <!-- ambient background: streaming track floor, speed streaks, drifting glows -->
+    <div class="ambient" aria-hidden="true">
+      <div class="amb-glow a"></div><div class="amb-glow b"></div>
+      <div class="amb-streaks"></div>
+      <div class="amb-floor"></div>
+    </div>
+
+    <slot />
+
+    <style is:global>
+      :root {
+        /* Sepang night race on asphalt, lit by festival LCD boards */
+        --bg: #07070a;
+        --bg-2: #0e0e14;
+        --panel: #0c0c11;
+        --ink: #f3f3f5;
+        --muted: #8b8b98;
+        --line: #22222b;
+
+        --f1red: #e10600;
+        --pink: #ff2bd6;       /* festival hot pink — primary UI accent */
+        --amber: #ffb000;      /* LCD amber */
+        --lime: #b6ff2e;
+        --teal: #00d2be;
+        --purple: #b14cff;     /* fastest sector */
+        --green: #39ff6a;      /* personal best */
+        --yellow: #ffd400;
+        --sunset: linear-gradient(100deg, #ff6a00, #ff2bd6 60%, #b14cff);
+
+        --display: 'Titillium Web', 'Segoe UI', system-ui, sans-serif;
+        --font: 'Titillium Web', 'Segoe UI', system-ui, sans-serif;
+        --lcd: 'Doto', 'Share Tech Mono', ui-monospace, monospace;
+        --mono: 'Share Tech Mono', ui-monospace, 'Cascadia Code', monospace;
+
+        /* legacy names still used by the garage page */
+        --text: var(--ink);
+        --border: var(--line);
+        --accent: var(--pink);
+        --accent2: var(--amber);
+        --glow: 0 0 24px rgba(255, 43, 214, 0.28);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      h1, h2, h3 { line-height: 1; margin: 0; font-family: var(--display); font-weight: 900; }
+      .wrap { width: min(1180px, 92vw); margin-inline: auto; }
+      .mono { font-family: var(--mono); }
+      ::selection { background: var(--pink); color: #000; }
+
+      /* asphalt grain + a low Sepang sunset glow on the horizon */
+      /* --- ambient background (sits behind everything, very low contrast) ---- */
+      .ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+      /* track floor: a perspective grid at the bottom, streaming toward you */
+      .amb-floor {
+        position: absolute; left: -60%; right: -60%; bottom: -12%; height: 55%;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+        background-size: 90px 90px;
+        transform: perspective(520px) rotateX(72deg); transform-origin: 50% 100%;
+        -webkit-mask-image: linear-gradient(transparent, #000 45%);
+        mask-image: linear-gradient(transparent, #000 45%);
+        animation: floor-run 3.2s linear infinite;
+      }
+      @keyframes floor-run { to { background-position: 0 90px, 0 0; } }
+      /* speed streaks: thin diagonal lines drifting across */
+      .amb-streaks {
+        position: absolute; inset: -20%;
+        background:
+          repeating-linear-gradient(112deg, transparent 0 140px, rgba(255, 43, 214, 0.05) 140px 141px, transparent 141px 330px),
+          repeating-linear-gradient(112deg, transparent 0 230px, rgba(0, 210, 190, 0.04) 230px 231px, transparent 231px 520px);
+        animation: streaks 24s linear infinite;
+        -webkit-mask-image: radial-gradient(70% 60% at 50% 50%, #000, transparent 85%);
+        mask-image: radial-gradient(70% 60% at 50% 50%, #000, transparent 85%);
+      }
+      @keyframes streaks { to { transform: translate3d(-330px, 140px, 0); } }
+      /* soft glows that sway with scroll (--g1/--g2 set by the script below) */
+      .amb-glow { position: absolute; width: 55vw; height: 55vw; border-radius: 50%; filter: blur(90px); opacity: 0.16; }
+      .amb-glow.a { background: var(--pink); left: -18vw; top: 20vh; transform: translate3d(0, var(--g1, 0px), 0); }
+      .amb-glow.b { background: var(--teal); right: -20vw; top: 60vh; transform: translate3d(0, var(--g2, 0px), 0); opacity: 0.11; }
+      @media (prefers-reduced-motion: reduce) { .amb-floor, .amb-streaks { animation: none; } }
+
+      .asphalt {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background:
+          radial-gradient(70% 45% at 85% -5%, rgba(255, 106, 0, 0.16), transparent 70%),
+          radial-gradient(60% 40% at 10% -10%, rgba(255, 43, 214, 0.12), transparent 70%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      /* --- shift lights --------------------------------------------------- */
+      .revs {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 70; height: 5px;
+        display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; padding: 0 3px;
+        background: #000; pointer-events: none;
+      }
+      .revs i { background: #16161c; transition: background 0.08s, box-shadow 0.08s; }
+      .revs i.on.g { background: var(--green); box-shadow: 0 0 10px var(--green); }
+      .revs i.on.r { background: var(--f1red); box-shadow: 0 0 10px var(--f1red); }
+      .revs i.on.b { background: #3d7bff; box-shadow: 0 0 10px #3d7bff; }
+      .revs.limiter i { background: #3d7bff; box-shadow: 0 0 12px #3d7bff; animation: limiter 0.12s steps(2) infinite; }
+      @keyframes limiter { 50% { opacity: 0.2; } }
+
+      /* --- LCD board primitives (dot-matrix panel + glowing text) --------- */
+      .lcd {
+        position: relative;
+        background:
+          radial-gradient(rgba(255, 255, 255, 0.045) 0.9px, transparent 1.3px) 0 0 / 4px 4px,
+          #050507;
+        border: 1px solid #1c1c24;
+        border-radius: 6px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), inset 0 10px 30px rgba(0, 0, 0, 0.8);
+      }
+      .lcd::after {
+        content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+        background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px);
+      }
+      .lcd-text {
+        font-family: var(--lcd); font-weight: 900; color: var(--c, var(--amber));
+        text-shadow: 0 0 6px currentColor, 0 0 20px color-mix(in srgb, currentColor 45%, transparent);
+        letter-spacing: 0.04em;
+      }
+
+      /* red/white kerb stripe */
+      .kerb {
+        height: 10px;
+        background: repeating-linear-gradient(90deg, var(--f1red) 0 30px, #efefef 30px 60px);
+        clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 6px 100%);
+      }
+
+      /* --- shared UI ------------------------------------------------------ */
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.3em; text-transform: uppercase;
+        color: var(--amber); display: inline-flex; align-items: center; gap: 0.7rem;
+      }
+      .eyebrow::before {
+        content: ''; width: 22px; height: 8px;
+        background: repeating-linear-gradient(90deg, var(--f1red) 0 5px, #efefef 5px 10px);
+        transform: skewX(-20deg);
+      }
+      .display { font-family: var(--display); font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.01em; }
+
+      .btn {
+        --cut: 12px;
+        display: inline-flex; align-items: center; gap: 0.6rem;
+        padding: 0.85rem 1.6rem; border: 0; cursor: pointer;
+        font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.95rem;
+        letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+        background: #17171e;
+        clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
+        transition: background 0.2s, color 0.2s, transform 0.2s;
+      }
+      .btn:hover { background: #22222c; transform: translateX(3px); }
+      .btn-primary { background: var(--f1red); color: #fff; }
+      .btn-primary:hover { background: #ff1a10; }
+
+      /* scroll-scrubbed choreography (scrollfx.ts) sets transforms inline every frame,
+         so no CSS transitions on those elements — they'd make the motion lag the scroll */
+      .fx-on .fx { transition: none !important; will-change: transform, opacity; }
+      .fx-on .case, .fx-on .billboard { will-change: transform, opacity; }
+      /* giant outlined words streaming sideways behind each section */
+      .bigword {
+        position: absolute; z-index: -1; top: 1.5rem; left: 0; pointer-events: none; user-select: none;
+        white-space: nowrap; will-change: transform;
+        font-family: var(--display); font-weight: 900; font-style: italic; text-transform: uppercase;
+        font-size: clamp(6rem, 17vw, 16rem); line-height: 1; letter-spacing: -0.02em;
+        color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.07);
+      }
+      @media (prefers-reduced-motion: reduce) { .bigword { display: none; } }
+
+      /* reveal-on-scroll */
+      .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+      .reveal.in { opacity: 1; transform: none; }
+      .reveal.d1 { transition-delay: 0.08s; }
+      .reveal.d2 { transition-delay: 0.16s; }
+      .reveal.d3 { transition-delay: 0.24s; }
+
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .revs.limiter i { animation: none; } }
+    </style>
+
+    <script>
+      // Shift lights: scroll velocity → "speed" and gear. Within each gear the
+      // LEDs sweep up and drop on the "upshift", like a real steering wheel.
+      const revs = document.getElementById('revs');
+      const leds = revs ? Array.from(revs.children) : [];
+      const MAX = 342, GEAR_SPAN = MAX / 8;
+      let lastY = window.scrollY, lastT = performance.now(), v = 0;
+
+      const tick = () => {
+        const now = performance.now();
+        const dt = Math.max(now - lastT, 1) / 1000;
+        const inst = Math.abs(window.scrollY - lastY) / dt; // px/s
+        lastY = window.scrollY; lastT = now;
+        v += (inst - v) * (inst > v ? 0.25 : 0.05);          // quick to rev, slow to coast
+        const kmh = Math.min(MAX, v * 0.12);
+
+        const g = kmh < 4 ? 0 : Math.min(8, 1 + Math.floor(kmh / GEAR_SPAN));
+        const frac = g === 0 ? 0 : g === 8 ? kmh / MAX : (kmh % GEAR_SPAN) / GEAR_SPAN;
+        const lit = Math.round(frac * leds.length);
+        leds.forEach((el, i) => el.classList.toggle('on', i < lit));
+        revs?.classList.toggle('limiter', kmh > MAX - 6);
+        // ambient glows sway smoothly up and down as you scroll (no jumps on long pages)
+        const sy = window.scrollY;
+        document.documentElement.style.setProperty('--g1', `${(Math.sin(sy / 900) * 160).toFixed(1)}px`);
+        document.documentElement.style.setProperty('--g2', `${(Math.cos(sy / 1200) * 200).toFixed(1)}px`);
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>

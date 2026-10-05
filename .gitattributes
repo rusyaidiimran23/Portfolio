@@ -1,0 +1,2 @@
+# server scripts must keep Linux line endings or bash on the VPS breaks
+*.sh text eol=lf
