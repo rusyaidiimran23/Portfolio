@@ -40,79 +40,90 @@ CONTENT = {
     "projects": [
         {
             "id": "trx", "lat": 3.142, "lon": 101.719, "tag": "TRX", "scene": "building", "color": "#00d2be",
+            "status": "Live · 2 more stations coming",
             "title": "Air-Quality Monitoring Network",
-            "client": "Surechem · TRX City", "location": "Tun Razak Exchange, Kuala Lumpur",
-            "year": "2026", "category": "Field install", "role": "Project engineering",
-            "summary": "Air-quality monitoring stations built around Kunak Air Pro analysers, "
-                       "planned, documented and deployed across the TRX development.",
+            "client": "TRX City", "location": "Tun Razak Exchange, Kuala Lumpur",
+            "year": "2026", "category": "Field install", "role": "Project engineering & installation",
+            "summary": "Air-quality monitoring for Kuala Lumpur's new financial district, built on "
+                       "Kunak Air Pro stations. I took it from proposal to installation on site, "
+                       "and the network is growing: two more stations are coming at the Apple Park.",
             "highlights": [
-                "Technical proposal and method statement for the Kunak Air Pro deployment",
-                "Installation drawings for the MRT Plaza and Raintree Plaza sites",
-                "Factory acceptance testing (QA/QC) and HIRARC risk assessment",
-                "Programme managed on a Gantt schedule through to installation",
+                "Wrote the technical proposal and method statement for the Kunak Air Pro deployment",
+                "Produced the installation drawings for the MRT Plaza and Raintree Plaza sites",
+                "Ran factory acceptance testing (QA/QC) and the HIRARC risk assessment",
+                "Managed the programme on a Gantt schedule and installed the stations on site",
+                "Expansion underway: two more stations planned at the Apple Park",
             ],
-            "stack": ["Kunak Air Pro", "Air quality", "FAT / QA-QC", "Site drawings"],
-            "marquee": "AIR QUALITY MONITORING * KUNAK AIR PRO * TRX KUALA LUMPUR",
+            "stack": ["Kunak Air Pro", "Air quality", "FAT / QA-QC", "HIRARC", "Site drawings"],
+            "marquee": "AIR QUALITY MONITORING * KUNAK AIR PRO * TRX KUALA LUMPUR * 2 MORE STATIONS COMING",
         },
         {
             "id": "mpob", "lat": 5.031, "lon": 118.327, "tag": "MPOB", "scene": "palm", "color": "#ffb000",
             "title": "Evapotranspiration Monitoring Station",
             "client": "Malaysian Palm Oil Board", "location": "Lahad Datu, Sabah",
-            "year": "2026", "category": "Field install", "role": "Installation, training & commissioning",
-            "summary": "An ET monitoring station at MPOB's palm-oil research site, collecting "
-                       "continuous meteorological data for evapotranspiration estimates.",
+            "year": "2026", "category": "Field install", "role": "Project management, logger programming & installation",
+            "summary": "An evapotranspiration (ET) station at MPOB's palm-oil research site in Sabah, "
+                       "collecting continuous meteorological data. I managed the project, programmed "
+                       "the logger, and installed and commissioned the station.",
             "highlights": [
+                "Managed the project end to end, coordinating MPOB, suppliers and the site team",
+                "Programmed the Campbell Scientific CR350 datalogger for the station's measurements",
                 "Erected a 3 m tripod with air temperature/RH, wind speed & direction, solar radiation and rain sensors",
-                "Wired the datalogger, solar panel, charge regulator, battery, earthing and lightning protection",
-                "Commissioned the system, trained the site team, and wrote the installation report",
+                "Wired power, earthing and lightning protection, then commissioned, trained the site team and reported",
             ],
-            "stack": ["Datalogger", "Met sensors", "Solar power", "Lightning protection"],
+            "stack": ["Campbell CR350", "CRBasic", "Met sensors", "Solar power", "Lightning protection"],
             "marquee": "EVAPOTRANSPIRATION STATION * LAHAD DATU, SABAH * MPOB",
         },
         {
             "id": "stars", "tag": "STARS", "scene": "signal", "color": "#39ff6a",
             "title": "STARS — Telemetry, Alerts & Reporting",
-            "client": "Surechem", "location": "Oil-palm estates, Malaysia",
-            "year": "2026", "category": "Platform", "role": "Full-stack developer",
-            "summary": "An IoT platform for LoRaWAN weather and soil sensors on plantation "
-                       "estates: device data in, live maps and dashboards out.",
+            "client": "Surechem", "location": "Multi-site, Malaysia",
+            "year": "2026", "category": "Platform", "role": "Initiator & full-stack developer",
+            "summary": "My own initiative: one platform that takes in data from many different "
+                       "loggers and sources, so every station, whatever brand or link it uses, "
+                       "ends up on the same map, dashboards and alerts.",
             "highlights": [
-                "Integrated the SenseCAP cloud API for weather and soil nodes (temperature, moisture, EC, pH, NPK)",
-                "Redesigned the PostgreSQL schema: clients, sites, stations, loggers, sensors, time series",
-                "Astro dashboard with a station map, status cards and data tables",
+                "Started and built on my own initiative to replace one-off dashboards per project",
+                "Ingests data from multiple, different loggers and sources, including the SenseCAP cloud API for LoRaWAN weather and soil nodes",
+                "Designed a logger-agnostic PostgreSQL schema: clients, sites, stations, loggers, sensors, time series",
+                "Dashboard with a station map, live status cards and data tables",
             ],
             "stack": ["Python", "FastAPI", "PostgreSQL", "SQLAlchemy", "Astro", "LoRaWAN"],
-            "marquee": "STARS * LORAWAN SENSORS * SOIL + WEATHER TELEMETRY",
+            "marquee": "STARS * MANY LOGGERS + SOURCES * ONE PLATFORM * TELEMETRY, ALERTS & REPORTING",
         },
         {
             "id": "rht", "lat": 5.696, "lon": 101.003, "tag": "RHT", "scene": "station", "color": "#3fa9ff",
             "title": "Mine Weather Station Portal",
             "client": "Rahman Hydraulic Tin", "location": "Pengkalan Hulu, Perak",
-            "year": "2026", "category": "Platform", "role": "Full-stack developer",
-            "summary": "A login-gated portal for two rain gauges and a GMX500 weather station "
-                       "at an open-pit tin mine, from logger upload to live dashboard.",
+            "year": "2026", "category": "Platform", "role": "End-to-end delivery",
+            "summary": "Two rain gauges and a GMX500 weather station at an open-pit tin mine, "
+                       "delivered end to end: from project management and logger configuration "
+                       "to the live portal, installation and handover.",
             "highlights": [
-                "Hourly CSVs from Bivocom loggers over FTP, ingested by a background loop with de-duplication",
-                "Network overview with KPIs and site map, plus per-station charts, wind rose and rainfall reports",
-                "Streaming AI briefings, data exports, cookie auth and admin user management",
+                "Managed the project from start to handover",
+                "Configured the Bivocom loggers to push hourly CSVs over FTP, ingested with de-duplication",
+                "Built the portal: network KPIs and site map, per-station charts, wind rose, rainfall reports, AI briefings and exports",
+                "Installed the stations on site and ran testing, commissioning & training (TCT)",
             ],
-            "stack": ["FastAPI", "SQLAlchemy", "PostgreSQL", "Vanilla JS", "Leaflet", "Bivocom"],
-            "marquee": "RAIN + WEATHER PORTAL * PENGKALAN HULU, PERAK * LIVE DASHBOARD",
+            "stack": ["Bivocom", "FastAPI", "PostgreSQL", "SQLAlchemy", "Leaflet", "Vanilla JS"],
+            "marquee": "RAIN + WEATHER STATIONS * PENGKALAN HULU, PERAK * END TO END: LOGGERS, PORTAL, INSTALL",
         },
         {
             "id": "surecam", "tag": "SURECAM", "scene": "camera", "color": "#ff2bd6",
-            "title": "SureCam AI — Smart CCTV",
+            "title": "SureCam AI — Smart CCTV & Attendance",
             "client": "Surechem", "location": "Malaysia",
-            "year": "", "category": "AI / Vision", "role": "Computer-vision developer",
-            "summary": "Edge AI for CCTV: pose and object detection on NVIDIA Jetson to flag "
-                       "fights and weapons, for residential and school monitoring.",
+            "year": "", "category": "AI / Vision", "role": "Initiator & computer-vision developer",
+            "summary": "My own initiative: turning ordinary CCTV into a smart camera. Edge AI on "
+                       "NVIDIA Jetson flags fights and weapons for residential and school "
+                       "monitoring, and a computer-vision attendance tracker logs who is on site.",
             "highlights": [
+                "Started on my own initiative and built from the ground up",
                 "YOLOv8 pose + object detection for fight and knife detection",
-                "Roughly 2x faster inference on Jetson with FP16, layer fusion and frame skipping",
-                "Live camera streams pushed straight to a monitoring dashboard",
+                "Attendance tracking with computer vision, straight from the camera feed",
+                "Roughly 2x faster inference on Jetson with FP16, layer fusion and frame skipping, streamed live to a dashboard",
             ],
             "stack": ["Python", "YOLOv8", "NVIDIA Jetson", "OpenCV"],
-            "marquee": "AI CCTV * FIGHT + WEAPON DETECTION * EDGE INFERENCE ON JETSON",
+            "marquee": "AI CCTV * FIGHT + WEAPON DETECTION * CV ATTENDANCE TRACKING * EDGE AI ON JETSON",
         },
         {
             "id": "lkm", "tag": "LKM", "scene": "cocoa", "color": "#ff7a1a",
@@ -132,20 +143,22 @@ CONTENT = {
         {
             "id": "sic", "lat": 2.7606, "lon": 101.7381,
             "tag": "SIC", "scene": "track", "color": "#ff2a1a",
-            "status": "Proposal · under consideration",
-            "title": "Tarmac & Environmental Monitoring",
+            "status": "POC built · SIC considering",
+            "title": "Asphalt Track Monitoring",
             "client": "Sepang International Circuit", "location": "Sepang, Selangor",
-            "year": "", "category": "Proposal", "role": "Technical proposal",
-            "summary": "A proposed monitoring and forecasting system for Sepang International "
-                       "Circuit, bringing track tarmac, air quality and weather conditions into "
-                       "one platform. Sepang is currently considering the proposal.",
+            "year": "", "category": "Proposal", "role": "Initiator, proposal & proof of concept",
+            "summary": "My own idea, shaped by how race tracks actually run: monitor the asphalt "
+                       "itself alongside air quality and weather, and forecast track conditions. "
+                       "I wrote the proposal and built a proof of concept, and Sepang is "
+                       "seriously considering it.",
             "highlights": [
-                "Drafted the technical proposal for an environmental, air-quality and tarmac monitoring & forecasting system",
-                "Track-surface (tarmac) monitoring alongside air quality and on-site weather",
-                "Currently under consideration by Sepang International Circuit",
+                "Initiated the idea and wrote the technical proposal, based on my understanding of race-track operations",
+                "Built a proof of concept to show it working",
+                "Track-surface (asphalt) monitoring alongside air quality and on-site weather, with forecasting",
+                "Under serious consideration by Sepang International Circuit",
             ],
-            "stack": ["Tarmac monitoring", "Air quality", "Weather", "Forecasting"],
-            "marquee": "SEPANG INTERNATIONAL CIRCUIT * TARMAC + AIR QUALITY MONITORING * PROPOSAL UNDER CONSIDERATION",
+            "stack": ["Asphalt monitoring", "Air quality", "Weather", "Forecasting", "Proof of concept"],
+            "marquee": "SEPANG INTERNATIONAL CIRCUIT * ASPHALT TRACK MONITORING * PROPOSAL + POC * UNDER SERIOUS CONSIDERATION",
         },
     ],
     "social": {
