@@ -12,7 +12,7 @@ const ogImage = new URL('/og.jpg', site).href;
 const person = {
   '@context': 'https://schema.org', '@type': 'Person', name: 'Rusyaidi Yeng', url: site.href,
   jobTitle: 'IoT & field engineer', homeLocation: { '@type': 'Place', name: 'Malaysia' },
-  knowsAbout: ['IoT', 'Field engineering', 'Dataloggers', 'Environmental monitoring', 'Project management', 'Motorsport'],
+  knowsAbout: ['IoT', 'Field engineering', 'Dataloggers', 'Environmental monitoring', 'Project management'],
 };
 // shift-light strip: 5 green, 5 red, 5 blue — like an F1 steering wheel
 const leds = Array.from({ length: 15 }, (_, i) => (i < 5 ? 'g' : i < 10 ? 'r' : 'b'));
