@@ -53,6 +53,8 @@ EOF
   NEWPASS=1
 else
   echo "    kept existing /etc/portfolio.env"
+  # switching from the IP to a domain (or back): point CORS at the new address
+  sed -i "s|^ALLOWED_ORIGINS=.*|ALLOWED_ORIGINS=https://${SITE},http://${SITE}|" /etc/portfolio.env
 fi
 
 echo "==> API service"
@@ -100,8 +102,9 @@ ${SITE} {
 	}
 }
 EOF
-# a real domain (not an IP) also gets www.<domain> -> <domain>
-if [[ ! "$SITE" =~ ^[0-9.]+$ ]] && [[ "$SITE" != www.* ]]; then
+# a top-level domain (example.com, not an IP or a subdomain like you.is-a.dev,
+# where www.<name> doesn't exist) also gets www.<domain> -> <domain>
+if [[ ! "$SITE" =~ ^[0-9.]+$ ]] && [[ "$SITE" =~ ^[^.]+\.[^.]+$ ]]; then
   cat >> /etc/caddy/Caddyfile <<EOF
 
 www.${SITE} {
