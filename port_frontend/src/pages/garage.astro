@@ -431,6 +431,7 @@ import Base from '../layouts/Base.astro';
   /* photo */
   .fz-grid :global(.fz-photo) { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #060608; }
   .fz-grid :global(.fz-photo img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+  .fz-grid :global(.fz-photo img.cover) { object-position: 50% 66%; } /* tall trackside covers: keep the vehicle in frame */
   .fz-grid :global(.fz-card:hover .fz-photo img) { transform: scale(1.06); }
   .fz-grid :global(.fz-photo::after) { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(0, 0, 0, 0.6)); }
   .fz-grid :global(.fz-ph) {
@@ -753,7 +754,10 @@ import Base from '../layouts/Base.astro';
     document.getElementById('fz-count')!.textContent = `${String(builds.length).padStart(2, '0')} VEHICLES`;
     const grid = document.getElementById('fz-grid')!;
     grid.innerHTML = builds.map((b) => {
-      const ph = photos[b.id]?.[0];
+      // card cover: photos/<id>/cover.jpg if there is one, else the first photo's thumbnail
+      const cover = (photos as unknown as { _covers?: Record<string, string> })._covers?.[b.id];
+      const first = photos[b.id]?.[0];
+      const img = cover ?? first?.src.replace(/\.jpg$/, '-t.jpg');
       const pc = perfClass(b);
       const [make, ...model] = b.name.split(' ');
       const year = /^\d{4}$/.test(b.chassis ?? '') ? b.chassis : '';
@@ -763,7 +767,7 @@ import Base from '../layouts/Base.astro';
       ];
       return `
         <button class="fz-card${b.id === selectedId ? ' on' : ''}" type="button" data-pick="${esc(b.id)}" style="--c: ${esc(b.color)}" aria-pressed="${b.id === selectedId}">
-          <span class="fz-photo">${ph ? `<img src="${esc(ph.src.replace(/\.jpg$/, '-t.jpg'))}" alt="" loading="lazy" />` : `<span class="fz-ph display">${esc(b.tag)}</span>`}
+          <span class="fz-photo">${img ? `<img src="${esc(img)}"${cover ? ' class="cover"' : ''} alt="" loading="lazy" />` : `<span class="fz-ph display">${esc(b.tag)}</span>`}
             ${b.sold ? '<span class="fz-sold">SOLD</span>' : ''}
             <span class="fz-class" style="--k: ${pc.color}"><b>${pc.cls}</b><em>${pc.pi}</em></span>
           </span>
@@ -804,7 +808,7 @@ import Base from '../layouts/Base.astro';
   function render(builds: Build[], photos: Record<string, Photo[]>) {
     const wrap = document.getElementById('builds')!;
     wrap.innerHTML = builds.map((b) => {
-      const ph = (photos[b.id] ?? []).slice(0, 6); // private page: up to 6 per build
+      const ph = (photos[b.id] ?? []).slice(0, 7); // private page: up to 7 per build
       const media = ph.length
         ? ph.map((p, j) => `<figure class="b-slide${j === 0 ? ' on' : ''}" data-cap="${esc(p.caption)}"><img src="${esc(p.src)}" alt="${esc(p.caption)}" loading="lazy" /></figure>`).join('')
           + `<span class="b-cap">${esc(ph[0].caption)}</span>`

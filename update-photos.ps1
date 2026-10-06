@@ -8,6 +8,8 @@
 # app window, tall screenshots = phone. Override with a tag in the file name:
 #   "3 - The edge camera unit [print].png"   ([print] / [phone] / [window])
 #
+#   photos\<id>\cover.jpg                         <- optional: card cover (Garage vehicle picker), not in the slideshow
+#
 # The number sets the order, the rest of the file name becomes the caption.
 # The site shows the first 3 per project. Accepts .jpg, .jpeg and .png.
 # Output: port_frontend\public\work\<id>\NN.jpg (+ NN-t.jpg thumbnails) and
@@ -39,14 +41,22 @@ function Save-Resized($img, $maxEdge, $path) {
 }
 
 $manifest = [ordered]@{}
+$covers = [ordered]@{}
 foreach ($dir in Get-ChildItem $src -Directory | Sort-Object Name) {
   $id = $dir.Name.ToLower()
   $dest = Join-Path $out $id
   if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }   # rebuild from scratch
   New-Item -ItemType Directory -Force $dest | Out-Null
 
-  $files = Get-ChildItem $dir.FullName -File |
-    Where-Object { $_.Extension -match '^\.(jpe?g|png)$' } |
+  $all = Get-ChildItem $dir.FullName -File | Where-Object { $_.Extension -match '^\.(jpe?g|png)$' }
+  $cover = $all | Where-Object { $_.BaseName -ieq 'cover' } | Select-Object -First 1
+  if ($cover) {
+    $img = [System.Drawing.Image]::FromFile($cover.FullName)
+    Save-Resized $img 900 (Join-Path $dest 'cover.jpg')
+    $img.Dispose()
+    $covers[$id] = "/work/$id/cover.jpg"
+  }
+  $files = $all | Where-Object { $_.BaseName -ine 'cover' } |
     Sort-Object { if ($_.BaseName -match '^\s*(\d+)') { [int]$matches[1] } else { 9999 } }, Name
 
   $list = New-Object System.Collections.ArrayList
@@ -81,6 +91,7 @@ foreach ($dir in Get-ChildItem $src -Directory | Sort-Object Name) {
 # drop output folders whose drop folder no longer exists
 Get-ChildItem $out -Directory | Where-Object { -not (Test-Path (Join-Path $src $_.Name)) } | Remove-Item -Recurse -Force
 
+if ($covers.Count) { $manifest['_covers'] = $covers }   # card covers, keyed by id
 $json = ConvertTo-Json -InputObject $manifest -Depth 5
 [IO.File]::WriteAllText((Join-Path $out 'photos.json'), $json, (New-Object System.Text.UTF8Encoding $false))
 Write-Output "Done -> port_frontend\public\work\photos.json (reload the site to see changes)"

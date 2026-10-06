@@ -1,4 +1,30 @@
 {
+    "cbr250rr":  [
+                     {
+                         "src":  "/work/cbr250rr/01.jpg",
+                         "caption":  "Posing with the CBR against a concrete wall",
+                         "fit":  "cover",
+                         "w":  850,
+                         "h":  1080,
+                         "frame":  ""
+                     },
+                     {
+                         "src":  "/work/cbr250rr/02.jpg",
+                         "caption":  "Leaning into a bend on the hill roads",
+                         "fit":  "cover",
+                         "w":  608,
+                         "h":  1080,
+                         "frame":  ""
+                     },
+                     {
+                         "src":  "/work/cbr250rr/03.jpg",
+                         "caption":  "Through the corner on the hill roads",
+                         "fit":  "cover",
+                         "w":  628,
+                         "h":  1080,
+                         "frame":  ""
+                     }
+                 ],
     "cefiro":  [
                    {
                        "src":  "/work/cefiro/01.jpg",
@@ -133,6 +159,24 @@
                      "frame":  ""
                  }
              ],
+    "sic":  [
+                {
+                    "src":  "/work/sic/01.jpg",
+                    "caption":  "Proposed site layout - weather, asphalt and air-quality points",
+                    "fit":  "contain",
+                    "w":  1918,
+                    "h":  1116,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/sic/02.jpg",
+                    "caption":  "Walking SIC through the proposal at the circuit",
+                    "fit":  "cover",
+                    "w":  1280,
+                    "h":  960,
+                    "frame":  ""
+                }
+            ],
     "stars":  [
                   {
                       "src":  "/work/stars/01.jpg",
@@ -283,6 +327,19 @@
                       "w":  1080,
                       "h":  720,
                       "frame":  ""
+                  },
+                  {
+                      "src":  "/work/zx4rr/07.jpg",
+                      "caption":  "Under the Sepang grandstand",
+                      "fit":  "cover",
+                      "w":  810,
+                      "h":  1080,
+                      "frame":  ""
                   }
-              ]
+              ],
+    "_covers":  {
+                    "cbr250rr":  "/work/cbr250rr/cover.jpg",
+                    "cefiro":  "/work/cefiro/cover.jpg",
+                    "zx4rr":  "/work/zx4rr/cover.jpg"
+                }
 }
