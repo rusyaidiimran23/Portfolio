@@ -20,8 +20,8 @@ CONTENT = {
         "with tripods, dataloggers and sensors, and back at the desk with the "
         "APIs, dashboards and alerts that turn readings into decisions. Weather, "
         "air quality, soil, AI cameras: if it measures something, I've "
-        "probably wired it, coded it, or both. Off the clock it's a Nissan Cefiro "
-        "and a Kawasaki ZX-4RR."
+        "probably wired it, coded it, or both. Away from work, you'll usually "
+        "find me at a track day — on two wheels or four."
     ),
     "skills": [
         "Python / FastAPI", "PostgreSQL / SQLAlchemy", "Astro", "TypeScript / JS",
