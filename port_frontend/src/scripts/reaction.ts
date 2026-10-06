@@ -165,7 +165,7 @@ export function initReaction() {
 
     if (state === 'idle') {
       if (Math.floor(now / 600) % 2 === 0) center('TAP TO START', 13, 'A');
-      text(vehicle === 'bike' ? 'ZX-4RR' : 'F1', 70, 21, vehicle === 'bike' ? 'L' : 'R');
+      text(vehicle === 'bike' ? 'BIKE' : 'F1', 70, 21, vehicle === 'bike' ? 'L' : 'R');
       sprite(vehicle, START_X, CAR_Y() + (Math.floor(now / 140) % 2)); // idling
     } else if (state === 'arming' || state === 'out') {
       center(state === 'arming' && lit === 0 ? 'STAND BY' : '', 13, 'W');

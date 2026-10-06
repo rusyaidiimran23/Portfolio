@@ -39,7 +39,7 @@ import Base from '../layouts/Base.astro';
       <div class="rx-board"><canvas id="rx-cv" tabindex="0" aria-label="LED board: tap when the lights go out"></canvas></div>
       <div class="rx-bar">
         <div class="rx-pick" role="group" aria-label="Pick your ride">
-          <button type="button" data-veh="bike">ZX-4RR</button>
+          <button type="button" data-veh="bike">Bike</button>
           <button type="button" data-veh="f1">F1 car</button>
         </div>
         <p class="rx-help mono">Tap the board or press <kbd>Space</kbd>. Go when the lights go <b>out</b>.</p>
@@ -140,9 +140,9 @@ import Base from '../layouts/Base.astro';
     <!-- driver card: portrait with an angled cut + giant race number, then bio + toolkit -->
     <div class="driver">
       <figure class="driver-photo reveal d1">
-        <img src="/about/profile.jpg" alt="Rusyaidi Yeng at a track day with his Kawasaki ZX-4RR" loading="lazy" />
+        <img src="/about/profile.jpg" alt="Rusyaidi Yeng at a track day" loading="lazy" />
         <span class="driver-num" aria-hidden="true" data-speed="-0.04">07</span>
-        <figcaption class="mono">Track day · ZX-4RR</figcaption>
+        <figcaption class="mono">Track day</figcaption>
       </figure>
       <div class="driver-info">
         <p class="driver-name display reveal">Rusyaidi <b>Yeng</b></p>
@@ -160,8 +160,8 @@ import Base from '../layouts/Base.astro';
       <p class="eyebrow">Off the clock — gym, track days &amp; hill roads</p>
       <p class="big oc-text">Outside of work, I like to keep moving. Most days start or end at the gym, and weekends are for the track or for the winding hill roads up to Bukit Tinggi and Genting on two wheels. It's the same thing that pulls me into my work: I like taking a machine apart, understanding how it behaves, and getting the most out of it, whether that's a motorcycle through a hairpin or a monitoring system out in the field.</p>
       <div class="oc-strip">
-        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-1.jpg" alt="Cornering on the ZX-4RR" loading="lazy" /></figure>
-        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-2.jpg" alt="Leaning into a hairpin on the ZX-4RR" loading="lazy" /></figure>
+        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-1.jpg" alt="Cornering on a bike" loading="lazy" /></figure>
+        <figure><img data-speed="0.08" data-scale="1.18" src="/about/ride-2.jpg" alt="Leaning into a hairpin" loading="lazy" /></figure>
       </div>
     </div>
   </section>
@@ -174,11 +174,11 @@ import Base from '../layouts/Base.astro';
         <div class="pit-copy">
           <p class="eyebrow">Pit lane — the builds</p>
           <h2 class="section-title display">The garage</h2>
-          <p class="big">A Nissan Cefiro (A31) and a Kawasaki ZX-4RR.
+          <p class="big">A car and a bike, and the work that goes into them.
             Build logs live behind the pit wall — crew only.</p>
           <a class="btn btn-primary" href="/garage">Enter the garage ▸</a>
         </div>
-        <canvas id="garage-board" class="bb-screen pit-board" role="img" aria-label="Cefiro and ZX-4RR"></canvas>
+        <canvas id="garage-board" class="bb-screen pit-board" role="img" aria-label="The garage: a car and a bike"></canvas>
       </div>
     </div>
   </section>
@@ -1108,8 +1108,8 @@ import Base from '../layouts/Base.astro';
     let gi = 0;
     const next = () => { gi = (gi + 1) % 2; garage.show(gi); };
     const garage = initBoard(canvas, [
-      { scene: 'car', tag: 'CEFIRO', color: '#ff1e2d', line: 'NISSAN CEFIRO A31 * BUILD LOG BEHIND THE PIT WALL' },
-      { scene: 'bike', tag: 'ZX-4RR', color: '#7cff2e', line: 'KAWASAKI ZX-4RR * BUILD LOG BEHIND THE PIT WALL' },
+      { scene: 'car', tag: 'CAR', color: '#ff1e2d', line: 'FOUR WHEELS * BUILD LOG BEHIND THE PIT WALL' },
+      { scene: 'bike', tag: 'BIKE', color: '#7cff2e', line: 'TWO WHEELS * BUILD LOG BEHIND THE PIT WALL' },
     ], next);
     garage.show(0);
     if (!reduced) window.setInterval(next, 7000);
