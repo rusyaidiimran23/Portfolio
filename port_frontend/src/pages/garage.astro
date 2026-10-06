@@ -431,7 +431,7 @@ import Base from '../layouts/Base.astro';
   /* photo */
   .fz-grid :global(.fz-photo) { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #060608; }
   .fz-grid :global(.fz-photo img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-  .fz-grid :global(.fz-photo img.cover) { object-position: 50% 66%; } /* tall trackside covers: keep the vehicle in frame */
+  .fz-grid :global(.fz-photo img.cover) { object-position: 50% 50%; } /* covers are pre-framed 16:10 */
   .fz-grid :global(.fz-card:hover .fz-photo img) { transform: scale(1.06); }
   .fz-grid :global(.fz-photo::after) { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(0, 0, 0, 0.6)); }
   .fz-grid :global(.fz-ph) {
@@ -459,7 +459,8 @@ import Base from '../layouts/Base.astro';
   .fz-grid :global(.fz-status) { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: #b9b9c4; }
   .fz-grid :global(.fz-status i) { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.45rem; }
   .fz-grid :global(.fz-stats) { display: grid; gap: 0.35rem; margin-top: 0.4rem; }
-  .fz-grid :global(.fz-stats > span) { display: grid; grid-template-columns: 5.6rem 1fr; align-items: center; gap: 0.6rem; }
+  .fz-grid :global(.fz-stats > span) { display: grid; grid-template-columns: 4.6rem 1fr 3.6rem; align-items: center; gap: 0.6rem; }
+  .fz-grid :global(.fz-stats b) { font-weight: 400; font-size: 0.66rem; letter-spacing: 0.08em; color: #d6d6de; text-align: right; }
   .fz-grid :global(.fz-stats em) { font-style: normal; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; color: var(--muted); }
   .fz-grid :global(.fz-bar) { display: block; height: 5px; background: #1a1a21; overflow: hidden; }
   .fz-grid :global(.fz-bar i) { display: block; height: 100%; width: calc(var(--v) * 100%); background: var(--c); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -701,6 +702,7 @@ import Base from '../layouts/Base.astro';
   type Build = {
     id: string; tag: string; color: string; scene: string; name: string;
     chassis?: string; status?: string; power?: string; log?: LogItem[];
+    year?: string; torque?: string; hp?: number; torque_nm?: number; weight_kg?: number; // real factory figures
     review?: { title?: string; body: string[] }; // optional write-up shown under the specs
     sold?: boolean;  // shows a SOLD banner over the photos
     short?: string;  // shorter tag for the LED board (max ~7 chars)
@@ -737,13 +739,14 @@ import Base from '../layouts/Base.astro';
   // --- Forza-style garage grid ------------------------------------------------------
   let selectedId = ''; // vehicle whose card is shown below ('' = none yet)
 
-  const hp = (b: Build) => Number((b.power ?? '').match(/(\d+)\s*hp/i)?.[1] ?? 0);
+  const hp = (b: Build) => b.hp ?? Number((b.power ?? '').match(/(\d+)\s*hp/i)?.[1] ?? 0);
   const lampOf = (b: Build) => (b.sold ? 'var(--f1red)' : /run|done|complete/i.test(b.status ?? '') ? 'var(--green)' : 'var(--amber)');
   // Forza-style performance class, derived from horsepower (just for fun)
   function perfClass(b: Build): { cls: string; pi: string; color: string } {
     const h = hp(b);
     if (!h) return { cls: '?', pi: '---', color: '#5a5a66' };
-    const pi = Math.min(999, Math.round(100 + h * 8));
+    // like Forza: graded on power-to-weight (hp per tonne), not raw power
+    const pi = b.weight_kg ? Math.min(999, Math.round(250 + (h / (b.weight_kg / 1000)) * 1.15)) : Math.min(999, Math.round(100 + h * 8));
     const [cls, color] =
       pi > 900 ? ['S2', '#3d7bff'] : pi > 800 ? ['S1', '#b14cff'] : pi > 700 ? ['A', '#ff2a1a']
       : pi > 600 ? ['B', '#ff7a1a'] : pi > 500 ? ['C', '#ffd400'] : ['D', '#39c5ff'];
@@ -760,10 +763,11 @@ import Base from '../layouts/Base.astro';
       const img = cover ?? first?.src.replace(/\.jpg$/, '-t.jpg');
       const pc = perfClass(b);
       const [make, ...model] = b.name.split(' ');
-      const year = /^\d{4}$/.test(b.chassis ?? '') ? b.chassis : '';
-      const stats: [string, number][] = [
-        ['POWER', Math.min(1, hp(b) / 100)],
-        ['BUILD LOG', Math.min(1, (b.log?.length ?? 0) / 10)],
+      const year = b.year ?? (/^\d{4}$/.test(b.chassis ?? '') ? b.chassis : '');
+      // bars on a common scale so the vehicles compare honestly
+      const stats: [string, number, string][] = [
+        ['POWER', Math.min(1, hp(b) / 200), hp(b) ? `${hp(b)} HP` : '—'],
+        ['TORQUE', Math.min(1, (b.torque_nm ?? 0) / 200), b.torque_nm ? `${b.torque_nm} NM` : '—'],
       ];
       return `
         <button class="fz-card${b.id === selectedId ? ' on' : ''}" type="button" data-pick="${esc(b.id)}" style="--c: ${esc(b.color)}" aria-pressed="${b.id === selectedId}">
@@ -775,7 +779,7 @@ import Base from '../layouts/Base.astro';
             <span class="fz-make mono">${esc(make)}${year ? ` · ${esc(year)}` : ''}</span>
             <span class="fz-model display">${esc(model.join(' ') || b.name)}</span>
             <span class="fz-status mono"><i style="background: ${lampOf(b)}"></i>${esc(b.status ?? '')}</span>
-            <span class="fz-stats">${stats.map(([k, v]) => `<span><em>${k}</em><span class="fz-bar"><i style="--v: ${v}"></i></span></span>`).join('')}</span>
+            <span class="fz-stats">${stats.map(([k, v, t]) => `<span><em>${k}</em><span class="fz-bar"><i style="--v: ${v}"></i></span><b class="mono">${t}</b></span>`).join('')}</span>
           </span>
           <span class="fz-cta">${b.id === selectedId ? 'Selected ✓' : 'Open ▸'}</span>
         </button>`;
@@ -828,9 +832,9 @@ import Base from '../layouts/Base.astro';
             </div>
             <h2 class="display" data-fx="left" data-d="220">${esc(b.name)}</h2>
             <div class="tiles" data-fx="rise" data-d="300">
-              <div class="tile lcd"><span>CHASSIS</span><b class="lcd-text">${esc(b.chassis || '—')}</b></div>
+              <div class="tile lcd"><span>${b.chassis ? 'CHASSIS · YEAR' : 'MODEL YEAR'}</span><b class="lcd-text">${esc([b.chassis, b.year].filter(Boolean).join(' · ') || '—')}</b></div>
               <div class="tile lcd"><span>POWER</span><b class="lcd-text">${esc(b.power || '—')}</b></div>
-              <div class="tile lcd"><span>LOG ENTRIES</span><b class="lcd-text">${String(log.length).padStart(2, '0')}</b></div>
+              <div class="tile lcd"><span>TORQUE</span><b class="lcd-text">${esc(b.torque || '—')}</b></div>
             </div>
             ${b.review?.body?.length ? `
             <div class="review" data-fx="rise" data-d="330">
@@ -869,7 +873,7 @@ import Base from '../layouts/Base.astro';
       if (b) initBoard(cv, [{
         scene: b.scene, tag: b.tag, color: b.color,
         light: b.sold ? 'red' : /run|done|complete/i.test(b.status ?? '') ? 'green' : 'amber',
-        line: [b.name, b.chassis && `CHASSIS ${b.chassis}`, b.status, b.power, b.log?.length ? `${b.log.length} LOG ENTRIES` : ''].filter(Boolean).join(' * ').toUpperCase(),
+        line: [b.name, b.year, b.chassis && `CHASSIS ${b.chassis}`, b.status, b.power, b.torque, b.log?.length ? `${b.log.length} LOG ENTRIES` : ''].filter(Boolean).join(' * ').toUpperCase(),
       }], undefined, { banner: true }).show(0);
     });
 

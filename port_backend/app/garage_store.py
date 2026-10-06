@@ -24,6 +24,13 @@ def _load() -> dict:
     if not PATH.exists():
         _save(copy.deepcopy(GARAGE))
     data = json.loads(PATH.read_text(encoding="utf-8"))
+    # specs, photos-related fields and reviews come from data.py (so edits there reach the
+    # live server); only the build logs added on the site live in garage.json
+    seed = {b["id"]: b for b in GARAGE["builds"]}
+    for b in data["builds"]:
+        b.update({k: copy.deepcopy(v) for k, v in seed.get(b["id"], {}).items() if k != "log"})
+    known = {b["id"] for b in data["builds"]}
+    data["builds"] += [copy.deepcopy(b) for i, b in seed.items() if i not in known]
     if "trackday" not in data:  # older garage.json (e.g. the live server): add Track Day once
         data["trackday"] = copy.deepcopy(TRACKDAY)
         _save(data)

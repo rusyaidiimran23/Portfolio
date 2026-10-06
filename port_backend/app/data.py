@@ -175,10 +175,13 @@ GARAGE = {
             # id = photo folder P.Portfolio/photos/<id>/ ; scene = LED board art if no photos
             "id": "cefiro", "tag": "CEFIRO", "color": "#ff1e2d", "scene": "car",
             "name": "Nissan Cefiro",
-            "chassis": "A31",
+            "chassis": "A31", "year": "1993",
+            # stock RB20DE (2.0 L straight-six) factory figures, until the build changes them
+            "hp": 153, "torque_nm": 184, "weight_kg": 1360,
+            "torque": "184 Nm @ 5,200 rpm",
             "review": {"body": ["To be added."]},
             "status": "In progress",
-            "power": "—",
+            "power": "153 hp @ 6,400 rpm",
             "log": [
                 {"date": "2026-06-02", "note": "Baseline compression test — all cylinders healthy."},
                 {"date": "2026-06-20", "note": "New coilovers on order. Planning a fresh set of wheels."},
@@ -188,9 +191,11 @@ GARAGE = {
         {
             "id": "zx4rr", "tag": "ZX-4RR", "color": "#7cff2e", "scene": "bike",
             "name": "Kawasaki ZX-4RR",
-            "chassis": "2024",
+            "chassis": "", "year": "2026",
             "status": "Running",
-            "power": "77 hp @ 14,500 rpm",
+            "hp": 76, "torque_nm": 37.6, "weight_kg": 188,
+            "power": "76 hp @ 14,500 rpm",
+            "torque": "37.6 Nm @ 12,500 rpm",
             "review": {
                 "title": "1 month / 1,000 km review",
                 "body": [
@@ -213,10 +218,12 @@ GARAGE = {
             "color": "#3d7bff",
             "scene": "bike",
             "name": "Honda CBR250RR",
-            "chassis": "2021",
+            "chassis": "", "year": "2021",
             "status": "Sold",
             "sold": True,
-            "power": "40 hp / 25 Nm",
+            "hp": 40, "torque_nm": 25, "weight_kg": 168,
+            "power": "40 hp @ 13,000 rpm",
+            "torque": "25 Nm @ 11,000 rpm",
             "review": {
                 "title": "<1 year / 10,000 km review",
                 "body": [
