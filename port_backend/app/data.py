@@ -10,7 +10,7 @@ CONTENT = {
     "hero": {
         "name": "Rusyaidi Yeng",
         "tagline": "I build IoT systems end to end — from sensors and dataloggers in the "
-                   "field to the platforms, dashboards and AI behind them.",
+                   "field to installation, data and dashboards.",
         "rpm": 15000,  # ZX-4RR redline vibe, drives the tachometer accent
     },
     # DRAFTED from your project docs — review wording, roles and client names
