@@ -176,13 +176,13 @@ GARAGE = {
             "id": "cefiro", "tag": "CEFIRO", "color": "#ff1e2d", "scene": "car",
             "name": "Nissan Cefiro",
             "chassis": "A31", "year": "1993",
-            # estimated from its real 0-100 km/h of 6.3 s at ~1,360 kg (an RB20DET A31 does
+            # estimated from a 0-100 km/h of 6.0 s at ~1,360 kg (an RB20DET A31 does
             # 6.8 s on 205 PS; an R33 RB25DET on 245 PS runs low 6s). Swap in dyno figures when you have them.
-            "hp": 225, "torque_nm": 280, "weight_kg": 1360, "estimate": True,
-            "torque": "~280 Nm (est.)",
+            "hp": 240, "torque_nm": 300, "weight_kg": 1360, "estimate": True,
+            "torque": "~300 Nm (est.)",
             "review": {"body": ["To be added."]},
             "status": "In progress",
-            "power": "~225 hp (est. · 0-100 in 6.3 s)",
+            "power": "~240 hp (est. · 0-100 in 6.0 s)",
             "log": [
                 {"date": "2026-06-02", "note": "Baseline compression test — all cylinders healthy."},
                 {"date": "2026-06-20", "note": "New coilovers on order. Planning a fresh set of wheels."},
