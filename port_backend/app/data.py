@@ -220,6 +220,15 @@ GARAGE = {
             "hp": 75, "torque_nm": 108, "weight_kg": 960,
             "power": "75 hp",
             "torque": "108 Nm @ 3,000 rpm",
+            "review": {
+                "title": "1 year with the Satria",
+                "body": [
+                    "The Satria is the car I learned to drive on. I practised in it before and after my licence test, "
+                    "which I took in an Axia. It was never technically mine, but I borrowed it and looked after it for a "
+                    "solid year. On stock suspension it rolled through corners like a boat, but rowing through that manual "
+                    "gearbox never got old."
+                ],
+            },
             "log": [],
         },
         {
