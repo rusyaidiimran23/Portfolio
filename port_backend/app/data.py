@@ -9,8 +9,8 @@ Edit these dicts to update your site. The public content is served at
 CONTENT = {
     "hero": {
         "name": "Rusyaidi Yeng",
-        "tagline": "I set up environmental monitoring systems in the field and build the "
-                   "software behind them — from sensors and dataloggers to dashboards and alerts.",
+        "tagline": "I build IoT systems end to end — from sensors and dataloggers in the "
+                   "field to the platforms, dashboards and AI behind them.",
         "rpm": 15000,  # ZX-4RR redline vibe, drives the tachometer accent
     },
     # DRAFTED from your project docs — review wording, roles and client names

@@ -4,15 +4,15 @@ interface Props {
   description?: string;
   noindex?: boolean; // keep a page out of search results (the Garage)
 }
-const { title = 'Rusyaidi Yeng', description = 'Environmental monitoring systems — field installs and the software behind them.', noindex = false } = Astro.props;
+const { title = 'Rusyaidi Yeng', description = 'I build IoT systems end to end — from sensors and dataloggers in the field to the platforms, dashboards and AI behind them.', noindex = false } = Astro.props;
 const site = Astro.site ?? new URL('https://rusyaidi.is-a.dev');
 const canonical = new URL(Astro.url.pathname, site).href;
 const ogImage = new URL('/og.jpg', site).href;
 // who this site is about, for search engines
 const person = {
   '@context': 'https://schema.org', '@type': 'Person', name: 'Rusyaidi Yeng', url: site.href,
-  jobTitle: 'Environmental monitoring & IoT engineer', homeLocation: { '@type': 'Place', name: 'Malaysia' },
-  knowsAbout: ['Environmental monitoring', 'IoT', 'Dataloggers', 'Air quality monitoring', 'Dashboards'],
+  jobTitle: 'IoT engineer — field systems, software & AI', homeLocation: { '@type': 'Place', name: 'Malaysia' },
+  knowsAbout: ['IoT', 'Field engineering', 'Dataloggers', 'Environmental monitoring', 'Full-stack development', 'Computer vision', 'Project management'],
 };
 // shift-light strip: 5 green, 5 red, 5 blue — like an F1 steering wheel
 const leds = Array.from({ length: 15 }, (_, i) => (i < 5 ? 'g' : i < 10 ? 'r' : 'b'));
@@ -35,7 +35,7 @@ const leds = Array.from({ length: 15 }, (_, i) => (i < 5 ? 'g' : i < 10 ? 'r' : 
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Rusyaidi Yeng — environmental monitoring systems and the software behind them" />
+    <meta property="og:image:alt" content="Rusyaidi Yeng — IoT systems end to end, from field installs to software and AI" />
     <meta name="twitter:card" content="summary_large_image" />
     {!noindex && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>" />
