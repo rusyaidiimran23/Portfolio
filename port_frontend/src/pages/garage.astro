@@ -703,6 +703,7 @@ import Base from '../layouts/Base.astro';
     id: string; tag: string; color: string; scene: string; name: string;
     chassis?: string; status?: string; power?: string; log?: LogItem[];
     year?: string; torque?: string; hp?: number; torque_nm?: number; weight_kg?: number; // real factory figures
+    estimate?: boolean; // figures are estimated, not measured
     review?: { title?: string; body: string[] }; // optional write-up shown under the specs
     sold?: boolean;  // shows a SOLD banner over the photos
     short?: string;  // shorter tag for the LED board (max ~7 chars)
@@ -745,8 +746,11 @@ import Base from '../layouts/Base.astro';
   function perfClass(b: Build): { cls: string; pi: string; color: string } {
     const h = hp(b);
     if (!h) return { cls: '?', pi: '---', color: '#5a5a66' };
-    // like Forza: graded on power-to-weight (hp per tonne), not raw power
-    const pi = b.weight_kg ? Math.min(999, Math.round(250 + (h / (b.weight_kg / 1000)) * 1.15)) : Math.min(999, Math.round(100 + h * 8));
+    // like Forza: graded on power-to-weight (hp per tonne), not raw power. Log curve calibrated
+    // to real 0-100 times: ~13 s -> D 400, ~6 s -> C, ~5 s -> B, ~3.5 s -> A 760
+    const pi = b.weight_kg
+      ? Math.max(100, Math.min(999, Math.round(-557 + 219.5 * Math.log(h / (b.weight_kg / 1000)))))
+      : Math.min(999, Math.round(100 + h * 8));
     const [cls, color] =
       pi > 900 ? ['S2', '#3d7bff'] : pi > 800 ? ['S1', '#b14cff'] : pi > 700 ? ['A', '#ff2a1a']
       : pi > 600 ? ['B', '#ff7a1a'] : pi > 500 ? ['C', '#ffd400'] : ['D', '#39c5ff'];
@@ -766,8 +770,8 @@ import Base from '../layouts/Base.astro';
       const year = b.year ?? (/^\d{4}$/.test(b.chassis ?? '') ? b.chassis : '');
       // bars on a common scale so the vehicles compare honestly
       const stats: [string, number, string][] = [
-        ['POWER', Math.min(1, hp(b) / 200), hp(b) ? `${hp(b)} HP` : '—'],
-        ['TORQUE', Math.min(1, (b.torque_nm ?? 0) / 200), b.torque_nm ? `${b.torque_nm} NM` : '—'],
+        ['POWER', Math.min(1, hp(b) / 250), hp(b) ? `${b.estimate ? '~' : ''}${hp(b)} HP` : '—'],
+        ['TORQUE', Math.min(1, (b.torque_nm ?? 0) / 300), b.torque_nm ? `${b.estimate ? '~' : ''}${b.torque_nm} NM` : '—'],
       ];
       return `
         <button class="fz-card${b.id === selectedId ? ' on' : ''}" type="button" data-pick="${esc(b.id)}" style="--c: ${esc(b.color)}" aria-pressed="${b.id === selectedId}">

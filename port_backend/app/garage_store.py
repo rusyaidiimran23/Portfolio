@@ -31,6 +31,8 @@ def _load() -> dict:
         b.update({k: copy.deepcopy(v) for k, v in seed.get(b["id"], {}).items() if k != "log"})
     known = {b["id"] for b in data["builds"]}
     data["builds"] += [copy.deepcopy(b) for i, b in seed.items() if i not in known]
+    order = list(seed)  # show them in data.py's order (sold ones last)
+    data["builds"].sort(key=lambda b: order.index(b["id"]) if b["id"] in order else len(order))
     if "trackday" not in data:  # older garage.json (e.g. the live server): add Track Day once
         data["trackday"] = copy.deepcopy(TRACKDAY)
         _save(data)
