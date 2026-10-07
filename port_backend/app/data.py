@@ -223,10 +223,9 @@ GARAGE = {
             "review": {
                 "title": "1 year with the Satria",
                 "body": [
-                    "The Satria is the car I learned to drive on. I practised in it before and after my licence test, "
-                    "which I took in an Axia. It was never technically mine, but I borrowed it and looked after it for a "
-                    "solid year. On stock suspension it rolled through corners like a boat, but rowing through that manual "
-                    "gearbox never got old."
+                    "The car behind the learning curve: practice runs before and after the licence test (taken in an "
+                    "Axia), then a solid year on loan, kept and looked after like my own. Stock suspension had it rolling "
+                    "through corners like a boat, but rowing through that manual gearbox never got old."
                 ],
             },
             "log": [],

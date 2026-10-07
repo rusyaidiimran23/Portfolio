@@ -817,6 +817,9 @@ import Base from '../layouts/Base.astro';
     const wrap = document.getElementById('builds')!;
     wrap.innerHTML = builds.map((b) => {
       const ph = (photos[b.id] ?? []).slice(0, 7); // private page: up to 7 per build
+      // no gallery yet but there is a card cover: show that instead of "photos coming soon"
+      const coverSrc = (photos as unknown as { _covers?: Record<string, string> })._covers?.[b.id];
+      if (!ph.length && coverSrc) ph.push({ src: coverSrc, caption: b.name });
       const media = ph.length
         ? ph.map((p, j) => `<figure class="b-slide${j === 0 ? ' on' : ''}" data-cap="${esc(p.caption)}"><img src="${esc(p.src)}" alt="${esc(p.caption)}" loading="lazy" /></figure>`).join('')
           + `<span class="b-cap">${esc(ph[0].caption)}</span>`
@@ -841,10 +844,10 @@ import Base from '../layouts/Base.astro';
               <div class="tile lcd"><span>TORQUE</span><b class="lcd-text">${esc(b.torque || '—')}</b></div>
             </div>
             ${b.review?.body?.length ? `
-            <div class="review" data-fx="rise" data-d="330">
+            <div class="review${b.review.body.join(' ').length > 240 ? '' : ' open'}" data-fx="rise" data-d="330">
               <p class="eyebrow">Rider's notes${b.review.title ? ` — ${esc(b.review.title)}` : ''}</p>
               <div class="rv-body">${b.review.body.map((para) => `<p>${esc(para)}</p>`).join('')}</div>
-              ${b.review.body.length > 1 ? `<button class="rv-toggle" type="button" data-review>Read full review ▸</button>` : ''}
+              ${b.review.body.join(' ').length > 240 ? `<button class="rv-toggle" type="button" data-review>Read full review ▸</button>` : ''}
             </div>` : ''}
             <div class="log-bar" data-fx="rise" data-d="360">
               <p class="eyebrow log-head">Build log — latest first</p>
