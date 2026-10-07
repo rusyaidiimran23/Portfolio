@@ -40,8 +40,13 @@ def _load() -> dict:
     data["trackday"]["tracks"] = copy.deepcopy(TRACKDAY["tracks"])
     # imported sessions (LapTrophy logs etc.) from data.py: add any the server doesn't have yet
     have = {s.get("source") for s in data["trackday"]["sessions"]} | set(data["trackday"].get("dismissed", []))
+    live = {s.get("source"): s for s in data["trackday"]["sessions"] if s.get("source")}
     for s in TRACKDAY["sessions"]:
-        if s.get("source") and s["source"] not in have:
+        if not s.get("source"):
+            continue
+        if s["source"] in live:            # already imported: refresh it (e.g. new telemetry)
+            live[s["source"]].update(copy.deepcopy(s))
+        elif s["source"] not in have:
             data["trackday"]["sessions"].append(copy.deepcopy(s))
     return data
 

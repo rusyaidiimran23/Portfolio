@@ -68,6 +68,7 @@ import Base from '../layouts/Base.astro';
           </div>
           <div class="td-tabs" id="td-tabs" role="tablist" aria-label="Tracks"></div>
           <div class="td-stage" id="td-stage"></div>
+          <div class="td-tele" id="td-tele" hidden></div>
         </section>
         </div>
 
@@ -417,6 +418,63 @@ import Base from '../layouts/Base.astro';
   @media (max-width: 760px) {
     .st-body :global(.st-kpis) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .st-body :global(.st-cols) { grid-template-columns: 1fr; }
+  }
+
+  /* --- telemetry ---------------------------------------------------------------- */
+  .td-tele { margin-top: 1rem; display: grid; gap: 1rem; }
+  .td-tele[hidden] { display: none; }
+  .td-tele :global(.tl-head .eyebrow) { margin: 0; }
+  .td-tele :global(.tl-kpis) { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
+  .td-tele :global(.tl-kpi) { display: grid; gap: 0.2rem; padding: 0.8rem 0.9rem; background: #08080b; border: 1px solid #1c1c24; border-top: 3px solid var(--c, #2a2a33); }
+  .td-tele :global(.tl-kpi:first-child) { border-top-color: var(--purple); }
+  .td-tele :global(.tl-kpi span) { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .td-tele :global(.tl-kpi b) { --c: var(--ink); color: var(--ink); font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.1; }
+  .td-tele :global(.tl-kpi:first-child b) { --c: var(--purple); color: var(--purple); }
+  .td-tele :global(.tl-kpi em) { font-style: normal; font-size: 0.66rem; color: #8b8b98; }
+  .td-tele :global(.tl-grid2) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1rem; }
+  .td-tele :global(.tl-card) { margin: 0; padding: 1rem; background: #08080b; border: 1px solid #1c1c24; min-width: 0; }
+  .td-tele :global(.tl-card figcaption) { margin: 0 0 0.7rem; }
+  .td-tele :global(.tl-map) { width: 100%; height: auto; display: block; }
+  .td-tele :global(.tl-tarmac) { fill: none; stroke: #1f1f27; stroke-width: 34; stroke-linejoin: round; }
+  .td-tele :global(.tl-heat line) { stroke-width: 9; stroke-linecap: round; }
+  .td-tele :global(.tl-heat line:hover) { stroke-width: 15; }
+  .td-tele :global(.tl-pin) { fill: none; stroke: #f3f3f5; stroke-width: 2.5; }
+  .td-tele :global(.tl-pin-l) { font-family: var(--mono); font-size: 22px; fill: #d6d6de; }
+  .td-tele :global(.tl-legend) { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; font-size: 0.66rem; color: var(--muted); }
+  .td-tele :global(.tl-legend i) { flex: 1; height: 8px; border-radius: 4px; }
+  .td-tele :global(.tl-key) { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.7rem; color: #d6d6de; margin-bottom: 0.4rem; }
+  .td-tele :global(.tl-key i), .td-tele :global(.tl-tip i) { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 0.45rem; vertical-align: middle; }
+  .td-tele :global(.tl-chart) { position: relative; }
+  .td-tele :global(.tl-chart svg) { width: 100%; height: auto; display: block; }
+  .td-tele :global(.tl-grid) { stroke: #1d1d25; stroke-width: 1; }
+  .td-tele :global(.tl-sec) { stroke: #3a3a46; stroke-width: 1; stroke-dasharray: 4 4; }
+  .td-tele :global(.tl-ax) { font-family: var(--mono); font-size: 10px; fill: #8b8b98; }
+  .td-tele :global(.tl-dl) { font-family: var(--mono); font-size: 10px; fill: #d6d6de; }
+  .td-tele :global(.tl-line) { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .td-tele :global(.tl-cross-l) { stroke: #8b8b98; stroke-width: 1; }
+  .td-tele :global(.tl-dot) { stroke: #08080b; stroke-width: 2; }
+  .td-tele :global(.tl-tip) {
+    position: absolute; top: 0; transform: translateX(-50%); display: grid; gap: 0.15rem; padding: 0.45rem 0.6rem; pointer-events: none;
+    font-size: 0.66rem; color: #e6e6ec; background: rgba(12, 12, 16, 0.95); border: 1px solid #2a2a33; white-space: nowrap;
+  }
+  .td-tele :global(.tl-tip[hidden]) { display: none; }
+  .td-tele :global(.tl-axis-note) { margin: 0.4rem 0 0; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--muted); }
+  .td-tele :global(.tl-table) { width: 100%; border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 0.8rem; }
+  .td-tele :global(.tl-table th), .td-tele :global(.tl-table td) { padding: 0.4rem 0.6rem; text-align: right; background: #0c0c11; color: #d6d6de; }
+  .td-tele :global(.tl-table thead th) { background: none; color: var(--muted); font-size: 0.62rem; letter-spacing: 0.18em; font-weight: 400; }
+  .td-tele :global(.tl-table thead th:first-child) { text-align: left; }
+  .td-tele :global(.tl-table tbody th), .td-tele :global(.tl-table tfoot th) { text-align: left; color: var(--muted); font-weight: 400; }
+  .td-tele :global(.tl-table th em) { font-style: normal; font-size: 0.6rem; color: #5a5a66; margin-left: 0.3rem; }
+  .td-tele :global(.tl-table td.fast) { background: color-mix(in srgb, var(--purple) 32%, #0c0c11); color: #fff; }
+  .td-tele :global(.tl-table tr.pb .lt) { color: var(--purple); }
+  .td-tele :global(.tl-table .dl) { color: var(--muted); }
+  .td-tele :global(.tl-table tfoot td), .td-tele :global(.tl-table tfoot th) { border-top: 1px solid #2a2a33; }
+  .td-tele :global(.tl-fast-key) { display: inline-block; width: 10px; height: 10px; margin-right: 0.4rem; vertical-align: -1px; background: color-mix(in srgb, var(--purple) 60%, #0c0c11); }
+  @media (max-width: 900px) {
+    .td-tele :global(.tl-kpis) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-tele :global(.tl-grid2) { grid-template-columns: 1fr; }
+    .td-tele :global(.tl-table) { font-size: 0.72rem; }
+    .td-tele :global(.tl-table th), .td-tele :global(.tl-table td) { padding: 0.35rem 0.4rem; }
   }
 
   /* --- Forza-style garage grid ----------------------------------------------------- */
@@ -922,7 +980,11 @@ import Base from '../layouts/Base.astro';
     length_km?: number; turns?: number; status: 'active' | 'planned'; map?: string; color: string;
     note?: string; // shown on the PB board when there's no lap time yet
   };
-  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[] };
+  type Telemetry = {
+    lap_length_m: number; laps: number[]; sectors: number[][]; best_lap: number; compare_lap: number;
+    top_speed: number; trace_best: number[][]; trace_compare: number[][]; map_best: number[][];
+  };
+  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[]; telemetry?: Telemetry };
   type TrackDay = { tracks: Track[]; sessions: Session[] };
 
   // drawn layouts (viewBox 0 0 1000 620). Only real, known layouts live here —
@@ -1133,6 +1195,7 @@ import Base from '../layouts/Base.astro';
         }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
       </div>`;
     startGhost(pbSecs);
+    renderTelemetry(t, sessions);
     if (dir && !reduced) {
       stage.style.setProperty('--dir', String(dir));
       stage.classList.remove('td-in'); void stage.offsetWidth; stage.classList.add('td-in');
@@ -1176,6 +1239,139 @@ import Base from '../layouts/Base.astro';
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
+  }
+
+  // --- TELEMETRY: charts from an imported GPS log (LapTrophy) ------------------------
+  // colours checked with the dataviz validator on the dark surface: best #5f9e1f, compare #6f8fe0
+  const C_BEST = '#5f9e1f', C_CMP = '#6f8fe0';
+  const fmtS = (s: number) => (s < 60 ? s.toFixed(2) : fmtLap(s));
+  // sequential lime ramp for the speed map: slow = dim, fast = bright
+  const ramp = (u: number) => {
+    const a = [46, 74, 16], b = [214, 255, 106];
+    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * u)).join(',')})`;
+  };
+
+  function renderTelemetry(t: Track, sessions: Session[]) {
+    const box = document.getElementById('td-tele')!;
+    const s = sessions.find((x) => x.telemetry);
+    if (!s || !s.telemetry) { box.hidden = true; box.innerHTML = ''; return; }
+    const tm = s.telemetry;
+    const L = tm.lap_length_m;
+    const flying = tm.laps.slice(1);
+    const mean = flying.reduce((a, b) => a + b, 0) / flying.length;
+    const sd = Math.sqrt(flying.reduce((a, b) => a + (b - mean) ** 2, 0) / flying.length);
+    const bestS = [0, 1, 2].map((k) => Math.min(...tm.sectors.slice(1).map((r) => r[k])));
+    const theo = bestS.reduce((a, b) => a + b, 0);
+    const best = Math.min(...tm.laps);
+    const avg = (L / best) * 3.6;
+    const gain = tm.laps[1] - best;
+
+    // --- speed map: best lap's GPS line, coloured by speed
+    const m = MAPS[t.map ?? ''];
+    const pts = tm.map_best;
+    const vmin = Math.min(...pts.map((p) => p[2])), vmax = Math.max(...pts.map((p) => p[2]));
+    const segs = pts.slice(0, -1).map((p, i) => {
+      const q = pts[i + 1], v = (p[2] + q[2]) / 2, u = (v - vmin) / (vmax - vmin || 1);
+      return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${ramp(u)}"><title>${Math.round(v)} km/h</title></line>`;
+    }).join('');
+    const top = pts.reduce((a, b) => (b[2] > a[2] ? b : a)), slow = pts.slice(3, -3).reduce((a, b) => (b[2] < a[2] ? b : a));
+    const speedMap = `
+      <svg class="tl-map" viewBox="0 0 1000 620" role="img" aria-label="Best lap racing line coloured by speed, ${vmin} to ${vmax} km/h">
+        ${m ? `<path d="${m.d}" class="tl-tarmac"/>` : ''}
+        <g class="tl-heat">${segs}</g>
+        <circle cx="${top[0]}" cy="${top[1]}" r="9" class="tl-pin"/><text x="${top[0] + 16}" y="${top[1] + 6}" class="tl-pin-l">${top[2]} km/h</text>
+        <circle cx="${slow[0]}" cy="${slow[1]}" r="9" class="tl-pin"/><text x="${slow[0] + 16}" y="${slow[1] + 6}" class="tl-pin-l">${slow[2]} km/h</text>
+      </svg>
+      <div class="tl-legend mono"><span>${vmin} km/h</span><i style="background: linear-gradient(90deg, ${ramp(0)}, ${ramp(0.5)}, ${ramp(1)})"></i><span>${vmax} km/h</span></div>`;
+
+    // --- speed trace: best lap vs the first flying lap, by distance round the lap
+    const W = 640, H = 260, pl = 40, pr = 16, pt = 14, pb = 28;
+    const X = (d: number) => pl + (Math.max(0, Math.min(L, d)) / L) * (W - pl - pr);
+    const ymax = Math.ceil(Math.max(...tm.trace_best.map((p) => p[1]), ...tm.trace_compare.map((p) => p[1])) / 20) * 20;
+    const Y = (v: number) => pt + (1 - v / ymax) * (H - pt - pb);
+    const line = (tr: number[][]) => tr.filter((p) => p[0] >= 0 && p[0] <= L).map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(' ');
+    const grid = Array.from({ length: ymax / 20 + 1 }, (_, i) => i * 20).map((v) =>
+      `<line x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}" class="tl-grid"/><text x="${pl - 6}" y="${Y(v) + 4}" class="tl-ax" text-anchor="end">${v}</text>`).join('');
+    const secs = [1, 2].map((k) => `<line x1="${X(L * k / 3)}" x2="${X(L * k / 3)}" y1="${pt}" y2="${H - pb}" class="tl-sec"/>`).join('')
+      + ['S1', 'S2', 'S3'].map((n, k) => `<text x="${X(L * (k + 0.5) / 3)}" y="${H - 8}" class="tl-ax" text-anchor="middle">${n}</text>`).join('');
+    const lastB = tm.trace_best.filter((p) => p[0] <= L).at(-1)!, lastC = tm.trace_compare.filter((p) => p[0] <= L).at(-1)!;
+    const trace = `
+      <div class="tl-key mono">
+        <span><i style="background:${C_BEST}"></i>Lap ${tm.best_lap} · ${fmtLap(tm.laps[tm.best_lap - 1])} (best)</span>
+        <span><i style="background:${C_CMP}"></i>Lap ${tm.compare_lap} · ${fmtLap(tm.laps[tm.compare_lap - 1])}</span>
+      </div>
+      <div class="tl-chart">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Speed through the lap, best lap against lap ${tm.compare_lap}">
+          ${grid}${secs}
+          <text x="${pl}" y="${pt - 3}" class="tl-ax">km/h</text>
+          <path d="${line(tm.trace_compare)}" class="tl-line" stroke="${C_CMP}"/>
+          <path d="${line(tm.trace_best)}" class="tl-line" stroke="${C_BEST}"/>
+          <text x="${W - pr}" y="${Y(lastB[1]) - 6}" class="tl-dl" text-anchor="end">best</text>
+          <text x="${W - pr}" y="${Y(lastC[1]) + 14}" class="tl-dl" text-anchor="end">lap ${tm.compare_lap}</text>
+          <g class="tl-cross" style="display:none"><line y1="${pt}" y2="${H - pb}" class="tl-cross-l"/>
+            <circle r="4" fill="${C_BEST}" class="tl-dot tb"/><circle r="4" fill="${C_CMP}" class="tl-dot tc"/></g>
+          <rect x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}" fill="transparent" class="tl-hit"/>
+        </svg>
+        <div class="tl-tip mono" hidden></div>
+      </div>
+      <p class="tl-axis-note mono">Distance round the lap, 0–${L} m</p>`;
+
+    // --- sector table: purple = fastest sector of the session
+    const rows = tm.laps.map((lap, i) => {
+      const sec = tm.sectors[i];
+      const cells = sec.map((v, k) => `<td class="${i > 0 && v === bestS[k] ? 'fast' : ''}">${v.toFixed(2)}</td>`).join('');
+      const d = lap - best;
+      return `<tr class="${lap === best ? 'pb' : ''}"><th scope="row">${i + 1}${i === 0 ? ' <em>out</em>' : ''}</th>${cells}
+        <td class="lt">${fmtLap(lap)}</td><td class="dl">${d === 0 ? 'PB' : `+${d.toFixed(2)}`}</td></tr>`;
+    }).join('');
+    const table = `
+      <table class="tl-table">
+        <thead><tr><th scope="col">Lap</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">Time</th><th scope="col">Gap</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><th scope="row">Ideal</th>${bestS.map((v) => `<td class="fast">${v.toFixed(2)}</td>`).join('')}<td class="lt">${fmtLap(theo)}</td><td class="dl">−${(best - theo).toFixed(2)}</td></tr></tfoot>
+      </table>
+      <p class="tl-axis-note mono"><i class="tl-fast-key"></i>fastest sector · lap 1 is the out-lap and isn't counted · splits ±0.5 s (1 Hz GPS)</p>`;
+
+    box.hidden = false;
+    box.innerHTML = `
+      <div class="tl-head">
+        <p class="eyebrow">Telemetry — ${esc(s.vehicle ?? '')} · ${esc(s.date)} · LapTrophy GPS</p>
+      </div>
+      <div class="tl-kpis">
+        ${[['Best lap', fmtLap(best), `lap ${tm.best_lap}`], ['Ideal lap', fmtLap(theo), 'best sectors combined'],
+           ['Top speed', `${tm.top_speed}`, 'km/h'], ['Avg speed', `${avg.toFixed(0)}`, 'km/h on the best lap'],
+           ['Consistency', `±${sd.toFixed(2)}`, 's across flying laps'], ['Improvement', `−${gain.toFixed(2)}`, `s, lap 2 → best`]]
+          .map(([k, v, u]) => `<div class="tl-kpi"><span class="mono">${k}</span><b class="lcd-text">${v}</b><em class="mono">${u}</em></div>`).join('')}
+      </div>
+      <div class="tl-grid2">
+        <figure class="tl-card"><figcaption class="eyebrow">Speed map — best lap</figcaption>${speedMap}</figure>
+        <figure class="tl-card"><figcaption class="eyebrow">Speed trace</figcaption>${trace}</figure>
+      </div>
+      <figure class="tl-card"><figcaption class="eyebrow">Sector times</figcaption>${table}</figure>`;
+
+    // crosshair + tooltip on the speed trace
+    const svg = box.querySelector<SVGSVGElement>('.tl-chart svg')!, tip = box.querySelector<HTMLElement>('.tl-tip')!;
+    const cross = svg.querySelector<SVGGElement>('.tl-cross')!;
+    const at = (tr: number[][], d: number) => {
+      const j = tr.findIndex((p) => p[0] >= d);
+      if (j <= 0) return tr[Math.max(0, j)][1];
+      const a = tr[j - 1], b = tr[j]; return a[1] + (b[1] - a[1]) * ((d - a[0]) / (b[0] - a[0] || 1));
+    };
+    svg.querySelector('.tl-hit')!.addEventListener('pointermove', (e) => {
+      const r = svg.getBoundingClientRect();
+      const sx = ((e as PointerEvent).clientX - r.left) * (W / r.width);
+      const d = Math.max(0, Math.min(L, ((sx - pl) / (W - pl - pr)) * L));
+      const vb = at(tm.trace_best, d), vc = at(tm.trace_compare, d), x = X(d);
+      cross.style.display = '';
+      cross.querySelector('line')!.setAttribute('x1', String(x)); cross.querySelector('line')!.setAttribute('x2', String(x));
+      const tb = cross.querySelector('.tb')!, tc = cross.querySelector('.tc')!;
+      tb.setAttribute('cx', String(x)); tb.setAttribute('cy', String(Y(vb)));
+      tc.setAttribute('cx', String(x)); tc.setAttribute('cy', String(Y(vc)));
+      tip.hidden = false;
+      tip.innerHTML = `<b>${Math.round(d)} m</b><span><i style="background:${C_BEST}"></i>best ${vb.toFixed(0)} km/h</span><span><i style="background:${C_CMP}"></i>lap ${tm.compare_lap} ${vc.toFixed(0)} km/h</span><span>Δ ${(vb - vc) >= 0 ? '+' : ''}${(vb - vc).toFixed(0)} km/h</span>`;
+      tip.style.left = `${(x / W) * 100}%`;
+    });
+    svg.querySelector('.tl-hit')!.addEventListener('pointerleave', () => { cross.style.display = 'none'; tip.hidden = true; });
   }
 
   // ghost dot laps the map in exactly the PB time
