@@ -1104,7 +1104,7 @@ import Base from '../layouts/Base.astro';
             <input name="date" type="date" required />
             <input name="best" placeholder="Best lap  1:02.345" pattern="^(\\d{1,2}:)?\\d{1,2}\\.\\d{1,3}$" required />
           </div>
-          <select name="vehicle"><option>Rental kart</option>${vehicles.map((v) => `<option>${esc(v)}</option>`).join('')}</select>
+          <select name="vehicle">${vehicles.map((v) => `<option>${esc(v)}</option>`).join('')}<option>Rental kart</option></select>
           <input name="notes" maxlength="300" placeholder="Notes — conditions, tyres, setup…" />
           <div class="lf-actions">
             <button class="btn btn-primary" type="submit">Save ▸</button>
