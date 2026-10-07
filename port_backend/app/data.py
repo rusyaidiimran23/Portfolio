@@ -276,9 +276,9 @@ TRACKDAY = {
             "status": "active", "map": "sgk", "color": "#b6ff2e",  # lime
         },
         {
-            # 1 km, 12 possible layouts; map = outer layout traced from satellite (swap for a GPS log later)
+            # 12 possible layouts; map = the one ridden, traced from satellite (~0.93 km)
             "id": "horizon", "name": "Beranang Horizon Circuit", "alias": "", "kind": "Kart circuit",
-            "location": "Beranang, Selangor", "length_km": 1.0, "status": "active", "map": "horizon", "color": "#00a19c",
+            "location": "Beranang, Selangor", "length_km": 0.93, "status": "active", "map": "horizon", "color": "#00a19c",
         },
         {
             "id": "sepang", "name": "Sepang International Circuit", "alias": "SIC", "kind": "F1 circuit",
