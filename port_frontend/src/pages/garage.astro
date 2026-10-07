@@ -272,6 +272,18 @@ import Base from '../layouts/Base.astro';
   .td-stage :global(.ts-delta) { font-size: 0.72rem; color: var(--muted); }
   .td-stage :global(li.pb .ts-delta) { color: var(--purple); }
   .td-stage :global(.ts-meta) { color: #b9b9c4; font-size: 0.85rem; min-width: 0; overflow-wrap: anywhere; }
+  .td-stage :global(.ts-laps) { grid-column: 1 / -1; display: flex; align-items: flex-end; gap: 4px; height: 3.4rem; margin-top: 0.2rem; }
+  .td-stage :global(.ts-laps i) {
+    position: relative; flex: 1; height: var(--h); min-height: 6px; background: #2a2a33; border-radius: 2px 2px 0 0;
+  }
+  .td-stage :global(.ts-laps i.near) { background: var(--green); opacity: 0.75; }
+  .td-stage :global(.ts-laps i.best) { background: var(--purple); box-shadow: 0 0 10px color-mix(in srgb, var(--purple) 60%, transparent); }
+  .td-stage :global(.ts-laps b) {
+    position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-family: var(--mono); font-weight: 400; font-size: 0.56rem; color: var(--muted); opacity: 0; transition: opacity 0.2s;
+  }
+  .td-stage :global(.ts-laps i:hover b), .td-stage :global(.ts-laps i.best b) { opacity: 1; }
+  .td-stage :global(.ts-laps i.best b) { color: var(--purple); }
   .td-stage :global(.del) { border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem; }
   .td-stage :global(.del.armed) { color: #fff; background: var(--f1red); }
 
@@ -909,7 +921,7 @@ import Base from '../layouts/Base.astro';
     id: string; name: string; alias?: string; kind?: string; location?: string;
     length_km?: number; turns?: number; status: 'active' | 'planned'; map?: string; color: string;
   };
-  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string };
+  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[] };
   type TrackDay = { tracks: Track[]; sessions: Session[] };
 
   // drawn layouts (viewBox 0 0 1000 620). Only real, known layouts live here —
@@ -936,6 +948,16 @@ import Base from '../layouts/Base.astro';
     return Number(m) * 60 + Number(s);
   };
   const fmtDelta = (d: number) => (d === 0 ? 'PB' : `+${d.toFixed(3)}`);
+  const fmtLap = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toFixed(2).padStart(5, '0')}`;
+  // lap-by-lap bars for sessions imported with lap data: taller = faster, purple = best lap
+  function lapBars(laps: number[]): string {
+    const best = Math.min(...laps), worst = Math.max(...laps);
+    return `<span class="ts-laps" aria-label="Lap times">${laps.map((l, i) => {
+      const h = worst === best ? 100 : 35 + 65 * (worst - l) / (worst - best);
+      const cls = l === best ? 'best' : l - best < 1 ? 'near' : '';
+      return `<i class="${cls}" style="--h: ${h.toFixed(0)}%" title="Lap ${i + 1}: ${fmtLap(l)}"><b>${fmtLap(l)}</b></i>`;
+    }).join('')}</span>`;
+  }
 
   let tdData: TrackDay | null = null;
   let tdBuilds: Build[] = [];
@@ -1097,7 +1119,8 @@ import Base from '../layouts/Base.astro';
             <span class="ts-lap lcd-text">${esc(s.best)}</span>
             <span class="ts-delta mono">${fmtDelta(d)}</span>
             <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}</span>
-            <button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify(s))}'>✕</button>
+            <button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle, notes: s.notes }))}'>✕</button>
+            ${s.laps?.length ? lapBars(s.laps) : ''}
           </li>`;
         }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
       </div>`;

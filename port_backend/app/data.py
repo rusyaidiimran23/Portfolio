@@ -286,5 +286,13 @@ TRACKDAY = {
         },
     ],
     # each: {"track": id, "date": "YYYY-MM-DD", "vehicle": "...", "best": "m:ss.sss", "notes": "..."}
-    "sessions": [],
+    # Sessions here with a "source" are imports (e.g. LapTrophy GPS logs): they're added to the
+    # live server's garage.json on the next deploy. Sessions logged on the site live only there.
+    "sessions": [
+        {
+            "track": "sgk", "date": "2026-09-15", "vehicle": "Rental kart", "best": "1:06.67",
+            "notes": "8 laps, best on lap 8 - LapTrophy GPS log",
+            "laps": [90.09, 70.69, 70.2, 70.47, 69.78, 68.89, 67.08, 66.67], "source": "laptrophy-2026-09-15-153423",
+        },
+    ],
 }

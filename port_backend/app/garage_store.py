@@ -38,6 +38,11 @@ def _load() -> dict:
         _save(data)
     # the track list (maps, colours, facts) comes from data.py; only the sessions live in garage.json
     data["trackday"]["tracks"] = copy.deepcopy(TRACKDAY["tracks"])
+    # imported sessions (LapTrophy logs etc.) from data.py: add any the server doesn't have yet
+    have = {s.get("source") for s in data["trackday"]["sessions"]} | set(data["trackday"].get("dismissed", []))
+    for s in TRACKDAY["sessions"]:
+        if s.get("source") and s["source"] not in have:
+            data["trackday"]["sessions"].append(copy.deepcopy(s))
     return data
 
 
@@ -110,6 +115,8 @@ def delete_session(track_id: str, entry: dict) -> dict | None:
             return None
         for i, s in enumerate(td["sessions"]):
             if s.get("track") == track_id and all(s.get(k, "") == entry.get(k, "") for k in ("date", "best", "vehicle")):
+                if s.get("source"):  # an import you deleted stays deleted
+                    td.setdefault("dismissed", []).append(s["source"])
                 del td["sessions"][i]
                 _save(data)
                 break
