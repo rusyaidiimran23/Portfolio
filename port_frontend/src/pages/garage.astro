@@ -920,6 +920,7 @@ import Base from '../layouts/Base.astro';
   type Track = {
     id: string; name: string; alias?: string; kind?: string; location?: string;
     length_km?: number; turns?: number; status: 'active' | 'planned'; map?: string; color: string;
+    note?: string; // shown on the PB board when there's no lap time yet
   };
   type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[] };
   type TrackDay = { tracks: Track[]; sessions: Session[] };
@@ -983,7 +984,7 @@ import Base from '../layouts/Base.astro';
       const best = bestOf(t.id);
       return `<button class="td-tab" type="button" role="tab" data-track="${esc(t.id)}" style="--c: ${esc(t.color)}" aria-selected="${t.id === tdSel}">
         <span class="tt-name">${esc(t.alias ? `${t.name} · ${t.alias}` : t.name)}</span>
-        <span class="tt-sub mono">${t.status === 'planned' ? 'UPCOMING' : best ? `PB ${esc(best.best)}` : 'NO LAPS YET'}</span>
+        <span class="tt-sub mono">${t.status === 'planned' ? 'UPCOMING' : best ? `PB ${esc(best.best)}` : t.note ? 'RIDDEN · NO TIME YET' : 'NO LAPS YET'}</span>
       </button>`;
     }).join('');
     buildCarousel(td);
@@ -1100,7 +1101,7 @@ import Base from '../layouts/Base.astro';
         <div class="td-pb lcd">
           <span>PERSONAL BEST</span>
           <b class="lcd-text">${best ? esc(best.best) : '-:--.---'}</b>
-          <em class="mono">${best ? `${esc(best.vehicle || '')}${best.vehicle ? ' · ' : ''}${esc(best.date)}` : t.status === 'planned' ? 'Not ridden yet — on the list' : 'Log your first session below'}</em>
+          <em class="mono">${best ? `${esc(best.vehicle || '')}${best.vehicle ? ' · ' : ''}${esc(best.date)}` : t.status === 'planned' ? 'Not ridden yet — on the list' : esc(t.note || 'Log your first session below')}</em>
         </div>
         <div class="td-bar">
           <p class="eyebrow">Sessions — latest first</p>
