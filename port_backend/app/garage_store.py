@@ -36,6 +36,8 @@ def _load() -> dict:
     if "trackday" not in data:  # older garage.json (e.g. the live server): add Track Day once
         data["trackday"] = copy.deepcopy(TRACKDAY)
         _save(data)
+    # the track list (maps, colours, facts) comes from data.py; only the sessions live in garage.json
+    data["trackday"]["tracks"] = copy.deepcopy(TRACKDAY["tracks"])
     return data
 
 

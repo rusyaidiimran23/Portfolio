@@ -270,17 +270,19 @@ GARAGE = {
 TRACKDAY = {
     "tracks": [
         {
+            # RUD Karting Sepang International Track (inside the Sepang circuit complex)
             "id": "sgk", "name": "SGK", "alias": "RUD", "kind": "Go-kart circuit",
-            "location": "", "status": "active", "map": "", "color": "#ff2bd6",
+            "location": "Sepang, Selangor", "length_km": 1.13,
+            "status": "active", "map": "sgk", "color": "#00a19c",
         },
         {
             "id": "horizon", "name": "Horizon Go-Kart", "alias": "", "kind": "Go-kart circuit",
-            "location": "Beranang, Selangor", "status": "active", "map": "", "color": "#00d2be",
+            "location": "Beranang, Selangor", "status": "active", "map": "", "color": "#00a19c",
         },
         {
             "id": "sepang", "name": "Sepang International Circuit", "alias": "SIC", "kind": "F1 circuit",
             "location": "Sepang, Selangor", "length_km": 5.543, "turns": 15,
-            "status": "planned", "map": "sepang", "color": "#ffb000",
+            "status": "planned", "map": "sepang", "color": "#00a19c",  # one colour for every track: Petronas Emerald
         },
     ],
     # each: {"track": id, "date": "YYYY-MM-DD", "vehicle": "...", "best": "m:ss.sss", "notes": "..."}
