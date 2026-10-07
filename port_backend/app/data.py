@@ -216,7 +216,8 @@ GARAGE = {
             "id": "satria", "tag": "SATRIA", "color": "#ffd400", "scene": "car",
             "name": "Proton Satria 1.3",
             "chassis": "", "year": "2003",
-            "status": "Running",
+            "status": "Sold",
+            "sold": True,
             "hp": 75, "torque_nm": 108, "weight_kg": 960,
             "power": "75 hp",
             "torque": "108 Nm @ 3,000 rpm",
@@ -224,8 +225,9 @@ GARAGE = {
                 "title": "1 year with the Satria",
                 "body": [
                     "The car behind the learning curve: practice runs before and after the licence test (taken in an "
-                    "Axia), then a solid year on loan, kept and looked after like my own. Stock suspension had it rolling "
-                    "through corners like a boat, but rowing through that manual gearbox never got old."
+                    "Axia), then a solid year borrowing it and looking after it like my own. Stock suspension had it rolling "
+                    "through corners like a boat, but rowing through that manual gearbox never got old. It has since "
+                    "moved on within the family."
                 ],
             },
             "log": [],
