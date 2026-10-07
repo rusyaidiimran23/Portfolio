@@ -273,16 +273,17 @@ TRACKDAY = {
             # RUD Karting Sepang International Track (inside the Sepang circuit complex)
             "id": "sgk", "name": "SGK", "alias": "RUD", "kind": "Go-kart circuit",
             "location": "Sepang, Selangor", "length_km": 1.13,
-            "status": "active", "map": "sgk", "color": "#00a19c",
+            "status": "active", "map": "sgk", "color": "#b6ff2e",  # lime
         },
         {
-            "id": "horizon", "name": "Horizon Go-Kart", "alias": "", "kind": "Go-kart circuit",
-            "location": "Beranang, Selangor", "status": "active", "map": "", "color": "#00a19c",
+            # 1 km, 12 possible layouts; not on OpenStreetMap yet, so the map waits for a GPS log
+            "id": "horizon", "name": "Beranang Horizon Circuit", "alias": "", "kind": "Kart circuit",
+            "location": "Beranang, Selangor", "length_km": 1.0, "status": "active", "map": "", "color": "#00a19c",
         },
         {
             "id": "sepang", "name": "Sepang International Circuit", "alias": "SIC", "kind": "F1 circuit",
             "location": "Sepang, Selangor", "length_km": 5.543, "turns": 15,
-            "status": "planned", "map": "sepang", "color": "#00a19c",  # one colour for every track: Petronas Emerald
+            "status": "planned", "map": "sepang", "color": "#00a19c",  # Petronas Emerald
         },
     ],
     # each: {"track": id, "date": "YYYY-MM-DD", "vehicle": "...", "best": "m:ss.sss", "notes": "..."}
