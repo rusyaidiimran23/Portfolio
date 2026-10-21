@@ -159,6 +159,32 @@
                      "frame":  ""
                  }
              ],
+    "rht":  [
+                {
+                    "src":  "/work/rht/01.jpg",
+                    "caption":  "Weather station and rain gauge at the mine",
+                    "fit":  "cover",
+                    "w":  960,
+                    "h":  1280,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/rht/02.jpg",
+                    "caption":  "Rain gauge and logger overlooking the pit lake",
+                    "fit":  "cover",
+                    "w":  960,
+                    "h":  1280,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/rht/03.jpg",
+                    "caption":  "Commissioning the weather sensor above the open-pit mine",
+                    "fit":  "cover",
+                    "w":  960,
+                    "h":  1280,
+                    "frame":  ""
+                }
+            ],
     "sic":  [
                 {
                     "src":  "/work/sic/01.jpg",
@@ -248,6 +274,14 @@
     "trx":  [
                 {
                     "src":  "/work/trx/01.jpg",
+                    "caption":  "Installing the Kunak Air Pro at MRT Plaza, TRX",
+                    "fit":  "cover",
+                    "w":  768,
+                    "h":  1024,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/02.jpg",
                     "caption":  "Kunak Air Pro station on its pole at TRX",
                     "fit":  "cover",
                     "w":  810,
@@ -255,7 +289,23 @@
                     "frame":  ""
                 },
                 {
-                    "src":  "/work/trx/02.jpg",
+                    "src":  "/work/trx/03.jpg",
+                    "caption":  "Raintree Plaza station at night, Menara Prudential behind",
+                    "fit":  "cover",
+                    "w":  768,
+                    "h":  1024,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/04.jpg",
+                    "caption":  "Running cable trays for the Raintree Plaza station",
+                    "fit":  "cover",
+                    "w":  768,
+                    "h":  1024,
+                    "frame":  ""
+                },
+                {
+                    "src":  "/work/trx/05.jpg",
                     "caption":  "Aerial view of the station location on the TRX plaza (drone)",
                     "fit":  "cover",
                     "w":  1600,
@@ -263,7 +313,7 @@
                     "frame":  ""
                 },
                 {
-                    "src":  "/work/trx/03.jpg",
+                    "src":  "/work/trx/06.jpg",
                     "caption":  "Plaza-level view of the installation site",
                     "fit":  "cover",
                     "w":  1600,
@@ -271,7 +321,7 @@
                     "frame":  ""
                 },
                 {
-                    "src":  "/work/trx/04.jpg",
+                    "src":  "/work/trx/07.jpg",
                     "caption":  "TRX skyline from the plaza",
                     "fit":  "cover",
                     "w":  810,
