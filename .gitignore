@@ -24,3 +24,8 @@ desktop.ini
 # local databases (leaderboard, visitor stats)
 port_backend/app/scores.db
 port_backend/app/stats.db
+
+# raw session logs (contain GPS tracks): samples dropped in the repo root, and bot uploads
+/*.csv
+/*.gpx
+port_backend/app/uploads/

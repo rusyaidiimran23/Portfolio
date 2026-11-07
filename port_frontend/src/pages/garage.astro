@@ -285,6 +285,8 @@ import Base from '../layouts/Base.astro';
   }
   .td-stage :global(.ts-laps i:hover b), .td-stage :global(.ts-laps i.best b) { opacity: 1; }
   .td-stage :global(.ts-laps i.best b) { color: var(--purple); }
+  .td-stage :global(.ts-view) { display: block; margin-top: 0.3rem; padding: 0.2rem 0.5rem; border: 1px solid #2a2a33; background: none; color: #b9b9c4; font-size: 0.7rem; cursor: pointer; }
+  .td-stage :global(.ts-view:hover), .td-stage :global(.ts-view.on) { border-color: var(--c, #fff); color: #fff; }
   .td-stage :global(.del) { border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem; }
   .td-stage :global(.del.armed) { color: #fff; background: var(--f1red); }
 
@@ -438,6 +440,7 @@ import Base from '../layouts/Base.astro';
   .td-tele :global(.tl-tarmac) { fill: none; stroke: #1f1f27; stroke-width: 34; stroke-linejoin: round; }
   .td-tele :global(.tl-heat line) { stroke-width: 9; stroke-linecap: round; }
   .td-tele :global(.tl-heat line:hover) { stroke-width: 15; }
+  .td-tele :global(.tl-coach) { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #d6d6de; font-size: 0.85rem; line-height: 1.55; }
   .td-tele :global(.tl-pin) { fill: none; stroke: #f3f3f5; stroke-width: 2.5; }
   .td-tele :global(.tl-pin-l) { font-family: var(--mono); font-size: 22px; fill: #d6d6de; }
   .td-tele :global(.tl-legend) { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; font-size: 0.66rem; color: var(--muted); }
@@ -984,8 +987,8 @@ import Base from '../layouts/Base.astro';
     lap_length_m: number; laps: number[]; sectors: number[][]; best_lap: number; compare_lap: number;
     top_speed: number; trace_best: number[][]; trace_compare: number[][]; map_best: number[][];
   };
-  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[]; telemetry?: Telemetry };
-  type TrackDay = { tracks: Track[]; sessions: Session[] };
+  type Session = { track: string; date: string; vehicle?: string; best: string; notes?: string; laps?: number[]; telemetry?: Telemetry; uploaded?: boolean };
+  type TrackDay = { tracks: Track[]; sessions: Session[]; coach?: Record<string, string> };
 
   // drawn layouts (viewBox 0 0 1000 620). Only real, known layouts live here —
   // tracks without one show "trace pending" until a GPS session provides the line.
@@ -1032,6 +1035,7 @@ import Base from '../layouts/Base.astro';
   let tdData: TrackDay | null = null;
   let tdBuilds: Build[] = [];
   let tdSel = '';
+  let teleDate = ''; // which session's telemetry is showing; '' = the latest
   let ghostRaf = 0;
 
   function renderTrackday(td: TrackDay | undefined, builds: Build[]) {
@@ -1188,8 +1192,8 @@ import Base from '../layouts/Base.astro';
             <span class="ts-date lcd-text">${esc(s.date)}</span>
             <span class="ts-lap lcd-text">${esc(s.best)}</span>
             <span class="ts-delta mono">${fmtDelta(d)}</span>
-            <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}</span>
-            <button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle, notes: s.notes }))}'>✕</button>
+            <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}${s.telemetry ? `<button class="ts-view mono" type="button" data-tele="${esc(s.date)}">Details ▾</button>` : ''}</span>
+            ${s.uploaded ? '' : `<button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle, notes: s.notes }))}'>✕</button>`}
             ${s.laps?.length ? lapBars(s.laps) : ''}
           </li>`;
         }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
@@ -1253,18 +1257,55 @@ import Base from '../layouts/Base.astro';
 
   function renderTelemetry(t: Track, sessions: Session[]) {
     const box = document.getElementById('td-tele')!;
-    const s = sessions.find((x) => x.telemetry);
+    const s = sessions.find((x) => x.telemetry && x.date === teleDate) ?? sessions.find((x) => x.telemetry);
     if (!s || !s.telemetry) { box.hidden = true; box.innerHTML = ''; return; }
+    document.querySelectorAll<HTMLElement>('#td-stage [data-tele]').forEach((b) => b.classList.toggle('on', b.dataset.tele === s.date));
     const tm = s.telemetry;
     const L = tm.lap_length_m;
     const flying = tm.laps.slice(1);
     const mean = flying.reduce((a, b) => a + b, 0) / flying.length;
     const sd = Math.sqrt(flying.reduce((a, b) => a + (b - mean) ** 2, 0) / flying.length);
-    const bestS = [0, 1, 2].map((k) => Math.min(...tm.sectors.slice(1).map((r) => r[k])));
+    // LapTrophy sometimes leaves a sector blank: skip it, never count it as zero
+    const bestS = [0, 1, 2].map((k) => Math.min(...tm.sectors.slice(1).map((r) => r[k]).filter((v) => v !== null)));
     const theo = bestS.reduce((a, b) => a + b, 0);
     const best = Math.min(...tm.laps);
     const avg = (L / best) * 3.6;
     const gain = tm.laps[1] - best;
+
+    // --- sector table: purple = fastest sector of the session
+    const rows = tm.laps.map((lap, i) => {
+      const sec = tm.sectors[i];
+      const cells = sec.map((v, k) => `<td class="${i > 0 && v === bestS[k] ? 'fast' : ''}">${v === null ? '–' : v.toFixed(2)}</td>`).join('');
+      const d = lap - best;
+      return `<tr class="${lap === best ? 'pb' : ''}"><th scope="row">${i + 1}${i === 0 ? ' <em>out</em>' : ''}</th>${cells}
+        <td class="lt">${fmtLap(lap)}</td><td class="dl">${d === 0 ? 'PB' : `+${d.toFixed(2)}`}</td></tr>`;
+    }).join('');
+    const table = `
+      <table class="tl-table">
+        <thead><tr><th scope="col">Lap</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">Time</th><th scope="col">Gap</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><th scope="row">Ideal</th>${bestS.map((v) => `<td class="fast">${v.toFixed(2)}</td>`).join('')}<td class="lt">${fmtLap(theo)}</td><td class="dl">−${(best - theo).toFixed(2)}</td></tr></tfoot>
+      </table>
+      <p class="tl-axis-note mono"><i class="tl-fast-key"></i>fastest sector · lap 1 is the out-lap and isn't counted · splits ±0.5 s (1 Hz GPS)</p>`;
+
+    const coach = tdData?.coach?.[t.id];
+    const head = `
+      <div class="tl-head">
+        <p class="eyebrow">Telemetry — ${[s.vehicle, s.date, 'LapTrophy GPS'].filter(Boolean).map((x) => esc(x)).join(' · ')}</p>
+      </div>
+      ${coach ? `<figure class="tl-card"><figcaption class="eyebrow">Coach — latest session</figcaption><p class="tl-coach mono">${esc(coach)}</p></figure>` : ''}
+      <div class="tl-kpis">
+        ${[['Best lap', fmtLap(best), `lap ${tm.best_lap}`], ['Ideal lap', fmtLap(theo), 'best sectors combined'],
+           ['Top speed', `${tm.top_speed}`, 'km/h'], ['Avg speed', `${avg.toFixed(0)}`, 'km/h on the best lap'],
+           ['Consistency', `±${sd.toFixed(2)}`, 's across flying laps'], ['Improvement', `−${gain.toFixed(2)}`, `s, lap 2 → best`]]
+          .map(([k, v, u]) => `<div class="tl-kpi"><span class="mono">${k}</span><b class="lcd-text">${v}</b><em class="mono">${u}</em></div>`).join('')}
+      </div>`;
+    box.hidden = false;
+    if (tm.map_best.length < 2 || tm.trace_best.length < 2 || tm.trace_compare.length < 2) { // lap times only, no speed log for this run
+      box.innerHTML = head + `<figure class="tl-card"><figcaption class="eyebrow">Sector times</figcaption>${table}</figure>
+        <p class="tl-axis-note mono">No speed log for this session, so no map or speed trace.</p>`;
+      return;
+    }
 
     // --- speed map: best lap's GPS line, coloured by speed
     const m = MAPS[t.map ?? ''];
@@ -1316,33 +1357,7 @@ import Base from '../layouts/Base.astro';
       </div>
       <p class="tl-axis-note mono">Distance round the lap, 0–${L} m</p>`;
 
-    // --- sector table: purple = fastest sector of the session
-    const rows = tm.laps.map((lap, i) => {
-      const sec = tm.sectors[i];
-      const cells = sec.map((v, k) => `<td class="${i > 0 && v === bestS[k] ? 'fast' : ''}">${v.toFixed(2)}</td>`).join('');
-      const d = lap - best;
-      return `<tr class="${lap === best ? 'pb' : ''}"><th scope="row">${i + 1}${i === 0 ? ' <em>out</em>' : ''}</th>${cells}
-        <td class="lt">${fmtLap(lap)}</td><td class="dl">${d === 0 ? 'PB' : `+${d.toFixed(2)}`}</td></tr>`;
-    }).join('');
-    const table = `
-      <table class="tl-table">
-        <thead><tr><th scope="col">Lap</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">Time</th><th scope="col">Gap</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr><th scope="row">Ideal</th>${bestS.map((v) => `<td class="fast">${v.toFixed(2)}</td>`).join('')}<td class="lt">${fmtLap(theo)}</td><td class="dl">−${(best - theo).toFixed(2)}</td></tr></tfoot>
-      </table>
-      <p class="tl-axis-note mono"><i class="tl-fast-key"></i>fastest sector · lap 1 is the out-lap and isn't counted · splits ±0.5 s (1 Hz GPS)</p>`;
-
-    box.hidden = false;
-    box.innerHTML = `
-      <div class="tl-head">
-        <p class="eyebrow">Telemetry — ${esc(s.vehicle ?? '')} · ${esc(s.date)} · LapTrophy GPS</p>
-      </div>
-      <div class="tl-kpis">
-        ${[['Best lap', fmtLap(best), `lap ${tm.best_lap}`], ['Ideal lap', fmtLap(theo), 'best sectors combined'],
-           ['Top speed', `${tm.top_speed}`, 'km/h'], ['Avg speed', `${avg.toFixed(0)}`, 'km/h on the best lap'],
-           ['Consistency', `±${sd.toFixed(2)}`, 's across flying laps'], ['Improvement', `−${gain.toFixed(2)}`, `s, lap 2 → best`]]
-          .map(([k, v, u]) => `<div class="tl-kpi"><span class="mono">${k}</span><b class="lcd-text">${v}</b><em class="mono">${u}</em></div>`).join('')}
-      </div>
+    box.innerHTML = head + `
       <div class="tl-grid2">
         <figure class="tl-card"><figcaption class="eyebrow">Speed map — best lap</figcaption>${speedMap}</figure>
         <figure class="tl-card"><figcaption class="eyebrow">Speed trace</figcaption>${trace}</figure>
@@ -1439,6 +1454,15 @@ import Base from '../layouts/Base.astro';
       });
       if (res.ok) renderTrackday(await res.json(), tdBuilds);
     }
+  });
+  tdEl.addEventListener('click', (e) => {
+    const view = (e.target as Element).closest<HTMLElement>('[data-tele]');
+    if (!view || !tdData) return;
+    teleDate = view.dataset.tele ?? '';
+    const track = tdData.tracks.find((x) => x.id === tdSel);
+    if (!track) return;
+    renderTelemetry(track, tdData.sessions.filter((s) => s.track === tdSel).sort((a, b) => b.date.localeCompare(a.date)));
+    document.getElementById('td-tele')!.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
   });
   tdEl.addEventListener('submit', async (e) => {
     e.preventDefault();

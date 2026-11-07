@@ -29,6 +29,8 @@ if [ ! -f /var/lib/portfolio/garage.json ] && [ -f "$STAGE/garage.seed.json" ]; 
 fi
 
 chown -R portfolio:portfolio /opt/portfolio /var/lib/portfolio
+# releases are packed on Windows, which can leave files writable by every user
+chmod -R go-w /opt/portfolio/site /opt/portfolio/backend
 systemctl restart portfolio-api
 sleep 2
 if curl -fsS http://127.0.0.1:8001/api/health >/dev/null; then echo "==> API healthy"; else
