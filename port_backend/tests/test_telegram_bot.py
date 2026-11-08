@@ -173,3 +173,30 @@ def test_backfilling_an_older_session_stays_quiet(bot, monkeypatch):
     count = len(replies)
     send(monkeypatch, laptrophy_csv(FIRST), "older")
     assert len(replies) == count + 1 and "1 new" in replies[-1][1]
+
+
+def test_report_command_uses_stored_sessions(bot, monkeypatch):
+    replies, _ = bot
+    post({"message": {"from": {"id": OWNER}, "chat": {"id": OWNER}, "text": "/report"}})
+    assert "No sessions" in replies[-1][1]
+    send(monkeypatch, laptrophy_csv(FIRST, SECOND), "one")
+    post({"message": {"from": {"id": OWNER}, "chat": {"id": OWNER}, "text": "/report"}})
+    assert "PERSONAL BEST" in replies[-1][1]
+
+
+def test_stranger_cannot_trigger_a_report(bot):
+    replies, _ = bot
+    post({"message": {"from": {"id": 999}, "chat": {"id": 999}, "text": "/report"}})
+    assert replies == []
+
+
+def test_advice_follows_report_and_failure_keeps_report(bot, monkeypatch):
+    replies, _ = bot
+    monkeypatch.setattr(tb.coach, "advice_for", lambda *a: "Try something.")
+    send(monkeypatch, laptrophy_csv(FIRST), "one")
+    assert "baseline" in replies[-2][1] and replies[-1][1] == "Try something."
+    def boom(*a):
+        raise RuntimeError("no")
+    monkeypatch.setattr(tb.coach, "advice_for", boom)
+    send(monkeypatch, laptrophy_csv(FIRST, SECOND), "two")
+    assert "PERSONAL BEST" in replies[-1][1]

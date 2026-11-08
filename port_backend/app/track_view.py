@@ -8,7 +8,7 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 
-from . import track_compare, track_sessions
+from . import coach as ai_coach, track_compare, track_sessions
 from .track_sessions import LOCAL_TZ
 
 _cache: tuple[tuple, list[dict]] | None = None
@@ -75,11 +75,6 @@ def _telemetry(session: dict, track: dict) -> dict:
     }
 
 
-def source_id(session: dict) -> str:
-    """Matches the ids of sessions already imported into data.py, so they aren't shown twice."""
-    return session["start"].strftime("laptrophy-%Y-%m-%d-%H%M%S")
-
-
 def trackday_view(trackday: dict, folder: Path) -> dict:
     """The stored Track Day block plus every uploaded session and each track's latest report."""
     view = copy.deepcopy(trackday)
@@ -92,9 +87,11 @@ def trackday_view(trackday: dict, folder: Path) -> dict:
         here = [s for s in uploads if s["track"] == name and s["laps"]]
         report = track_compare.analyse(here)
         if report:
-            coach[track["id"]] = track_compare.format_report(report)
+            text = track_compare.format_report(report)
+            advice = ai_coach.saved_advice(folder, {"start": report["latest"]["start"]})
+            coach[track["id"]] = f"{text}\n\n{advice}" if advice else text
         for session in here:
-            source = source_id(session)
+            source = track_sessions.source_id(session)
             if source in dismissed:
                 continue
             stored = next((s for s in view["sessions"] if s.get("source") == source), None)

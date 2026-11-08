@@ -119,6 +119,11 @@ def parse_file(data: bytes, name: str) -> list[dict]:
     return parse_csv(data, name)
 
 
+def source_id(session: dict) -> str:
+    """A session's permanent id. Matches sessions already imported into data.py, so they aren't shown twice."""
+    return session["start"].astimezone(timezone.utc).strftime("laptrophy-%Y-%m-%d-%H%M%S")
+
+
 def _point_quality(points: list[tuple]) -> tuple[bool, int]:
     """Speed readings beat GPX positions, whichever arrives first; then more points win."""
     return (bool(points) and len(points[0]) > 3, len(points))

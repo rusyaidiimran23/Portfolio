@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from . import track_compare, track_sessions
+from . import coach, track_compare, track_sessions
 
 MAX_BYTES = 5 * 1024 * 1024   # a 15-minute GPS log is far smaller than this
 MAX_PER_DAY = 20              # uploads will trigger paid AI calls later
@@ -130,9 +130,13 @@ def handle_update(update: dict) -> dict | None:
     if str(sender) != owner:
         return None  # strangers get no reply, and cost nothing
 
+    text = str(msg.get("text") or "").strip().lower()
+    if text.split("@")[0] == "/report":
+        return {"report": chat_id}
+
     doc = msg.get("document")
     if not isinstance(doc, dict):
-        return {"reply": chat_id, "text": "Send me a LapTrophy CSV or GPX export."}
+        return {"reply": chat_id, "text": "Send me your LapTrophy CSV exports, or /report for your latest session."}
 
     name = str(doc.get("file_name") or "")
     ext = Path(name).suffix.lower()
@@ -152,10 +156,30 @@ def handle_update(update: dict) -> dict | None:
     }
 
 
+def _send_report(chat_id: int, sessions: list[dict], report: dict) -> None:
+    """The plain report always goes first, so slow or failed advice can't hold it back."""
+    _reply(chat_id, track_compare.format_report(report))
+    try:
+        advice = coach.advice_for(report, sessions, upload_dir())
+    except Exception as exc:  # noqa: BLE001 - advice is optional; the report has already gone
+        print(f"[telegram] advice failed: {type(exc).__name__}")
+        return
+    if advice:
+        _reply(chat_id, advice)
+
+
 def process(job: dict) -> None:
     """Runs after the webhook has returned, so Telegram never waits on a download."""
     if "reply" in job:
         _reply(job["reply"], job["text"])
+        return
+    if "report" in job:
+        sessions = track_sessions.load_all(upload_dir())
+        report = track_compare.analyse(sessions)
+        if report:
+            _send_report(job["report"], sessions, report)
+        else:
+            _reply(job["report"], "No sessions with lap times yet. Send a LapTrophy track CSV.")
         return
 
     chat_id = job["chat_id"]
@@ -193,6 +217,6 @@ def process(job: dict) -> None:
         report = track_compare.analyse(sessions)
         # sending old sessions shouldn't repeat the report: only speak when the newest run is what changed
         if report and any(track_sessions.same_session(s, {"start": report["latest"]["start"]}) for s in gained_laps):
-            _reply(chat_id, track_compare.format_report(report))
+            _send_report(chat_id, sessions, report)
     elif new:
         _reply(chat_id, "Send the track CSV too, so I can add lap and sector times for this session.")

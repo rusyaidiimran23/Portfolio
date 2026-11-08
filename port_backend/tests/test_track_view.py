@@ -102,3 +102,9 @@ def test_uploads_use_the_tracks_bike_unless_one_was_stored(folder):
                              "source": "laptrophy-2026-09-15-153423"}])
     td["tracks"][0]["vehicle"] = "Kawasaki ZX-4RR"
     assert [s["vehicle"] for s in tv.trackday_view(td, folder)["sessions"]] == ["Rental kart", "Kawasaki ZX-4RR"]
+
+
+def test_saved_advice_appears_with_the_report(folder):
+    (folder / "coach-laptrophy-2026-10-31-120000.txt").write_text("Try something.", encoding="utf-8")
+    text = tv.trackday_view(trackday(), folder)["coach"]["sgk"]
+    assert text.endswith("Try something.") and "session" in text
