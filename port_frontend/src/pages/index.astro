@@ -587,69 +587,6 @@ import Mascot from '../components/Mascot.astro';
   .cases :global(.case.flash) { animation: case-flash 1.4s ease; }
   @keyframes case-flash { 0%, 45% { box-shadow: 0 0 0 2px var(--c), 0 0 46px -6px var(--c); } }
 
-  /* the room */
-  .cases :global(.lounge) {
-    position: relative; display: grid; grid-template-columns: 190px minmax(0, 1fr); align-items: end; gap: 0 1.2rem;
-    min-height: 330px; padding: 3.6rem 1.6rem 0; overflow: hidden;
-    background:
-      radial-gradient(60% 80% at 60% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%),
-      repeating-linear-gradient(90deg, transparent 0 118px, rgba(255, 255, 255, 0.025) 118px 120px),
-      linear-gradient(180deg, color-mix(in srgb, var(--c) 10%, #0b0b10), #07070a 85%);
-  }
-  .cases :global(.lounge.flip) { grid-template-columns: minmax(0, 1fr) 190px; }
-  /* crew in the narrow column, photos in the wide one (swapped on every other room) */
-  .cases :global(.lg-crew) { grid-column: 1; grid-row: 1; }
-  .cases :global(.lg-frames) { grid-column: 2; grid-row: 1; }
-  .cases :global(.lounge.flip .lg-crew) { grid-column: 2; }
-  .cases :global(.lounge.flip .lg-frames) { grid-column: 1; }
-  .cases :global(.lg-floor) { grid-row: 2; }
-  .cases :global(.lg-sign) {
-    position: absolute; top: 1rem; left: 1.4rem; display: flex; align-items: baseline; gap: 0.5rem;
-    font: italic 900 1.5rem var(--display); letter-spacing: 0.04em; color: #fff; text-transform: uppercase;
-    text-shadow: 0 0 6px var(--c), 0 0 22px var(--c);
-  }
-  .cases :global(.lounge.flip .lg-sign) { left: auto; right: 1.4rem; }
-  .cases :global(.lg-sign b) { font: 1rem var(--lcd); color: var(--c); text-shadow: 0 0 10px var(--c); }
-  .cases :global(.lg-floor) {
-    grid-column: 1 / -1; height: 26px; margin: 0 -1.6rem; border-top: 2px solid color-mix(in srgb, var(--c) 55%, #000);
-    background: linear-gradient(180deg, #121219, #07070a);
-  }
-
-  /* photos hung on the wall: prints in white mats, screenshots on a monitor bezel */
-  /* one justified row: each frame grows in proportion to its aspect ratio, so all share one height (max 220px) */
-  .cases :global(.lg-frames) { display: flex; gap: 1.4rem; align-items: flex-end; justify-content: center; padding: 0 0 1.4rem; min-width: 0; }
-  .cases :global(.lg-frame) {
-    position: relative; flex: var(--ar) 1 0%; aspect-ratio: var(--ar); max-width: calc(220px * var(--ar)); min-width: 0;
-    padding: 7px; border: 0; background: #f3f3f5; cursor: zoom-in; transform: rotate(var(--tilt));
-    box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.6);
-    transition: transform 0.25s, box-shadow 0.25s;
-  }
-  .cases :global(.lg-frame::before) { /* picture light */
-    content: ''; position: absolute; left: 50%; top: -1.6rem; width: 46%; height: 6px; transform: translateX(-50%);
-    background: #2a2a33; border-radius: 3px; box-shadow: 0 6px 30px 8px color-mix(in srgb, var(--c) 30%, transparent);
-  }
-  .cases :global(.lg-frame img) { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .cases :global(.lg-frame.screen) { background: #15151c; padding: 6px 6px 14px; border-radius: 6px; }
-  .cases :global(.lg-frame.screen img) { object-fit: contain; background: #050507; }
-  .cases :global(.lg-frame:hover), .cases :global(.lg-frame:focus-visible) {
-    transform: rotate(0) translateY(-6px) scale(1.04); z-index: 2; outline: none;
-    box-shadow: 0 26px 40px -14px rgba(0, 0, 0, 0.9), 0 0 0 3px var(--c), 0 0 30px -4px var(--c);
-  }
-  .cases :global(.lg-tv) { width: min(560px, 100%); padding: 10px 10px 18px; background: #15151c; border-radius: 8px; box-shadow: 0 18px 30px -12px #000; }
-  .cases :global(.case-board) { display: block; width: 100%; aspect-ratio: 128 / 41; border-radius: 4px; }
-
-  /* the crew member and their speech bubble */
-  .cases :global(.lg-crew) { position: relative; z-index: 1; display: grid; justify-items: center; align-self: end; margin-bottom: -6px; }
-  .cases :global(.lg-blob) { background: none; border: 0; padding: 0; cursor: pointer; }
-  .cases :global(.lg-blob svg) { display: block; width: 170px; height: auto; }
-  .cases :global(.lg-bubble) {
-    position: relative; margin: 0 0 0.5rem; max-width: 200px; padding: 0.45rem 0.65rem; border-radius: 12px;
-    background: #f3f3f5; color: #0a0a0d; font-size: 0.8rem; font-weight: 600; line-height: 1.3; text-align: center;
-  }
-  .cases :global(.lg-bubble::after) { content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 0; border-top-color: #f3f3f5; }
-  .cases :global(.lg-bubble.pop) { animation: bubble-pop 0.25s ease; }
-  @keyframes bubble-pop { from { transform: scale(0.85); opacity: 0.4; } }
-
   /* the story under the room */
   .cases :global(.case-body) { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 1rem 2.2rem; padding: 1.5rem 1.7rem 1.5rem; min-width: 0; }
   .cases :global(.case-story), .cases :global(.case-facts) { display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; }
@@ -726,12 +663,6 @@ import Mascot from '../components/Mascot.astro';
     .oc-strip { grid-template-columns: 1fr; }
     .oc-strip figure, .oc-strip figure:first-child, .oc-strip figure:last-child { clip-path: none; }
     .cases :global(.case-body) { grid-template-columns: 1fr; }
-    .cases :global(.lounge), .cases :global(.lounge.flip) { grid-template-columns: 130px minmax(0, 1fr); padding: 3.4rem 1rem 0; }
-    .cases :global(.lounge.flip .lg-crew) { grid-column: 1; }
-    .cases :global(.lounge.flip .lg-frames) { grid-column: 2; }
-    .cases :global(.lounge.flip .lg-sign) { left: 1rem; right: auto; }
-    .cases :global(.lg-blob svg) { width: 120px; }
-    .cases :global(.lg-floor) { margin: 0 -1rem; }
     .pit-body { grid-template-columns: 1fr; padding: 1.6rem; }
   }
   @media (max-width: 620px) {
@@ -743,16 +674,6 @@ import Mascot from '../components/Mascot.astro';
     .contact .row { flex-direction: column; }
     .cases :global(.case-body) { padding: 1.2rem; }
     /* phones: crew on top, photos in a swipeable row */
-    .cases :global(.lounge), .cases :global(.lounge.flip) { grid-template-columns: 1fr; min-height: 0; }
-    .cases :global(.lg-crew), .cases :global(.lounge.flip .lg-crew) { grid-column: 1; grid-row: 1; justify-self: start; display: flex; align-items: flex-end; gap: 0.4rem; margin: 0 0 0.6rem; }
-    .cases :global(.lg-crew .lg-bubble) { order: 2; margin: 0 0 3rem; }
-    .cases :global(.lg-crew .lg-bubble::after) { left: -6px; bottom: 10px; transform: rotate(90deg); }
-    .cases :global(.lg-blob svg) { width: 100px; }
-    .cases :global(.lg-frames), .cases :global(.lounge.flip .lg-frames) { grid-column: 1; grid-row: 2; }
-    .cases :global(.lg-floor) { grid-row: 3; }
-    .cases :global(.lg-frames) { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 1.8rem 0.4rem 1.2rem; margin: 0 -1rem; padding-left: 1rem; scrollbar-width: none; }
-    .cases :global(.lg-frames::-webkit-scrollbar) { display: none; }
-    .cases :global(.lg-frame) { flex: 0 0 auto; height: 180px; max-width: none; scroll-snap-align: center; }
     .sc-link { display: none; }
   }
 </style>
