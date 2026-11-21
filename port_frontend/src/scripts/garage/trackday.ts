@@ -19,6 +19,7 @@ function lapBars(laps: number[]): string {
 let tdData: TrackDay | null = null;
 let tdBuilds: Build[] = [];
 let tdSel = '';
+let teleDate = ''; // which session's telemetry is showing; '' = the latest
 let ghostRaf = 0;
 let tdStage: HTMLElement;
 let trackSpin: ReturnType<typeof spinner>;
@@ -182,14 +183,14 @@ function showTrack(id: string, dir = 0) {
           <span class="ts-date lcd-text">${esc(s.date)}</span>
           <span class="ts-lap lcd-text">${esc(s.best)}</span>
           <span class="ts-delta mono">${fmtDelta(d)}</span>
-          <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}</span>
-          <button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle, notes: s.notes }))}'>✕</button>
+          <span class="ts-meta">${esc(s.vehicle || '')}${s.notes ? ` — ${esc(s.notes)}` : ''}${s.telemetry ? `<button class="ts-view mono" type="button" data-tele="${esc(s.date)}">Details ▾</button>` : ''}</span>
+          ${s.uploaded ? '' : `<button class="del" type="button" aria-label="Delete session" data-td-del='${esc(JSON.stringify({ date: s.date, best: s.best, vehicle: s.vehicle, notes: s.notes }))}'>✕</button>`}
           ${s.laps?.length ? lapBars(s.laps) : ''}
         </li>`;
       }).join('') : `<li class="empty">${t.status === 'planned' ? 'Not ridden yet.' : 'No sessions logged yet.'}</li>`}</ol>
     </div>`;
   startGhost(pbSecs);
-  renderTelemetry(t, sessions);
+  renderTelemetry(t, sessions, teleDate, tdData.coach?.[t.id]);
   if (dir && !reduced) {
     stage.style.setProperty('--dir', String(dir));
     stage.classList.remove('td-in'); void stage.offsetWidth; stage.classList.add('td-in');
@@ -283,6 +284,15 @@ export function initTrackday() {
     const el = e.target as HTMLElement;
     const tab = el.closest<HTMLElement>('[data-track]');
     if (tab) { switchTrack(tab.dataset.track!); return; }
+    const view = el.closest<HTMLElement>('[data-tele]');
+    if (view && tdData) {
+      teleDate = view.dataset.tele ?? '';
+      const track = tdData.tracks.find((x) => x.id === tdSel);
+      if (!track) return;
+      renderTelemetry(track, tdData.sessions.filter((s) => s.track === tdSel).sort((a, b) => b.date.localeCompare(a.date)), teleDate, tdData.coach?.[track.id]);
+      document.getElementById('td-tele')!.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     const form = tdEl.querySelector<HTMLFormElement>('.td-form');
     if (el.closest('[data-td-add]') && form) {
       form.hidden = !form.hidden;

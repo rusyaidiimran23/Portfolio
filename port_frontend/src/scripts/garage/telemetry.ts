@@ -12,20 +12,57 @@ const ramp = (u: number) => {
   return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * u)).join(',')})`;
 };
 
-export function renderTelemetry(t: Track, sessions: Session[]) {
+/** Telemetry for the session dated `date` (or the latest one with a log), with the coach's advice on top. */
+export function renderTelemetry(t: Track, sessions: Session[], date = '', coach?: string) {
   const box = document.getElementById('td-tele')!;
-  const s = sessions.find((x) => x.telemetry);
+  const s = sessions.find((x) => x.telemetry && x.date === date) ?? sessions.find((x) => x.telemetry);
   if (!s || !s.telemetry) { box.hidden = true; box.innerHTML = ''; return; }
+  document.querySelectorAll<HTMLElement>('#td-stage [data-tele]').forEach((b) => b.classList.toggle('on', b.dataset.tele === s.date));
   const tm = s.telemetry;
   const L = tm.lap_length_m;
   const flying = tm.laps.slice(1);
   const mean = flying.reduce((a, b) => a + b, 0) / flying.length;
   const sd = Math.sqrt(flying.reduce((a, b) => a + (b - mean) ** 2, 0) / flying.length);
-  const bestS = [0, 1, 2].map((k) => Math.min(...tm.sectors.slice(1).map((r) => r[k])));
+  // LapTrophy sometimes leaves a sector blank: skip it, never count it as zero
+  const bestS = [0, 1, 2].map((k) => Math.min(...tm.sectors.slice(1).map((r) => r[k]).filter((v): v is number => v !== null)));
   const theo = bestS.reduce((a, b) => a + b, 0);
   const best = Math.min(...tm.laps);
   const avg = (L / best) * 3.6;
   const gain = tm.laps[1] - best;
+
+  // --- sector table: purple = fastest sector of the session
+  const rows = tm.laps.map((lap, i) => {
+    const sec = tm.sectors[i];
+    const cells = sec.map((v, k) => `<td class="${i > 0 && v === bestS[k] ? 'fast' : ''}">${v === null ? '–' : v.toFixed(2)}</td>`).join('');
+    const d = lap - best;
+    return `<tr class="${lap === best ? 'pb' : ''}"><th scope="row">${i + 1}${i === 0 ? ' <em>out</em>' : ''}</th>${cells}
+      <td class="lt">${fmtLap(lap)}</td><td class="dl">${d === 0 ? 'PB' : `+${d.toFixed(2)}`}</td></tr>`;
+  }).join('');
+  const table = `
+    <table class="tl-table">
+      <thead><tr><th scope="col">Lap</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">Time</th><th scope="col">Gap</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><th scope="row">Ideal</th>${bestS.map((v) => `<td class="fast">${v.toFixed(2)}</td>`).join('')}<td class="lt">${fmtLap(theo)}</td><td class="dl">−${(best - theo).toFixed(2)}</td></tr></tfoot>
+    </table>
+    <p class="tl-axis-note mono"><i class="tl-fast-key"></i>fastest sector · lap 1 is the out-lap and isn't counted · splits ±0.5 s (1 Hz GPS)</p>`;
+
+  const head = `
+    <div class="tl-head">
+      <p class="eyebrow">Telemetry — ${[s.vehicle, s.date, 'LapTrophy GPS'].filter(Boolean).map((x) => esc(x)).join(' · ')}</p>
+    </div>
+    ${coach ? `<figure class="tl-card"><figcaption class="eyebrow">Coach — latest session</figcaption><p class="tl-coach mono">${esc(coach)}</p></figure>` : ''}
+    <div class="tl-kpis">
+      ${[['Best lap', fmtLap(best), `lap ${tm.best_lap}`], ['Ideal lap', fmtLap(theo), 'best sectors combined'],
+         ['Top speed', `${tm.top_speed}`, 'km/h'], ['Avg speed', `${avg.toFixed(0)}`, 'km/h on the best lap'],
+         ['Consistency', `±${sd.toFixed(2)}`, 's across flying laps'], ['Improvement', `−${gain.toFixed(2)}`, `s, lap 2 → best`]]
+        .map(([k, v, u]) => `<div class="tl-kpi"><span class="mono">${k}</span><b class="lcd-text">${v}</b><em class="mono">${u}</em></div>`).join('')}
+    </div>`;
+  box.hidden = false;
+  if (tm.map_best.length < 2 || tm.trace_best.length < 2 || tm.trace_compare.length < 2) { // lap times only, no speed log for this run
+    box.innerHTML = head + `<figure class="tl-card"><figcaption class="eyebrow">Sector times</figcaption>${table}</figure>
+      <p class="tl-axis-note mono">No speed log for this session, so no map or speed trace.</p>`;
+    return;
+  }
 
   // --- speed map: best lap's GPS line, coloured by speed
   const m = MAPS[t.map ?? ''];
@@ -77,33 +114,7 @@ export function renderTelemetry(t: Track, sessions: Session[]) {
     </div>
     <p class="tl-axis-note mono">Distance round the lap, 0–${L} m</p>`;
 
-  // --- sector table: purple = fastest sector of the session
-  const rows = tm.laps.map((lap, i) => {
-    const sec = tm.sectors[i];
-    const cells = sec.map((v, k) => `<td class="${i > 0 && v === bestS[k] ? 'fast' : ''}">${v.toFixed(2)}</td>`).join('');
-    const d = lap - best;
-    return `<tr class="${lap === best ? 'pb' : ''}"><th scope="row">${i + 1}${i === 0 ? ' <em>out</em>' : ''}</th>${cells}
-      <td class="lt">${fmtLap(lap)}</td><td class="dl">${d === 0 ? 'PB' : `+${d.toFixed(2)}`}</td></tr>`;
-  }).join('');
-  const table = `
-    <table class="tl-table">
-      <thead><tr><th scope="col">Lap</th><th scope="col">S1</th><th scope="col">S2</th><th scope="col">S3</th><th scope="col">Time</th><th scope="col">Gap</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr><th scope="row">Ideal</th>${bestS.map((v) => `<td class="fast">${v.toFixed(2)}</td>`).join('')}<td class="lt">${fmtLap(theo)}</td><td class="dl">−${(best - theo).toFixed(2)}</td></tr></tfoot>
-    </table>
-    <p class="tl-axis-note mono"><i class="tl-fast-key"></i>fastest sector · lap 1 is the out-lap and isn't counted · splits ±0.5 s (1 Hz GPS)</p>`;
-
-  box.hidden = false;
-  box.innerHTML = `
-    <div class="tl-head">
-      <p class="eyebrow">Telemetry — ${esc(s.vehicle ?? '')} · ${esc(s.date)} · LapTrophy GPS</p>
-    </div>
-    <div class="tl-kpis">
-      ${[['Best lap', fmtLap(best), `lap ${tm.best_lap}`], ['Ideal lap', fmtLap(theo), 'best sectors combined'],
-         ['Top speed', `${tm.top_speed}`, 'km/h'], ['Avg speed', `${avg.toFixed(0)}`, 'km/h on the best lap'],
-         ['Consistency', `±${sd.toFixed(2)}`, 's across flying laps'], ['Improvement', `−${gain.toFixed(2)}`, `s, lap 2 → best`]]
-        .map(([k, v, u]) => `<div class="tl-kpi"><span class="mono">${k}</span><b class="lcd-text">${v}</b><em class="mono">${u}</em></div>`).join('')}
-    </div>
+  box.innerHTML = head + `
     <div class="tl-grid2">
       <figure class="tl-card"><figcaption class="eyebrow">Speed map — best lap</figcaption>${speedMap}</figure>
       <figure class="tl-card"><figcaption class="eyebrow">Speed trace</figcaption>${trace}</figure>

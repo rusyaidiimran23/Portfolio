@@ -285,6 +285,8 @@ import Base from '../layouts/Base.astro';
   }
   .td-stage :global(.ts-laps i:hover b), .td-stage :global(.ts-laps i.best b) { opacity: 1; }
   .td-stage :global(.ts-laps i.best b) { color: var(--purple); }
+  .td-stage :global(.ts-view) { display: block; margin-top: 0.3rem; padding: 0.2rem 0.5rem; border: 1px solid #2a2a33; background: none; color: #b9b9c4; font-size: 0.7rem; cursor: pointer; }
+  .td-stage :global(.ts-view:hover), .td-stage :global(.ts-view.on) { border-color: var(--c, #fff); color: #fff; }
   .td-stage :global(.del) { border: 0; background: none; cursor: pointer; color: #4a4a55; font-family: var(--mono); font-size: 0.75rem; }
   .td-stage :global(.del.armed) { color: #fff; background: var(--f1red); }
 
@@ -438,6 +440,7 @@ import Base from '../layouts/Base.astro';
   .td-tele :global(.tl-tarmac) { fill: none; stroke: #1f1f27; stroke-width: 34; stroke-linejoin: round; }
   .td-tele :global(.tl-heat line) { stroke-width: 9; stroke-linecap: round; }
   .td-tele :global(.tl-heat line:hover) { stroke-width: 15; }
+  .td-tele :global(.tl-coach) { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #d6d6de; font-size: 0.85rem; line-height: 1.55; }
   .td-tele :global(.tl-pin) { fill: none; stroke: #f3f3f5; stroke-width: 2.5; }
   .td-tele :global(.tl-pin-l) { font-family: var(--mono); font-size: 22px; fill: #d6d6de; }
   .td-tele :global(.tl-legend) { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; font-size: 0.66rem; color: var(--muted); }

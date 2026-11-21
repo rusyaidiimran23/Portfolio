@@ -274,6 +274,10 @@ TRACKDAY = {
             "id": "sgk", "name": "SGK", "alias": "RUD", "kind": "Go-kart circuit",
             "location": "Sepang, Selangor", "length_km": 1.13,
             "status": "active", "map": "sgk", "color": "#b6ff2e",  # lime
+            "laptrophy": "Sepang Go Kart Circuit",  # the name in LapTrophy's track CSV
+            "vehicle": "Kawasaki ZX-4RR",  # LapTrophy exports don't record the bike; used for uploaded sessions
+            # GPS to map coordinates, fitted to the drawn layout from the Sep 15 session
+            "map_fit": {"lat0": 2.763287, "lon0": 101.72829, "x": [2.0566, 0.0014, 490.7879], "y": [0.0224, -2.0712, 322.0924]},
         },
         {
             # 12 possible layouts; map = the one ridden, traced from satellite (~0.93 km)

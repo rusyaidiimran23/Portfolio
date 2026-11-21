@@ -19,6 +19,8 @@ Visitor stats (stats.py, SQLite, no cookies):
     POST /api/hit            -> {kind, path, label?, ref?}  page view / event
     GET  /api/stats/live     -> public numbers for the homepage LED ticker
     GET  /api/stats          -> private dashboard (auth)
+Track Day coach (telegram_bot.py):
+    POST /api/telegram/webhook -> Telegram updates; stores shared session logs
 """
 from __future__ import annotations
 
@@ -29,12 +31,12 @@ import re
 import secrets
 import time
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import BackgroundTasks, Body, Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
 from .data import CONTENT
-from . import game, garage_store, mailer, stats
+from . import game, garage_store, mailer, stats, telegram_bot, track_view
 
 # --- config -----------------------------------------------------------------
 # Change the garage password by setting GARAGE_PASSWORD in the environment.
@@ -186,7 +188,9 @@ def auth(login: Login) -> dict:
 
 @app.get("/api/garage", dependencies=[Depends(require_auth)])
 def garage() -> dict:
-    return garage_store.get()
+    data = garage_store.get()
+    data["trackday"] = track_view.trackday_view(data["trackday"], telegram_bot.upload_dir())
+    return data
 
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -269,7 +273,7 @@ def add_session(track_id: str, s: TrackSession) -> dict:
     td = garage_store.add_session(track_id, s.model_dump())
     if td is None:
         raise HTTPException(status_code=404, detail="No such track.")
-    return td
+    return track_view.trackday_view(td, telegram_bot.upload_dir())
 
 
 @app.delete("/api/garage/trackday/{track_id}/session", dependencies=[Depends(require_auth)])
@@ -277,7 +281,7 @@ def delete_session(track_id: str, s: TrackSession) -> dict:
     td = garage_store.delete_session(track_id, s.model_dump())
     if td is None:
         raise HTTPException(status_code=404, detail="No such track.")
-    return td
+    return track_view.trackday_view(td, telegram_bot.upload_dir())
 
 
 @app.delete("/api/garage/{build_id}/log", dependencies=[Depends(require_auth)])
@@ -387,3 +391,21 @@ def stats_live() -> dict:
 @app.get("/api/stats", dependencies=[Depends(require_auth)])
 def stats_report() -> dict:
     return stats.report()
+
+
+# --- Track Day coach: session logs shared to the Telegram bot ----------------------
+
+@app.post("/api/telegram/webhook")
+def telegram_webhook(
+    background: BackgroundTasks,
+    update: dict = Body(...),
+    x_telegram_bot_api_secret_token: str = Header(default=""),
+) -> dict:
+    if not telegram_bot.configured():
+        raise HTTPException(status_code=404, detail="Not found.")
+    if not telegram_bot.secret_ok(x_telegram_bot_api_secret_token):
+        raise HTTPException(status_code=403, detail="Forbidden.")
+    job = telegram_bot.handle_update(update)
+    if job:
+        background.add_task(telegram_bot.process, job)
+    return {"ok": True}

@@ -23,15 +23,17 @@ export type Track = {
 };
 
 export type Telemetry = {
-  lap_length_m: number; laps: number[]; sectors: number[][]; best_lap: number; compare_lap: number;
+  lap_length_m: number; laps: number[]; sectors: (number | null)[][]; // LapTrophy sometimes leaves a sector blank
+  best_lap: number; compare_lap: number;
   top_speed: number; trace_best: number[][]; trace_compare: number[][]; map_best: number[][];
 };
 
 export type Session = {
   track: string; date: string; vehicle?: string; best: string; notes?: string;
   laps?: number[]; telemetry?: Telemetry;
+  uploaded?: boolean; // came in through the Telegram bot: can't be deleted from the page
 };
 
-export type TrackDay = { tracks: Track[]; sessions: Session[] };
+export type TrackDay = { tracks: Track[]; sessions: Session[]; coach?: Record<string, string> }; // coach: track id -> latest advice
 
 export type GarageData = { builds: Build[]; trackday?: TrackDay };
