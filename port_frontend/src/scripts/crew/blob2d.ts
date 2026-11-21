@@ -120,6 +120,7 @@ export class Blob2D {
   private gazeTo = { x: 0, y: 0 };
   private raf = 0;
   private last = 0;
+  private onScreen = true;
 
   constructor(host: HTMLElement, look: Partial<Look> = {}, size = 220) {
     this.look = { ...DEFAULT_LOOK, ...look };
@@ -139,6 +140,8 @@ export class Blob2D {
     this.build();
     this.frame = this.frame.bind(this);
     this.raf = requestAnimationFrame(this.frame);
+    // skip the animation work while scrolled out of view (pages can have many blobs)
+    new IntersectionObserver(([en]) => { this.onScreen = en.isIntersecting; }, { rootMargin: '100px' }).observe(this.svg);
   }
 
   set(look: Partial<Look>) { this.look = { ...this.look, ...look }; this.build(); }
@@ -351,6 +354,7 @@ export class Blob2D {
 
   private frame(now: number) {
     this.raf = requestAnimationFrame(this.frame);
+    if (!this.onScreen) { this.last = now; return; }
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.t += dt; this.mt += dt;

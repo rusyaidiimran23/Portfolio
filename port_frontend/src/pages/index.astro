@@ -575,21 +575,85 @@ import Mascot from '../components/Mascot.astro';
   }
   .filters :global(button:hover) { color: var(--ink); border-color: #3a3a46; }
   .filters :global(button[aria-selected="true"]) { color: #000; background: var(--amber); border-color: var(--amber); }
-  /* each case study is a full-width showcase row: media one side, story the other */
-  .cases { display: grid; gap: 1.6rem; }
+  /* each project is a lounge (a room in its colour, photos on the wall, a crew member
+     in it) with the story underneath; everything readable without clicking */
+  .cases { display: grid; gap: 2.2rem; }
   .cases :global(.case) {
-    position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-    background: linear-gradient(180deg, #0d0d12, #08080b); border: 1px solid #1c1c24; border-top: 3px solid var(--c);
-    scroll-margin-top: 110px; transition: box-shadow 0.25s;
+    position: relative; display: grid; background: linear-gradient(180deg, #0d0d12, #08080b);
+    border: 1px solid #1c1c24; border-top: 3px solid var(--c); scroll-margin-top: 110px; transition: box-shadow 0.25s;
   }
-  .cases :global(.case:nth-child(even) .case-media) { order: 2; }
   .cases :global(.case[hidden]) { display: none; }
   .cases :global(.case:hover) { box-shadow: 0 30px 70px -40px var(--c); }
-  .cases :global(.case-body) { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.6rem 1.7rem 1.5rem; min-width: 0; }
-  .cases :global(.case-media) { position: relative; min-height: 360px; background: #050507; overflow: hidden; }
   .cases :global(.case.flash) { animation: case-flash 1.4s ease; }
   @keyframes case-flash { 0%, 45% { box-shadow: 0 0 0 2px var(--c), 0 0 46px -6px var(--c); } }
-  .cases :global(.case-top) { display: flex; align-items: center; gap: 0.8rem; }
+
+  /* the room */
+  .cases :global(.lounge) {
+    position: relative; display: grid; grid-template-columns: 190px minmax(0, 1fr); align-items: end; gap: 0 1.2rem;
+    min-height: 330px; padding: 3.6rem 1.6rem 0; overflow: hidden;
+    background:
+      radial-gradient(60% 80% at 60% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%),
+      repeating-linear-gradient(90deg, transparent 0 118px, rgba(255, 255, 255, 0.025) 118px 120px),
+      linear-gradient(180deg, color-mix(in srgb, var(--c) 10%, #0b0b10), #07070a 85%);
+  }
+  .cases :global(.lounge.flip) { grid-template-columns: minmax(0, 1fr) 190px; }
+  /* crew in the narrow column, photos in the wide one (swapped on every other room) */
+  .cases :global(.lg-crew) { grid-column: 1; grid-row: 1; }
+  .cases :global(.lg-frames) { grid-column: 2; grid-row: 1; }
+  .cases :global(.lounge.flip .lg-crew) { grid-column: 2; }
+  .cases :global(.lounge.flip .lg-frames) { grid-column: 1; }
+  .cases :global(.lg-floor) { grid-row: 2; }
+  .cases :global(.lg-sign) {
+    position: absolute; top: 1rem; left: 1.4rem; display: flex; align-items: baseline; gap: 0.5rem;
+    font: italic 900 1.5rem var(--display); letter-spacing: 0.04em; color: #fff; text-transform: uppercase;
+    text-shadow: 0 0 6px var(--c), 0 0 22px var(--c);
+  }
+  .cases :global(.lounge.flip .lg-sign) { left: auto; right: 1.4rem; }
+  .cases :global(.lg-sign b) { font: 1rem var(--lcd); color: var(--c); text-shadow: 0 0 10px var(--c); }
+  .cases :global(.lg-floor) {
+    grid-column: 1 / -1; height: 26px; margin: 0 -1.6rem; border-top: 2px solid color-mix(in srgb, var(--c) 55%, #000);
+    background: linear-gradient(180deg, #121219, #07070a);
+  }
+
+  /* photos hung on the wall: prints in white mats, screenshots on a monitor bezel */
+  /* one justified row: each frame grows in proportion to its aspect ratio, so all share one height (max 220px) */
+  .cases :global(.lg-frames) { display: flex; gap: 1.4rem; align-items: flex-end; justify-content: center; padding: 0 0 1.4rem; min-width: 0; }
+  .cases :global(.lg-frame) {
+    position: relative; flex: var(--ar) 1 0%; aspect-ratio: var(--ar); max-width: calc(220px * var(--ar)); min-width: 0;
+    padding: 7px; border: 0; background: #f3f3f5; cursor: zoom-in; transform: rotate(var(--tilt));
+    box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.6);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .cases :global(.lg-frame::before) { /* picture light */
+    content: ''; position: absolute; left: 50%; top: -1.6rem; width: 46%; height: 6px; transform: translateX(-50%);
+    background: #2a2a33; border-radius: 3px; box-shadow: 0 6px 30px 8px color-mix(in srgb, var(--c) 30%, transparent);
+  }
+  .cases :global(.lg-frame img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .cases :global(.lg-frame.screen) { background: #15151c; padding: 6px 6px 14px; border-radius: 6px; }
+  .cases :global(.lg-frame.screen img) { object-fit: contain; background: #050507; }
+  .cases :global(.lg-frame:hover), .cases :global(.lg-frame:focus-visible) {
+    transform: rotate(0) translateY(-6px) scale(1.04); z-index: 2; outline: none;
+    box-shadow: 0 26px 40px -14px rgba(0, 0, 0, 0.9), 0 0 0 3px var(--c), 0 0 30px -4px var(--c);
+  }
+  .cases :global(.lg-tv) { width: min(560px, 100%); padding: 10px 10px 18px; background: #15151c; border-radius: 8px; box-shadow: 0 18px 30px -12px #000; }
+  .cases :global(.case-board) { display: block; width: 100%; aspect-ratio: 128 / 41; border-radius: 4px; }
+
+  /* the crew member and their speech bubble */
+  .cases :global(.lg-crew) { position: relative; z-index: 1; display: grid; justify-items: center; align-self: end; margin-bottom: -6px; }
+  .cases :global(.lg-blob) { background: none; border: 0; padding: 0; cursor: pointer; }
+  .cases :global(.lg-blob svg) { display: block; width: 170px; height: auto; }
+  .cases :global(.lg-bubble) {
+    position: relative; margin: 0 0 0.5rem; max-width: 200px; padding: 0.45rem 0.65rem; border-radius: 12px;
+    background: #f3f3f5; color: #0a0a0d; font-size: 0.8rem; font-weight: 600; line-height: 1.3; text-align: center;
+  }
+  .cases :global(.lg-bubble::after) { content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 0; border-top-color: #f3f3f5; }
+  .cases :global(.lg-bubble.pop) { animation: bubble-pop 0.25s ease; }
+  @keyframes bubble-pop { from { transform: scale(0.85); opacity: 0.4; } }
+
+  /* the story under the room */
+  .cases :global(.case-body) { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 1rem 2.2rem; padding: 1.5rem 1.7rem 1.5rem; min-width: 0; }
+  .cases :global(.case-story), .cases :global(.case-facts) { display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; }
+  .cases :global(.case-top) { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
   .cases :global(.case-pos) { font-size: 1.7rem; line-height: 1; }
   .cases :global(.case-tag) { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; padding: 0.15rem 0.5rem; color: #000; background: var(--c); }
   .cases :global(.case-status) {
@@ -601,74 +665,6 @@ import Mascot from '../components/Mascot.astro';
   .cases :global(.case-meta) { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-family: var(--mono); font-size: 0.74rem; color: #b4b4c0; }
   .cases :global(.case-meta b) { color: var(--muted); font-weight: 400; margin-right: 0.4rem; letter-spacing: 0.18em; font-size: 0.6rem; }
   .cases :global(.case-sum) { color: #d6d6de; margin: 0; font-size: 1rem; }
-  /* broadcast-style showcase: full-bleed slides with hard edges, a fast diagonal
-     wipe between them, a colour slash and a giant outlined slide number */
-  .cases :global(.show) { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; grid-template-columns: minmax(0, 1fr); } /* column = box width, never the image width */
-  .cases :global(.slides) { position: relative; overflow: hidden; background: #060608; }
-  .cases :global(.slide) {
-    position: absolute; inset: 0; padding: 0; border: 0; background: #060608; cursor: zoom-in; overflow: hidden;
-    clip-path: polygon(0 0, 0 0, -20% 100%, -20% 100%); z-index: 1;
-  }
-  .cases :global(.slide.prev) { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 2; }
-  .cases :global(.slide.on) {
-    clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); z-index: 3;
-    transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1), transform 0.35s ease;
-  }
-  /* going back: the wipe comes in from the right */
-  .cases :global(.slides.rev .slide:not(.on):not(.prev)) { clip-path: polygon(120% 0, 120% 0, 100% 100%, 100% 100%); }
-  .cases :global(.slide img) { display: block; width: 100%; height: 100%; }
-
-  /* field photos: full bleed, slow push-in */
-  .cases :global(.f-photo img) { object-fit: cover; }
-  .cases :global(.f-photo.on img) { animation: push calc(var(--slide-ms, 5s) + 1.5s) ease-out both; }
-  .cases :global(.show.paused .slide.on img) { animation-play-state: paused; }
-  @keyframes push { from { transform: scale(1.1); } to { transform: scale(1); } }
-
-  /* screenshots: float clean on a dark panel lit in the project colour */
-  .cases :global(.f-shot) {
-    background:
-      radial-gradient(80% 70% at 50% 55%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%),
-      linear-gradient(135deg, #0d0d13, #050507);
-  }
-  .cases :global(.f-shot img) {
-    object-fit: contain; padding: 1.6rem 1.6rem 2.2rem;
-    filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.75));
-  }
-
-  /* overlays: colour slash bottom-left, giant outlined number bottom-right */
-  .cases :global(.slides::before) {
-    content: ''; position: absolute; z-index: 6; left: -3%; bottom: 0; width: 42%; height: 7px;
-    background: var(--c); transform: skewX(-35deg); transform-origin: left bottom; pointer-events: none;
-  }
-  .cases :global(.show-num) {
-    position: absolute; z-index: 6; right: 0.9rem; bottom: -0.5rem; pointer-events: none;
-    font-family: var(--display); font-weight: 900; font-style: italic; font-size: clamp(3.5rem, 7vw, 6rem); line-height: 1;
-    color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.85);
-    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
-  }
-  .cases :global(.show-bar) {
-    display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 1rem;
-    background: #050507; border-top: 1px solid #1c1c24;
-  }
-  .cases :global(.show-count) { --c: var(--c); font-size: 1rem; flex: 0 0 auto; }
-  .cases :global(.show-cap) {
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.05em; color: #c9c9d2;
-    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .cases :global(.show-dots) { display: flex; gap: 0.35rem; flex: 0 0 auto; }
-  .cases :global(.dot) { width: 26px; height: 6px; padding: 0; border: 0; cursor: pointer; background: #22222b; overflow: hidden; }
-  .cases :global(.dot i) { display: block; height: 100%; background: var(--c); transform-origin: left; transform: scaleX(0); }
-  .cases :global(.dot.on i) { animation: dot-fill var(--slide-ms, 5s) linear forwards; }
-  .cases :global(.show.paused .dot.on i) { animation-play-state: paused; }
-  @keyframes dot-fill { to { transform: scaleX(1); } }
-  @media (prefers-reduced-motion: reduce) {
-    .cases :global(.slide) { transition: none; }
-    .cases :global(.dot.on i) { animation: none !important; }
-    .cases :global(.dot.on i) { transform: scaleX(1); }
-  }
-  /* no photos yet: the project's LED scene fills the slot */
-  .cases :global(.case-led) { position: absolute; inset: 0; display: grid; place-items: center; padding: 1.4rem; }
-  .cases :global(.case-board) { width: 100%; aspect-ratio: 128 / 41; border-radius: 4px; }
 
   /* photo viewer */
   .lightbox {
@@ -729,9 +725,13 @@ import Mascot from '../components/Mascot.astro';
     .driver-photo { max-width: 420px; }
     .oc-strip { grid-template-columns: 1fr; }
     .oc-strip figure, .oc-strip figure:first-child, .oc-strip figure:last-child { clip-path: none; }
-    .cases :global(.case) { grid-template-columns: 1fr; }
-    .cases :global(.case:nth-child(even) .case-media) { order: 0; }
-    .cases :global(.case-media) { min-height: 300px; }
+    .cases :global(.case-body) { grid-template-columns: 1fr; }
+    .cases :global(.lounge), .cases :global(.lounge.flip) { grid-template-columns: 130px minmax(0, 1fr); padding: 3.4rem 1rem 0; }
+    .cases :global(.lounge.flip .lg-crew) { grid-column: 1; }
+    .cases :global(.lounge.flip .lg-frames) { grid-column: 2; }
+    .cases :global(.lounge.flip .lg-sign) { left: 1rem; right: auto; }
+    .cases :global(.lg-blob svg) { width: 120px; }
+    .cases :global(.lg-floor) { margin: 0 -1rem; }
     .pit-body { grid-template-columns: 1fr; padding: 1.6rem; }
   }
   @media (max-width: 620px) {
@@ -742,7 +742,17 @@ import Mascot from '../components/Mascot.astro';
     .links a:not(.lock) { display: none; }
     .contact .row { flex-direction: column; }
     .cases :global(.case-body) { padding: 1.2rem; }
-    .cases :global(.case-media) { min-height: 240px; }
+    /* phones: crew on top, photos in a swipeable row */
+    .cases :global(.lounge), .cases :global(.lounge.flip) { grid-template-columns: 1fr; min-height: 0; }
+    .cases :global(.lg-crew), .cases :global(.lounge.flip .lg-crew) { grid-column: 1; grid-row: 1; justify-self: start; display: flex; align-items: flex-end; gap: 0.4rem; margin: 0 0 0.6rem; }
+    .cases :global(.lg-crew .lg-bubble) { order: 2; margin: 0 0 3rem; }
+    .cases :global(.lg-crew .lg-bubble::after) { left: -6px; bottom: 10px; transform: rotate(90deg); }
+    .cases :global(.lg-blob svg) { width: 100px; }
+    .cases :global(.lg-frames), .cases :global(.lounge.flip .lg-frames) { grid-column: 1; grid-row: 2; }
+    .cases :global(.lg-floor) { grid-row: 3; }
+    .cases :global(.lg-frames) { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 1.8rem 0.4rem 1.2rem; margin: 0 -1rem; padding-left: 1rem; scrollbar-width: none; }
+    .cases :global(.lg-frames::-webkit-scrollbar) { display: none; }
+    .cases :global(.lg-frame) { flex: 0 0 auto; height: 180px; max-width: none; scroll-snap-align: center; }
     .sc-link { display: none; }
   }
 </style>
@@ -750,9 +760,9 @@ import Mascot from '../components/Mascot.astro';
 <script>
   import { initBlueprint } from '../scripts/blueprint';
   import { scrollFx } from '../scripts/scrollfx';
-  import { swipeable } from '../scripts/swipe';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
+  import { chiefLook, loungeHTML, wakeLounges } from '../scripts/lounge';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -871,86 +881,31 @@ import Mascot from '../components/Mascot.astro';
 
   function renderCases(projects: Project[]) {
     const wrap = document.getElementById('projects')!;
-    // showcase media: broadcast-style slides — full-bleed field photos, screenshots
-    // floating on a lit panel, a diagonal wipe between them. LED scene if no photos yet.
     const two = (n: number) => String(n).padStart(2, '0');
-    // [print] tag = treat as a photo even if it's a .png (e.g. a phone photo saved as png)
-    const kindOf = (ph: NonNullable<Project['photos']>[number]) =>
-      ph.frame === 'print' || ph.fit !== 'contain' ? 'photo' : 'shot';
-    const media = (p: Project) => {
-      const photos = (p.photos ?? []).slice(0, 3);
-      if (!photos.length) return `<div class="case-led"><canvas class="case-board" data-pid="${esc(p.id)}" aria-hidden="true"></canvas></div>`;
-      return `<div class="show" data-n="${photos.length}">
-        <div class="slides">${photos.map((ph, j) => `
-          <button class="ph slide f-${kindOf(ph)}${j === 0 ? ' on' : ''}" type="button"
-            data-pid="${esc(p.id)}" data-i="${j}" data-cap="${esc(ph.caption)}" aria-label="${esc(ph.caption)}">
-            <img src="${esc(ph.src)}" alt="${esc(ph.caption)}" loading="lazy" />
-          </button>`).join('')}
-          <span class="show-num" aria-hidden="true">01</span>
-        </div>
-        <div class="show-bar">
-          <span class="show-count lcd-text">01/${two(photos.length)}</span>
-          <span class="show-cap">${esc(photos[0].caption)}</span>
-          ${photos.length > 1 ? `<span class="show-dots">${photos.map((_, j) =>
-            `<button type="button" class="dot${j === 0 ? ' on' : ''}" data-go="${j}" aria-label="Photo ${j + 1}"><i></i></button>`).join('')}</span>` : ''}
-        </div>
-      </div>`;
-    };
-
     wrap.innerHTML = projects.map((p, i) => `
       <article class="case" id="project-${esc(p.id)}" data-cat="${esc(p.category)}" style="--c: ${esc(p.color)}">
-        <div class="case-media">${media(p)}</div>
+        ${loungeHTML(p, i)}
         <div class="case-body">
-        <div class="case-top">
-          <span class="case-pos lcd-text">P${i + 1}</span>
-          <span class="case-tag">${esc(p.tag)}</span>
-          ${p.status ? `<span class="case-status">${esc(p.status)}</span>` : ''}
-          <span class="case-cat">${esc(p.category)}</span>
-        </div>
-        <h3>${esc(p.title)}</h3>
-        <div class="case-meta">${[['CLIENT', p.client], ['WHERE', p.location], ['YEAR', p.year], ['ROLE', p.role]]
-          .filter(([, v]) => v).map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join('')}</div>
-        ${p.summary ? `<p class="case-sum">${esc(p.summary)}</p>` : ''}
-        ${p.highlights?.length ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
-        <div class="tyres">${(p.stack ?? []).map((t, j) =>
-          `<span class="tyre" style="--compound: ${COMPOUNDS[j % 3][1]}"><i>${COMPOUNDS[j % 3][0]}</i>${esc(t)}</span>`).join('')}</div>
+          <div class="case-story">
+            <div class="case-top">
+              <span class="case-pos lcd-text">P${i + 1}</span>
+              <span class="case-tag">${esc(p.tag)}</span>
+              ${p.status ? `<span class="case-status">${esc(p.status)}</span>` : ''}
+              <span class="case-cat">${esc(p.category)}</span>
+            </div>
+            <h3>${esc(p.title)}</h3>
+            <div class="case-meta">${[['CLIENT', p.client], ['WHERE', p.location], ['YEAR', p.year], ['ROLE', p.role]]
+              .filter(([, v]) => v).map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join('')}</div>
+            ${p.summary ? `<p class="case-sum">${esc(p.summary)}</p>` : ''}
+          </div>
+          <div class="case-facts">
+            ${p.highlights?.length ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+            <div class="tyres">${(p.stack ?? []).map((t, j) =>
+              `<span class="tyre" style="--compound: ${COMPOUNDS[j % 3][1]}"><i>${COMPOUNDS[j % 3][0]}</i>${esc(t)}</span>`).join('')}</div>
+          </div>
         </div>
       </article>`).join('');
-
-    // slideshows: advance every few seconds while on screen, pause on hover, dots jump
-    const SLIDE_MS = 5000;
-    wrap.querySelectorAll<HTMLElement>('.show').forEach((show) => {
-      const slides = Array.from(show.querySelectorAll<HTMLElement>('.slide'));
-      const dots = Array.from(show.querySelectorAll<HTMLElement>('.dot'));
-      const count = show.querySelector('.show-count')!;
-      const cap = show.querySelector('.show-cap')!;
-      const num = show.querySelector('.show-num')!;
-      show.style.setProperty('--slide-ms', `${SLIDE_MS}ms`);
-      let at = 0, timer = 0, visible = false, hover = false;
-      const box = show.querySelector<HTMLElement>('.slides')!;
-      const go = (i: number, dir: 1 | -1 = 1) => {
-        const from = at;
-        at = (i + slides.length) % slides.length;
-        if (at === from) return;
-        box.classList.toggle('rev', dir < 0); void box.offsetWidth;
-        // the outgoing slide stays underneath while the new one wipes in over it
-        slides.forEach((s, j) => { s.classList.toggle('prev', j === from); s.classList.toggle('on', j === at); });
-        num.textContent = two(at + 1);
-        dots.forEach((d, j) => { d.classList.remove('on'); void d.offsetWidth; d.classList.toggle('on', j === at); });
-        count.textContent = `${two(at + 1)}/${two(slides.length)}`;
-        cap.textContent = slides[at].dataset.cap ?? '';
-      };
-      const tick = () => {
-        clearInterval(timer);
-        show.classList.toggle('paused', !visible || hover);
-        if (visible && !hover && !reduced && slides.length > 1) timer = window.setInterval(() => go(at + 1), SLIDE_MS);
-      };
-      dots.forEach((d) => d.addEventListener('click', () => { const i = Number(d.dataset.go); go(i, i < at ? -1 : 1); tick(); }));
-      if (slides.length > 1) swipeable(box, (dir) => { go(at + dir, dir); tick(); });
-      show.addEventListener('pointerenter', () => { hover = true; tick(); });
-      show.addEventListener('pointerleave', () => { hover = false; tick(); });
-      new IntersectionObserver(([e]) => { visible = e.isIntersecting; tick(); }, { threshold: 0.4 }).observe(show);
-    });
+    chiefLook().then((look) => wakeLounges(wrap, projects, look));
 
     // projects without photos show their own LED scene in the media slot
     wrap.querySelectorAll<HTMLCanvasElement>('.case-board').forEach((cv) => {
