@@ -36,7 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
 from .data import CONTENT
-from . import game, garage_store, mailer, stats, telegram_bot, track_view
+from . import crew, game, garage_store, mailer, stats, telegram_bot, track_view
 
 # --- config -----------------------------------------------------------------
 # Change the garage password by setting GARAGE_PASSWORD in the environment.
@@ -55,7 +55,7 @@ app = FastAPI(title="Portfolio API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -184,6 +184,21 @@ def auth(login: Login) -> dict:
             detail="Wrong password.",
         )
     return {"token": make_token()}
+
+
+# --- mascot crew: designed in the Garage, shown on the public site ---------------
+
+@app.get("/api/crew")
+def get_crew() -> dict:
+    return {"members": crew.get()}
+
+
+@app.put("/api/crew", dependencies=[Depends(require_auth)])
+def put_crew(body: dict = Body(...)) -> dict:
+    try:
+        return {"members": crew.save(body.get("members"))}
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @app.get("/api/garage", dependencies=[Depends(require_auth)])

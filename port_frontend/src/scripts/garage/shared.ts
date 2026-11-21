@@ -21,7 +21,7 @@ export const localNow = () => {
 };
 
 /** JSON request to the API with the stored token. */
-export function api(method: 'POST' | 'DELETE', path: string, body: unknown): Promise<Response> {
+export function api(method: 'POST' | 'PUT' | 'DELETE', path: string, body: unknown): Promise<Response> {
   return fetch(`${API_BASE}${path}`, {
     method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
     body: JSON.stringify(body),

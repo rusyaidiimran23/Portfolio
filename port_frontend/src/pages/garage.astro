@@ -40,6 +40,7 @@ import Base from '../layouts/Base.astro';
         <button class="fzm-tab" type="button" data-pane-go="garage" aria-selected="true">Garage</button>
         <button class="fzm-tab" type="button" data-pane-go="track" aria-selected="false">Track Day</button>
         <button class="fzm-tab" type="button" data-pane-go="stats" aria-selected="false">Stats</button>
+        <button class="fzm-tab" type="button" data-pane-go="crew" aria-selected="false">Crew</button>
         <span class="fzm-key mono" aria-hidden="true">E</span>
         <i class="fzm-ink" aria-hidden="true"></i>
       </nav>
@@ -82,6 +83,29 @@ import Base from '../layouts/Base.astro';
           <div class="st-body" id="st-body"><p class="st-empty mono">Loading telemetry…</p></div>
         </section>
         </div>
+
+        <div class="pane" data-pane="crew" hidden>
+        <!-- CREW: design the site mascots; saved to /api/crew and shown on the public site -->
+        <section class="cr" aria-label="Mascot crew">
+          <div class="td-head">
+            <div><p class="eyebrow">Paddock — the mascots</p><h2 class="td-title display">Crew</h2></div>
+            <span class="td-count lcd-text" id="cr-msg">--</span>
+          </div>
+          <div class="cr-bar">
+            <div class="cr-list" id="cr-list"></div>
+            <div class="cr-tools">
+              <label class="sr" for="cr-name">Name</label>
+              <input id="cr-name" maxlength="30" placeholder="Name" autocomplete="off" />
+              <button class="btn" id="cr-main" type="button">Make main</button>
+              <button class="btn" id="cr-add" type="button">+ Add</button>
+              <button class="btn" id="cr-del" type="button">Remove</button>
+              <button class="btn btn-primary" id="cr-save" type="button" disabled>Save ▸</button>
+            </div>
+          </div>
+          <p class="cr-note mono">The MAIN mascot greets visitors on the public site.</p>
+          <div id="cr-editor"></div>
+        </section>
+        </div>
       </div>
 
       <!-- edge arrows + the slash that sweeps across on a screen change -->
@@ -93,6 +117,17 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
+  /* --- Crew screen (mascot designer) */
+  .cr-bar { display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem; align-items: center; justify-content: space-between; margin: 0.4rem 0 0.4rem; }
+  .cr-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .cr :global(.cr-chip) { display: flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.6rem 0.2rem 0.2rem; background: #0e0e14; border: 1px solid var(--line); color: var(--ink); cursor: pointer; font-size: 0.85rem; }
+  .cr :global(.cr-chip.on) { border-color: var(--pink); background: #1c0b19; }
+  .cr :global(.cr-chip em) { font-style: normal; font-size: 0.6rem; color: #000; background: var(--amber); padding: 0 0.3rem; letter-spacing: 0.12em; }
+  .cr :global(.cr-mini svg) { display: block; width: 54px; height: 46px; }
+  .cr-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+  .cr-tools input { width: 11rem; padding: 0.45rem 0.6rem; background: #0b0b10; border: 1px solid var(--line); color: var(--ink); font-family: var(--mono); }
+  .cr-tools .btn[disabled] { opacity: 0.45; pointer-events: none; }
+  .cr-note { color: var(--muted); font-size: 0.72rem; margin: 0 0 1rem; }
   /* --- nav ------------------------------------------------------------------- */
   .titlebar {
     position: fixed; top: 5px; left: 0; right: 0; z-index: 40;
@@ -771,6 +806,7 @@ import Base from '../layouts/Base.astro';
   import { initPanes, paneFromHash } from '../scripts/garage/panes';
   import { KEY, token } from '../scripts/garage/shared';
   import { loadStats } from '../scripts/garage/stats';
+  import { loadCrew } from '../scripts/garage/crew';
   import { initTrackday, renderTrackday, replayTrack } from '../scripts/garage/trackday';
   import type { GarageData, Photos } from '../scripts/garage/types';
 
@@ -801,7 +837,7 @@ import Base from '../layouts/Base.astro';
 
   initBuilds(() => loadGarage(token(), true));
   initTrackday();
-  const setPane = initPanes(content, { track: replayTrack, stats: loadStats });
+  const setPane = initPanes(content, { track: replayTrack, stats: loadStats, crew: loadCrew });
 
   // auto-unlock if a valid token is stored
   const saved = localStorage.getItem(KEY);

@@ -1,0 +1,85 @@
+---
+// The site mascot: the MAIN crew member designed in the Garage (Crew screen).
+// Floats in the corner, says a line as each section comes into view, hops when clicked.
+---
+<aside class="mascot" id="mascot" hidden aria-label="Crew chief">
+  <div class="m-bubble" id="m-bubble" hidden aria-live="polite"></div>
+  <button class="m-body" id="m-body" type="button" aria-label="Crew chief: click for a tip"></button>
+  <button class="m-x" id="m-x" type="button" aria-label="Hide the crew chief">✕</button>
+</aside>
+
+<style>
+  .mascot { position: fixed; right: 14px; bottom: 10px; z-index: 40; display: grid; justify-items: end; pointer-events: none; }
+  .mascot[hidden] { display: none; }
+  .m-body { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; }
+  .m-body :global(svg) { display: block; width: 116px; height: auto; }
+  .m-bubble {
+    pointer-events: auto; max-width: min(260px, 70vw); margin-bottom: 0.3rem; margin-right: 18px; padding: 0.5rem 0.75rem;
+    background: #f3f3f5; color: #0a0a0d; font-weight: 600; font-size: 0.86rem; line-height: 1.35; border-radius: 12px; position: relative;
+    box-shadow: 0 10px 30px -12px #000;
+  }
+  .m-bubble::after { content: ''; position: absolute; right: 38px; bottom: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #f3f3f5; }
+  .m-bubble[hidden] { display: none; }
+  .m-x { pointer-events: auto; position: absolute; right: 0; bottom: 4px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line);
+    background: #0c0c11; color: var(--muted); font-size: 0.65rem; cursor: pointer; opacity: 0; transition: opacity 0.2s; }
+  .mascot:hover .m-x, .m-x:focus-visible { opacity: 1; }
+  @media (max-width: 600px) { .m-body :global(svg) { width: 84px; } .m-x { opacity: 0.8; } }
+</style>
+
+<script>
+  import { API_BASE } from '../lib/api';
+  import { Blob2D, type Look, type Mood } from '../scripts/crew/blob2d';
+
+  const HIDE_KEY = 'mascot_hidden';
+  const box = document.getElementById('mascot')!;
+  const bubble = document.getElementById('m-bubble')!;
+
+  // a line per section, said once when it scrolls into view
+  const SECTIONS: [string, string, Mood][] = [
+    ['work', 'These are the builds. Open one to see the photos from site.', 'talk'],
+    ['about', "That's the driver: IoT systems, from field installs to dashboards.", 'talk'],
+    ['garage-teaser', 'His actual garage. Crew only past this point!', 'wow'],
+    ['contact', 'Want to talk? Radio in below and he\'ll get back to you.', 'happy'],
+  ];
+  const TIPS = ['Box box! Scroll down for the projects.', 'Find the start lights near the top for a reaction game.', 'Every project here is running out in the field.', 'Purple sector!'];
+
+  async function start() {
+    try { if (localStorage.getItem(HIDE_KEY)) return; } catch { /* storage blocked: show it */ }
+    const res = await fetch(`${API_BASE}/api/crew`).catch(() => null);
+    if (!res || !res.ok) return;
+    const members: { role: string; name: string; look: Look }[] = (await res.json()).members ?? [];
+    const chief = members.find((m) => m.role === 'main') ?? members[0];
+    if (!chief) return;
+    box.hidden = false;
+    const blob = new Blob2D(document.getElementById('m-body')!, chief.look, 100);
+    addEventListener('pointermove', (e) => blob.lookAt(e.clientX, e.clientY), { passive: true });
+
+    let hideT = 0;
+    const say = (text: string, mood: Mood = 'talk', ms = 4200) => {
+      clearTimeout(hideT);
+      bubble.textContent = text; bubble.hidden = false;
+      blob.setMood(mood);
+      hideT = window.setTimeout(() => { bubble.hidden = true; if (blob.mood === mood) blob.setMood('idle'); }, ms);
+    };
+
+    setTimeout(() => say(`Hey! I'm ${chief.name}. Welcome to the paddock.`, 'happy'), 1800);
+    const seen = new Set<string>();
+    const io = new IntersectionObserver((entries) => {
+      for (const en of entries) {
+        if (!en.isIntersecting || seen.has(en.target.id)) continue;
+        seen.add(en.target.id);
+        const line = SECTIONS.find(([id]) => id === en.target.id);
+        if (line) say(line[1], line[2]);
+      }
+    }, { threshold: 0.35 });
+    SECTIONS.forEach(([id]) => { const el = document.getElementById(id); if (el) io.observe(el); });
+
+    let tip = 0;
+    document.getElementById('m-body')!.addEventListener('click', () => { say(TIPS[tip++ % TIPS.length], 'happy', 3200); });
+    document.getElementById('m-x')!.addEventListener('click', () => {
+      box.hidden = true; blob.destroy(); io.disconnect();
+      try { localStorage.setItem(HIDE_KEY, '1'); } catch { /* ignore */ }
+    });
+  }
+  start();
+</script>
