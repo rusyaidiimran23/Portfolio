@@ -116,37 +116,14 @@ import Mascot from '../components/Mascot.astro';
 
   <div class="kerb wrap"></div>
 
-  <!-- 01 WORK: featured screen, then the case studies -->
+  <!-- 01 WORK: an F1 TV timing screen, one project at a time -->
   <section id="work" class="section wrap">
     <header class="sec-head reveal">
       <span class="sec-no lcd-text" style="--c: var(--purple)">01</span>
       <div><p class="eyebrow">Race results — selected work</p><h2 class="section-title display">The work</h2></div>
     </header>
 
-    <div class="billboard reveal d1" id="billboard">
-      <canvas id="board" class="bb-screen" role="img" aria-label="Featured project"></canvas>
-      <div class="bb-nav" id="pj-nav" role="tablist" aria-label="Choose a project"></div>
-    </div>
-
-    <!-- car select: three.js showroom, one "car" per project, Forza-style HUD -->
-    <div class="sr" id="showroom" hidden>
-      <canvas id="sr-canvas" role="img" aria-label="An F1 car on a turntable, painted in the selected project's colours"></canvas>
-      <p class="sr-load" id="sr-load">Warming up the garage…</p>
-      <div class="sr-tabs" id="sr-tabs" role="tablist" aria-label="Choose a project"></div>
-      <button class="sr-arrow l" id="sr-prev" type="button" aria-label="Previous project">‹</button>
-      <button class="sr-arrow r" id="sr-next" type="button" aria-label="Next project">›</button>
-      <div class="sr-hud" id="sr-hud" aria-live="polite">
-        <div class="sr-top"><span class="sr-class"><b id="sr-cls">A</b><span id="sr-pi">700</span></span><span class="mono sr-status" id="sr-status"></span><span class="sr-pos lcd-text" id="sr-pos"></span></div>
-        <h3 id="sr-title"></h3>
-        <p class="sr-meta" id="sr-meta"></p>
-        <div class="sr-parts"><span class="mono">Parts fitted</span><div id="sr-parts"></div></div>
-        <button class="btn btn-primary sr-go" id="sr-go" type="button">View project ▸</button>
-      </div>
-      <p class="sr-hint">Q / E to switch · drag to spin</p>
-    </div>
-
-    <div class="filters mono reveal d1" id="filters" role="tablist" aria-label="Filter projects"></div>
-    <div class="cases" id="projects"></div>
+    <div class="tv reveal d1" id="projects" aria-label="Selected work"></div>
   </section>
 
   <!-- 02 ABOUT + SKILLS -->
@@ -207,6 +184,7 @@ import Mascot from '../components/Mascot.astro';
       <span class="sec-no lcd-text" style="--c: var(--pink)">03</span>
       <div><p class="eyebrow">Team radio — channel open</p><h2 class="section-title display">Box, box — get in touch</h2></div>
     </header>
+    <div class="radio-grid">
     <form id="contact-form" class="contact lcd">
       <div class="row">
         <input name="name" placeholder="Your name" required />
@@ -218,6 +196,18 @@ import Mascot from '../components/Mascot.astro';
       <button class="btn btn-primary" type="submit">Transmit ▸</button>
       <p class="form-status lcd-text" id="form-status"></p>
     </form>
+    <!-- pit wall notes: what to radio in about (facts from the rest of the page) -->
+    <aside class="radio-notes reveal d1" aria-label="What I work on">
+      <p class="eyebrow">Pit wall notes</p>
+      <ul>
+        <li><b>Monitoring systems, end to end</b><span>Weather, air quality, soil and evapotranspiration stations: sensors, dataloggers, power and comms.</span></li>
+        <li><b>Field installs &amp; commissioning</b><span>Site drawings, risk assessment, FAT, installation and handover.</span></li>
+        <li><b>Data platforms &amp; dashboards</b><span>APIs, databases, live maps, alerts and reports.</span></li>
+        <li><b>AI cameras</b><span>Computer vision on edge devices, from proof of concept up.</span></li>
+      </ul>
+      <p class="radio-base mono">Based in Malaysia · deployments nationwide</p>
+    </aside>
+    </div>
   </section>
 
   <!-- photo viewer for the case studies -->
@@ -451,9 +441,9 @@ import Mascot from '../components/Mascot.astro';
 
   /* --- hero: name + one line + the map ---------------------------------------- */
   .hero {
-    position: relative; z-index: 2; min-height: 100vh;
+    position: relative; z-index: 2; min-height: 86vh; /* a touch under full height: less empty space, the next section peeks in */
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    align-items: center; gap: 2rem 3rem; padding: 6.5rem 0 3rem;
+    align-items: center; gap: 2rem 3rem; padding: 5.5rem 0 2rem;
   }
   .hero-title { display: grid; margin: 0.7rem 0 0; }
   .ht-1, .ht-2 { font-size: clamp(2.8rem, 7.2vw, 6rem); line-height: 0.9; }
@@ -489,13 +479,9 @@ import Mascot from '../components/Mascot.astro';
   .sc-link { margin-left: auto; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
   .sc-link:hover { text-decoration: underline; }
 
-  /* --- featured LED screen (top of the work section) -------------------------- */
+  /* --- LED screen (the garage teaser's board) ------------------------------------- */
   /* --accent is registered so the per-project colour can transition */
   @property --accent { syntax: '<color>'; inherits: true; initial-value: #00d2be; }
-  .billboard {
-    --accent: #00d2be; margin-bottom: 2.6rem;
-    transition: --accent 0.9s ease, opacity 0.6s ease, transform 0.6s ease;
-  }
   .bb-screen {
     display: block; width: 100%; aspect-ratio: 128 / 41; cursor: pointer;
     border-radius: 6px; background: #050507;
@@ -506,26 +492,6 @@ import Mascot from '../components/Mascot.astro';
     -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgba(255, 255, 255, 0.1));
   }
 
-  /* timing-tower chips (created in JS, hence :global) with auto-advance bar */
-  .bb-nav { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 1.1rem; }
-  .bb-nav :global(button) {
-    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 0.5rem;
-    font-family: var(--display); font-weight: 700; font-style: italic; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 0.45rem 1rem 0.5rem 0.55rem; cursor: pointer; color: var(--muted);
-    border: 0; background: #101016;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-    transition: color 0.25s, background 0.25s, transform 0.25s;
-  }
-  .bb-nav :global(button em) {
-    font-style: normal; font-family: var(--mono); font-size: 0.64rem; padding: 0.1rem 0.35rem; color: #000; background: #4a4a55;
-  }
-  .bb-nav :global(button:hover) { color: var(--ink); transform: translateY(-1px); }
-  .bb-nav :global(button[aria-selected="true"]) { color: #fff; background: color-mix(in srgb, var(--accent) 22%, #101016); }
-  .bb-nav :global(button[aria-selected="true"] em) { background: var(--accent); }
-  .bb-nav :global(.bar) { position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: var(--accent); transform-origin: left; transform: scaleX(0); }
-  .bb-nav :global(button[aria-selected="true"] .bar) { animation: chip-progress var(--dur, 6s) linear forwards; }
-  .billboard.manual .bb-nav :global(.bar) { animation: none; transform: scaleX(0); }
-  @keyframes chip-progress { to { transform: scaleX(1); } }
 
   /* --- sections ------------------------------------------------------------ */
   .kerb.wrap { position: relative; z-index: 2; opacity: 0.9; }
@@ -584,41 +550,6 @@ import Mascot from '../components/Mascot.astro';
   .chiplist :global(li:nth-child(3n)) { color: var(--pink); border-left-color: var(--pink); text-shadow: 0 0 8px rgba(255, 43, 214, 0.5); }
 
   /* case studies (cards are created in JS, hence :global) */
-  .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
-  .filters :global(button) {
-    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
-    padding: 0.45rem 0.85rem; border: 1px solid #23232c; background: #0a0a0e; color: var(--muted); cursor: pointer;
-    transition: color 0.2s, background 0.2s, border-color 0.2s;
-  }
-  .filters :global(button:hover) { color: var(--ink); border-color: #3a3a46; }
-  .filters :global(button[aria-selected="true"]) { color: #000; background: var(--amber); border-color: var(--amber); }
-  /* each project is a lounge (a room in its colour, photos on the wall, a crew member
-     in it) with the story underneath; everything readable without clicking */
-  .cases { display: grid; gap: 2.2rem; }
-  .cases :global(.case) {
-    position: relative; display: grid; background: linear-gradient(180deg, #0d0d12, #08080b);
-    border: 1px solid #1c1c24; border-top: 3px solid var(--c); scroll-margin-top: 90px; transition: box-shadow 0.25s;
-  }
-  .cases :global(.case[hidden]) { display: none; }
-  .cases :global(.case:hover) { box-shadow: 0 30px 70px -40px var(--c); }
-  .cases :global(.case.flash) { animation: case-flash 1.4s ease; }
-  @keyframes case-flash { 0%, 45% { box-shadow: 0 0 0 2px var(--c), 0 0 46px -6px var(--c); } }
-
-  /* the story under the room */
-  .cases :global(.case-body) { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 1rem 2.2rem; padding: 1.5rem 1.7rem 1.5rem; min-width: 0; }
-  .cases :global(.case-story), .cases :global(.case-facts) { display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; }
-  .cases :global(.case-top) { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
-  .cases :global(.case-pos) { font-size: 1.7rem; line-height: 1; }
-  .cases :global(.case-tag) { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; padding: 0.15rem 0.5rem; color: #000; background: var(--c); }
-  .cases :global(.case-status) {
-    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
-    padding: 0.12rem 0.5rem; color: var(--c); border: 1px dashed var(--c);
-  }
-  .cases :global(.case-cat) { margin-left: auto; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
-  .cases :global(.case h3) { font-size: clamp(1.35rem, 2.4vw, 1.75rem); font-style: italic; text-transform: uppercase; line-height: 1.05; }
-  .cases :global(.case-meta) { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-family: var(--mono); font-size: 0.74rem; color: #b4b4c0; }
-  .cases :global(.case-meta b) { color: var(--muted); font-weight: 400; margin-right: 0.4rem; letter-spacing: 0.18em; font-size: 0.6rem; }
-  .cases :global(.case-sum) { color: #d6d6de; margin: 0; font-size: 1rem; }
 
   /* photo viewer */
   .lightbox {
@@ -637,22 +568,19 @@ import Mascot from '../components/Mascot.astro';
   .lb-btn:hover { border-color: var(--amber); color: var(--amber); }
   .lb-close { position: absolute; top: 1.2rem; right: 1.2rem; }
 
-  .cases :global(.case ul) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
-  .cases :global(.case li) { position: relative; padding-left: 1.15rem; color: #b9b9c4; font-size: 0.93rem; line-height: 1.45; }
-  .cases :global(.case li::before) { content: ''; position: absolute; left: 0; top: 0.6em; width: 0.55rem; height: 3px; background: var(--c); box-shadow: 0 0 8px var(--c); }
-  .cases :global(.tyres) { display: flex; gap: 0.35rem 0.8rem; flex-wrap: wrap; margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed #1f1f28; }
-  .cases :global(.tyre) { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: #a5a5b2; }
-  .cases :global(.tyre i) {
-    width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
-    font-style: normal; font-size: 0.55rem; font-weight: 700; color: #fff;
-    background: #111; border: 3px solid var(--compound);
-  }
-
   .pit { border: 1px solid #1c1c24; background: linear-gradient(180deg, #0c0c11, #08080b); }
   .pit-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2.4rem; align-items: center; padding: 2.4rem; }
   .pit-copy .btn { margin-top: 1.4rem; }
 
-  .contact { max-width: 640px; display: flex; flex-direction: column; gap: 0.8rem; padding: 1.4rem; }
+  .radio-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+  .radio-notes { padding: 1.4rem 1.5rem; border: 1px solid #1c1c24; border-left: 4px solid var(--pink); background: linear-gradient(180deg, #0d0d12, #08080b); }
+  .radio-notes ul { list-style: none; margin: 0.9rem 0 1.1rem; padding: 0; display: grid; gap: 0.9rem; }
+  .radio-notes li { display: grid; gap: 0.2rem; padding-left: 1.1rem; position: relative; }
+  .radio-notes li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 0.55rem; height: 3px; background: var(--pink); }
+  .radio-notes b { font: italic 900 1rem/1.15 var(--display); text-transform: uppercase; letter-spacing: 0.03em; color: #fff; }
+  .radio-notes span { color: #b9b9c4; font-size: 0.9rem; line-height: 1.45; }
+  .radio-base { margin: 0; padding-top: 0.8rem; border-top: 1px dashed #24242d; font-size: 0.7rem; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
+  .contact { display: flex; flex-direction: column; gap: 0.8rem; padding: 1.4rem; }
   .contact > * { position: relative; z-index: 1; }
   .contact .row { display: flex; gap: 0.8rem; }
   .contact input, .contact textarea {
@@ -679,18 +607,12 @@ import Mascot from '../components/Mascot.astro';
     .driver-photo { max-width: 420px; }
     .oc-strip { grid-template-columns: 1fr; }
     .oc-strip figure, .oc-strip figure:first-child, .oc-strip figure:last-child { clip-path: none; }
-    .cases :global(.case-body) { grid-template-columns: 1fr; }
     .pit-body { grid-template-columns: 1fr; padding: 1.6rem; }
+    .radio-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 620px) {
-    /* billboard chips: one swipeable row instead of three stacked rows */
-    .bb-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.3rem; -webkit-overflow-scrolling: touch; }
-    .bb-nav::-webkit-scrollbar { display: none; }
-    .bb-nav :global(button) { flex: 0 0 auto; }
     .links a:not(.lock) { display: none; }
     .contact .row { flex-direction: column; }
-    .cases :global(.case-body) { padding: 1.2rem; }
-    /* phones: crew on top, photos in a swipeable row */
     .sc-link { display: none; }
   }
 </style>
@@ -700,8 +622,7 @@ import Mascot from '../components/Mascot.astro';
   import { scrollFx } from '../scripts/scrollfx';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
-  import { chiefLook, loungeHTML, wakeLounges } from '../scripts/lounge';
-  import { initShowroom } from '../scripts/showroom';
+  import { initTiming, type TimingProject } from '../scripts/timing';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -750,7 +671,7 @@ import Mascot from '../components/Mascot.astro';
     });
   }
 
-  // --- your work: billboard + case studies, all driven by /api/content -------
+  // --- your work: the timing screen, driven by /api/content ---------------------
   // Edit projects in port_backend/app/data.py — they flow into both.
   type Project = {
     id: string; tag: string; scene: string; color: string; title: string;
@@ -761,8 +682,7 @@ import Mascot from '../components/Mascot.astro';
   };
   type Content = { projects: Project[]; about?: string; skills?: string[]; hero?: { tagline?: string }; offline?: boolean };
 
-  const AUTO_MS = 6000; // auto-advance interval; matches the chip progress bar
-  const COMPOUNDS = [['S', '#e10600'], ['M', '#ffd400'], ['H', '#efefef']];
+  const AUTO_MS = 7000; // timing screen auto-advance; matches the tower's progress bar
   const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
   async function loadContent(): Promise<Content> {
@@ -809,117 +729,17 @@ import Mascot from '../components/Mascot.astro';
   })();
   const contentReady = loadContent();
 
-  /** Scroll to a project's case study and flash it in its colour. */
+  // --- your work: the timing screen. Its selection is shared with the hero map; the block
+  //     further down owns it (auto-cycle, keys) and sets `pick`.
+  let tv: ReturnType<typeof initTiming> | null = null;
+  let pick: (i: number) => void = () => {};
+  /** Show a project in the timing screen and scroll to it (hero map link, deep links). */
   function openCase(id: string) {
-    const card = document.getElementById(`project-${id}`);
-    if (!card) return;
-    if (card.hidden) document.querySelector<HTMLButtonElement>('#filters button')?.click(); // reset to "All"
-    card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
-  }
-
-  // --- car select: the three.js showroom + Forza-style HUD over it ----------------------
-  // a playful "class / PI" badge in the Forza style, from the kind of project and how much is in it
-  const CLASS: Record<string, [string, number]> = { platform: ['S1', 820], 'field install': ['A', 720], 'ai / vision': ['S2', 900], proposal: ['B', 640] };
-  function carSelect(projects: Project[]) {
-    const $ = (id: string) => document.getElementById(id)!;
-    const box = $('showroom'), hud = $('sr-hud'), tabs = $('sr-tabs');
-    box.hidden = false;
-    tabs.innerHTML = `<span class="sr-key">Q</span>${projects.map((p, i) =>
-      `<button class="sr-tab" type="button" role="tab" data-i="${i}" style="--tc: ${esc(p.color)}">${esc(p.tag)}</button>`).join('')}<span class="sr-key">E</span>`;
-    let at = 0;
-    const fill = (i: number) => {
-      const p = projects[i];
-      box.style.setProperty('--c', p.color);
-      const [cls, base] = CLASS[(p.category ?? '').toLowerCase()] ?? ['C', 560];
-      $('sr-cls').textContent = cls;
-      $('sr-pi').textContent = String(Math.min(999, base + (p.highlights?.length ?? 0) * 12 + (p.stack?.length ?? 0) * 6));
-      $('sr-pos').textContent = `P${i + 1}/${projects.length}`;
-      $('sr-title').textContent = p.title;
-      $('sr-meta').textContent = [p.client, p.location, p.year, p.role].filter(Boolean).join(' · ');
-      $('sr-status').textContent = p.status ?? p.category ?? '';
-      $('sr-parts').innerHTML = (p.stack ?? []).slice(0, 6).map((t) => `<i>${esc(t)}</i>`).join('');
-      tabs.querySelectorAll<HTMLElement>('.sr-tab').forEach((t) => t.setAttribute('aria-selected', String(Number(t.dataset.i) === i)));
-      hud.classList.remove('swap'); void hud.offsetWidth; hud.classList.add('swap');
-    };
-    fill(0);
-    initShowroom($('sr-canvas') as HTMLCanvasElement, projects).then((room) => {
-      $('sr-load').remove();
-      room.show(0);
-      const go = (i: number, dir: 1 | -1) => { at = (i + projects.length) % projects.length; room.show(at, dir); fill(at); };
-      $('sr-prev').addEventListener('click', () => go(at - 1, -1));
-      $('sr-next').addEventListener('click', () => go(at + 1, 1));
-      tabs.addEventListener('click', (e) => {
-        const t = (e.target as Element).closest<HTMLElement>('[data-i]');
-        if (t) { const i = Number(t.dataset.i); go(i, i < at ? -1 : 1); }
-      });
-      $('sr-go').addEventListener('click', () => openCase(projects[at].id));
-      // Q / E (and arrow keys) while the showroom is on screen, not while typing
-      let inView = false;
-      new IntersectionObserver(([en]) => { inView = en.isIntersecting && en.intersectionRatio > 0.5; }, { threshold: [0, 0.5, 1] }).observe(box);
-      addEventListener('keydown', (e) => {
-        if (!inView || (e.target as HTMLElement).closest('input, textarea') || !document.getElementById('lightbox')!.hidden) return;
-        const k = e.key.toLowerCase();
-        if (k === 'q' || k === 'arrowleft') go(at - 1, -1);
-        else if (k === 'e' || k === 'arrowright') go(at + 1, 1);
-      });
-    }).catch(() => { box.hidden = true; });
-  }
-
-  function renderCases(projects: Project[]) {
-    const wrap = document.getElementById('projects')!;
-    const two = (n: number) => String(n).padStart(2, '0');
-    wrap.innerHTML = projects.map((p, i) => `
-      <article class="case" id="project-${esc(p.id)}" data-cat="${esc(p.category)}" style="--c: ${esc(p.color)}">
-        ${loungeHTML(p, i)}
-        <div class="case-body">
-          <div class="case-story">
-            <div class="case-top">
-              <span class="case-pos lcd-text">P${i + 1}</span>
-              <span class="case-tag">${esc(p.tag)}</span>
-              ${p.status ? `<span class="case-status">${esc(p.status)}</span>` : ''}
-              <span class="case-cat">${esc(p.category)}</span>
-            </div>
-            <h3>${esc(p.title)}</h3>
-            <div class="case-meta">${[['CLIENT', p.client], ['WHERE', p.location], ['YEAR', p.year], ['ROLE', p.role]]
-              .filter(([, v]) => v).map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join('')}</div>
-            ${p.summary ? `<p class="case-sum">${esc(p.summary)}</p>` : ''}
-          </div>
-          <div class="case-facts">
-            ${p.highlights?.length ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
-            <div class="tyres">${(p.stack ?? []).map((t, j) =>
-              `<span class="tyre" style="--compound: ${COMPOUNDS[j % 3][1]}"><i>${COMPOUNDS[j % 3][0]}</i>${esc(t)}</span>`).join('')}</div>
-          </div>
-        </div>
-      </article>`).join('');
-    chiefLook().then((look) => wakeLounges(wrap, projects, look));
-    if (projects.length) carSelect(projects);
-
-
-    // projects without photos show their own LED scene in the media slot
-    wrap.querySelectorAll<HTMLCanvasElement>('.case-board').forEach((cv) => {
-      const i = projects.findIndex((x) => x.id === cv.dataset.pid);
-      const p = projects[i];
-      if (p) initBoard(cv, [{
-        scene: p.scene, tag: p.tag, color: p.color, line: p.marquee || p.title,
-        sub: `P${i + 1} LAP ${two(i + 1)}/${two(projects.length)}`,
-      }]).show(0);
-    });
-
-    // category filters (only worth showing with 2+ categories)
-    const bar = document.getElementById('filters')!;
-    const cats = ['All', ...new Set(projects.map((p) => p.category).filter((c): c is string => !!c))];
-    bar.hidden = cats.length < 3;
-    bar.innerHTML = '';
-    const cards = Array.from(wrap.querySelectorAll<HTMLElement>('.case'));
-    cats.forEach((cat, i) => {
-      const b = document.createElement('button');
-      b.textContent = cat; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(i === 0));
-      b.addEventListener('click', () => {
-        bar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-        cards.forEach((card) => { card.hidden = cat !== 'All' && card.dataset.cat !== cat; });
-      });
-      bar.appendChild(b);
+    contentReady.then((c) => {
+      const i = c.projects.findIndex((p) => p.id === id);
+      if (i < 0) return;
+      pick(i);
+      document.getElementById('projects')!.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     });
   }
 
@@ -965,85 +785,83 @@ import Mascot from '../components/Mascot.astro';
       ? 'No telemetry — start the FastAPI server to load live content.'
       : c.about ?? '';
     document.getElementById('skills')!.innerHTML = (c.skills ?? []).map((s) => `<li>${esc(s)}</li>`).join('');
-    renderCases(c.projects);
-    const seen = new IntersectionObserver((entries) => entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      seen.unobserve(e.target);
-      track('project', (e.target as HTMLElement).id.replace(/^project-/, ''));
-    }), { threshold: 0.5 });
-    document.querySelectorAll('#projects .case').forEach((el) => seen.observe(el));
-    scrollFx(document.getElementById('projects')!); // animate the freshly rendered case studies
   });
 
-  // --- hero map + featured screen: one shared selection, click through to the case study
+  // --- hero map + timing screen: one shared selection. It cycles like a TV broadcast until
+  //     you take over (tower click, Q/E, map click); the Auto button turns cycling back on.
   (() => {
-    const billboard = document.getElementById('billboard');
-    const canvas = document.getElementById('board') as HTMLCanvasElement | null;
-    const nav = document.getElementById('pj-nav');
-    if (!billboard || !canvas || !nav) { lightsOut(); return; }
-
     const spot = document.getElementById('spot');
     const mapCanvas = document.getElementById('deploy-map') as HTMLCanvasElement | null;
     const tagEl = document.getElementById('spot-tag');
     const titleEl = document.getElementById('spot-title');
     const placeEl = document.getElementById('spot-place');
     const linkEl = document.getElementById('spot-link') as HTMLAnchorElement | null;
+    const host = document.getElementById('projects')!;
 
     let projects: Project[] = [];
-    let board: BoardApi;
     let map: MapApi | null = null;
-    let buttons: HTMLButtonElement[] = [];
-    let idx = -1, timer = 0;
+    let idx = -1, timer = 0, auto = false, inView = false, hovering = false;
+    const counted = new Set<string>();
 
     function select(i: number) {
       const n = Math.max(projects.length, 1);
       const next = (i + n) % n;
       if (next === idx) return;
       idx = next;
-      board.show(idx);
       map?.setActive(idx);
+      tv?.show(idx);
       const p = projects[idx];
       if (!p) return;
-      billboard!.style.setProperty('--accent', p.color);
       spot?.style.setProperty('--accent', p.color);
       if (tagEl) tagEl.textContent = p.tag;
       if (titleEl) titleEl.textContent = p.title;
       if (placeEl) placeEl.textContent = [p.location, p.lat == null ? 'nationwide' : ''].filter(Boolean).join(' · ');
-      if (linkEl) linkEl.href = `#project-${p.id}`;
-      canvas!.setAttribute('aria-label', `${p.tag} — ${p.title}`);
-      buttons.forEach((b, j) => b.setAttribute('aria-selected', String(j === idx)));
+      if (linkEl) linkEl.href = `#${p.id}`;
+      if (inView && !counted.has(p.id)) { counted.add(p.id); track('project', p.id); } // stats: projects actually seen
     }
-    function stopAuto() { clearInterval(timer); billboard!.classList.add('manual'); }
-    const openActive = () => { stopAuto(); if (projects[idx]) openCase(projects[idx].id); };
-    linkEl?.addEventListener('click', (e) => { e.preventDefault(); openActive(); });
+    const tick = () => {
+      clearInterval(timer);
+      if (auto && !hovering) timer = window.setInterval(() => select(idx + 1), AUTO_MS);
+    };
+    function setAuto(on: boolean) {
+      auto = on && !reduced && projects.length > 1;
+      tv?.setAuto(auto);
+      tick();
+    }
+    pick = (i: number) => { setAuto(false); select(i); };
+    linkEl?.addEventListener('click', (e) => { e.preventDefault(); if (projects[idx]) openCase(projects[idx].id); });
 
-    // the board powers on once the lights are out and your projects are loaded
+    // the screen powers on once the lights are out and your projects are loaded
     Promise.all([lightsOut(), contentReady]).then(([, c]) => {
       projects = c.projects;
-      const screens = projects.length
-        ? projects.map((p) => ({ scene: p.scene, tag: p.tag, color: p.color, line: p.marquee || p.title }))
-        : [{ scene: 'static', tag: 'NO SIG', color: '#ffb000', line: 'NO TELEMETRY * START THE FASTAPI SERVER' }];
-      board = initBoard(canvas, screens, openActive);
-      if (mapCanvas && projects.length) map = initMap(mapCanvas, projects, (i) => { stopAuto(); select(i); });
+      if (!projects.length) {
+        host.innerHTML = '<p class="mono" style="padding:2rem;color:var(--muted)">No telemetry — start the FastAPI server to load the projects.</p>';
+        return;
+      }
+      tv = initTiming(host, projects as TimingProject[], { onPick: (i) => pick(i), autoMs: AUTO_MS });
+      tv.onAutoToggle(() => setAuto(!auto));
+      if (mapCanvas) map = initMap(mapCanvas, projects, (i) => pick(i));
 
-      nav.style.setProperty('--dur', `${AUTO_MS}ms`);
-      buttons = projects.map((p, i) => {
-        const b = document.createElement('button');
-        b.setAttribute('role', 'tab');
-        const pos = document.createElement('em'); pos.textContent = `P${i + 1}`;
-        const bar = document.createElement('span'); bar.className = 'bar';
-        b.append(pos, p.tag, bar);
-        b.addEventListener('click', () => { stopAuto(); select(i); });
-        nav.appendChild(b);
-        return b;
+      // hovering the screen holds the current project; Q/E (or arrows) switch while it's on screen
+      host.addEventListener('pointerenter', () => { hovering = true; tick(); });
+      host.addEventListener('pointerleave', () => { hovering = false; tick(); });
+      new IntersectionObserver(([en]) => {
+        inView = en.isIntersecting;
+        if (inView && projects[idx] && !counted.has(projects[idx].id)) { counted.add(projects[idx].id); track('project', projects[idx].id); }
+      }, { threshold: 0.35 }).observe(host);
+      addEventListener('keydown', (e) => {
+        if (!inView || (e.target as HTMLElement).closest('input, textarea') || !document.getElementById('lightbox')!.hidden) return;
+        const k = e.key.toLowerCase();
+        if (k === 'q' || k === 'arrowleft') pick(idx - 1);
+        else if (k === 'e' || k === 'arrowright') pick(idx + 1);
       });
 
       // deep link: #trx, #stars, … (project id or tag)
       const hash = location.hash.replace('#', '').toLowerCase();
       const start = projects.findIndex((p) => p.id === hash || p.tag.toLowerCase() === hash);
-      if (start >= 0 || reduced || projects.length < 2) { stopAuto(); select(Math.max(start, 0)); return; }
+      if (start >= 0) { pick(start); return; }
       select(0);
-      timer = window.setInterval(() => select(idx + 1), AUTO_MS);
+      setAuto(true);
     });
   })();
 
