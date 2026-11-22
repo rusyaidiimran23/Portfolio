@@ -128,8 +128,22 @@ import Mascot from '../components/Mascot.astro';
       <div class="bb-nav" id="pj-nav" role="tablist" aria-label="Choose a project"></div>
     </div>
 
-    <!-- the pit building from above: every garage, roofless; click one to drop into it -->
-    <div class="pitview" id="pitview" hidden></div>
+    <!-- car select: three.js showroom, one "car" per project, Forza-style HUD -->
+    <div class="sr" id="showroom" hidden>
+      <canvas id="sr-canvas" role="img" aria-label="An F1 car on a turntable, painted in the selected project's colours"></canvas>
+      <p class="sr-load" id="sr-load">Warming up the garage…</p>
+      <div class="sr-tabs" id="sr-tabs" role="tablist" aria-label="Choose a project"></div>
+      <button class="sr-arrow l" id="sr-prev" type="button" aria-label="Previous project">‹</button>
+      <button class="sr-arrow r" id="sr-next" type="button" aria-label="Next project">›</button>
+      <div class="sr-hud" id="sr-hud" aria-live="polite">
+        <div class="sr-top"><span class="sr-class"><b id="sr-cls">A</b><span id="sr-pi">700</span></span><span class="mono sr-status" id="sr-status"></span><span class="sr-pos lcd-text" id="sr-pos"></span></div>
+        <h3 id="sr-title"></h3>
+        <p class="sr-meta" id="sr-meta"></p>
+        <div class="sr-parts"><span class="mono">Parts fitted</span><div id="sr-parts"></div></div>
+        <button class="btn btn-primary sr-go" id="sr-go" type="button">View project ▸</button>
+      </div>
+      <p class="sr-hint">Q / E to switch · drag to spin</p>
+    </div>
 
     <div class="filters mono reveal d1" id="filters" role="tablist" aria-label="Filter projects"></div>
     <div class="cases" id="projects"></div>
@@ -686,7 +700,8 @@ import Mascot from '../components/Mascot.astro';
   import { scrollFx } from '../scripts/scrollfx';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
-  import { chiefLook, loungeHTML, pitView, wakeLounges } from '../scripts/lounge';
+  import { chiefLook, loungeHTML, wakeLounges } from '../scripts/lounge';
+  import { initShowroom } from '../scripts/showroom';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -803,6 +818,54 @@ import Mascot from '../components/Mascot.astro';
     card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
   }
 
+  // --- car select: the three.js showroom + Forza-style HUD over it ----------------------
+  // a playful "class / PI" badge in the Forza style, from the kind of project and how much is in it
+  const CLASS: Record<string, [string, number]> = { platform: ['S1', 820], 'field install': ['A', 720], 'ai / vision': ['S2', 900], proposal: ['B', 640] };
+  function carSelect(projects: Project[]) {
+    const $ = (id: string) => document.getElementById(id)!;
+    const box = $('showroom'), hud = $('sr-hud'), tabs = $('sr-tabs');
+    box.hidden = false;
+    tabs.innerHTML = `<span class="sr-key">Q</span>${projects.map((p, i) =>
+      `<button class="sr-tab" type="button" role="tab" data-i="${i}" style="--tc: ${esc(p.color)}">${esc(p.tag)}</button>`).join('')}<span class="sr-key">E</span>`;
+    let at = 0;
+    const fill = (i: number) => {
+      const p = projects[i];
+      box.style.setProperty('--c', p.color);
+      const [cls, base] = CLASS[(p.category ?? '').toLowerCase()] ?? ['C', 560];
+      $('sr-cls').textContent = cls;
+      $('sr-pi').textContent = String(Math.min(999, base + (p.highlights?.length ?? 0) * 12 + (p.stack?.length ?? 0) * 6));
+      $('sr-pos').textContent = `P${i + 1}/${projects.length}`;
+      $('sr-title').textContent = p.title;
+      $('sr-meta').textContent = [p.client, p.location, p.year, p.role].filter(Boolean).join(' · ');
+      $('sr-status').textContent = p.status ?? p.category ?? '';
+      $('sr-parts').innerHTML = (p.stack ?? []).slice(0, 6).map((t) => `<i>${esc(t)}</i>`).join('');
+      tabs.querySelectorAll<HTMLElement>('.sr-tab').forEach((t) => t.setAttribute('aria-selected', String(Number(t.dataset.i) === i)));
+      hud.classList.remove('swap'); void hud.offsetWidth; hud.classList.add('swap');
+    };
+    fill(0);
+    initShowroom($('sr-canvas') as HTMLCanvasElement, projects).then((room) => {
+      $('sr-load').remove();
+      room.show(0);
+      const go = (i: number, dir: 1 | -1) => { at = (i + projects.length) % projects.length; room.show(at, dir); fill(at); };
+      $('sr-prev').addEventListener('click', () => go(at - 1, -1));
+      $('sr-next').addEventListener('click', () => go(at + 1, 1));
+      tabs.addEventListener('click', (e) => {
+        const t = (e.target as Element).closest<HTMLElement>('[data-i]');
+        if (t) { const i = Number(t.dataset.i); go(i, i < at ? -1 : 1); }
+      });
+      $('sr-go').addEventListener('click', () => openCase(projects[at].id));
+      // Q / E (and arrow keys) while the showroom is on screen, not while typing
+      let inView = false;
+      new IntersectionObserver(([en]) => { inView = en.isIntersecting && en.intersectionRatio > 0.5; }, { threshold: [0, 0.5, 1] }).observe(box);
+      addEventListener('keydown', (e) => {
+        if (!inView || (e.target as HTMLElement).closest('input, textarea') || !document.getElementById('lightbox')!.hidden) return;
+        const k = e.key.toLowerCase();
+        if (k === 'q' || k === 'arrowleft') go(at - 1, -1);
+        else if (k === 'e' || k === 'arrowright') go(at + 1, 1);
+      });
+    }).catch(() => { box.hidden = true; });
+  }
+
   function renderCases(projects: Project[]) {
     const wrap = document.getElementById('projects')!;
     const two = (n: number) => String(n).padStart(2, '0');
@@ -829,11 +892,8 @@ import Mascot from '../components/Mascot.astro';
           </div>
         </div>
       </article>`).join('');
-    chiefLook().then((look) => {
-      wakeLounges(wrap, projects, look);
-      const view = document.getElementById('pitview')!;
-      if (projects.length) { view.hidden = false; pitView(view, projects, look, openCase); }
-    });
+    chiefLook().then((look) => wakeLounges(wrap, projects, look));
+    if (projects.length) carSelect(projects);
 
 
     // projects without photos show their own LED scene in the media slot
