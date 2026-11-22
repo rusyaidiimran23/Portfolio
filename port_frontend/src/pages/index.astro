@@ -128,14 +128,6 @@ import Mascot from '../components/Mascot.astro';
       <div class="bb-nav" id="pj-nav" role="tablist" aria-label="Choose a project"></div>
     </div>
 
-    <!-- live circuit: one car per project (Kenney Racing Kit, CC0) -->
-    <div class="circuit reveal d1" id="circuit">
-      <canvas id="cc-canvas" role="img" aria-label="A race circuit with one car per project"></canvas>
-      <div class="cc-labels" id="cc-labels"></div>
-      <p class="cc-hint mono">Hover a car · click to jump to its project</p>
-      <p class="cc-credit mono">3D: Kenney Racing Kit</p>
-    </div>
-
     <div class="filters mono reveal d1" id="filters" role="tablist" aria-label="Filter projects"></div>
     <div class="cases" id="projects"></div>
   </section>
@@ -692,7 +684,6 @@ import Mascot from '../components/Mascot.astro';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
   import { chiefLook, loungeHTML, wakeLounges } from '../scripts/lounge';
-  import { initCircuit } from '../scripts/circuit';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -837,19 +828,6 @@ import Mascot from '../components/Mascot.astro';
       </article>`).join('');
     chiefLook().then((look) => wakeLounges(wrap, projects, look));
 
-    // live circuit: hover a car lights its card, click jumps to it; hovering a card slows its car
-    const caseById = new Map(projects.map((p) => [p.id, document.getElementById(`project-${p.id}`)]));
-    initCircuit({
-      canvas: document.getElementById('cc-canvas') as HTMLCanvasElement,
-      labels: document.getElementById('cc-labels')!,
-      onPick: (id) => openCase(id),
-      onHover: (id) => caseById.forEach((card, pid) => card?.classList.toggle('car-on', pid === id)),
-    }, projects).then((cc) => {
-      caseById.forEach((card, pid) => {
-        card?.addEventListener('pointerenter', () => cc.highlight(pid));
-        card?.addEventListener('pointerleave', () => cc.highlight(null));
-      });
-    }).catch(() => { document.getElementById('circuit')!.hidden = true; });
 
     // projects without photos show their own LED scene in the media slot
     wrap.querySelectorAll<HTMLCanvasElement>('.case-board').forEach((cv) => {
