@@ -106,3 +106,35 @@
   .tv-shot img { animation: none; }
   .tv-prog { animation: none !important; }
 }
+
+/* --- the wow bits ------------------------------------------------------------------------- */
+/* F1 TV stinger: a team-colour band with the giant tag whips across between projects */
+.tv-stinger { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+.tv-stinger::before, .tv-stinger span {
+  position: absolute; top: -10%; bottom: -10%; left: 0; transform: translateX(-130%) skewX(-18deg);
+}
+.tv-stinger::before { content: ''; width: 70%; background: linear-gradient(90deg, #fff 0 3%, var(--sc, #fff) 3% 92%, #fff 92% 95%, transparent 95%); }
+.tv-stinger span {
+  width: 70%; display: grid; place-items: center; transform: translateX(-130%) skewX(-18deg);
+  font: italic 900 clamp(4rem, 11vw, 9rem)/1 var(--display); text-transform: uppercase; letter-spacing: -0.01em;
+  color: transparent; -webkit-text-stroke: 2px rgba(0, 0, 0, 0.55);
+}
+.tv-stinger.go::before { animation: sting 0.75s cubic-bezier(0.7, 0, 0.25, 1) forwards; }
+.tv-stinger.go span { animation: sting 0.75s cubic-bezier(0.7, 0, 0.25, 1) 0.03s forwards; }
+@keyframes sting {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  45%, 52% { transform: translateX(22%) skewX(-18deg); }
+  100% { transform: translateX(200%) skewX(-18deg); }
+}
+/* purple sector: the new row flashes like a fastest sector */
+.tv-row.flash { animation: purple 1.1s ease; }
+@keyframes purple { 0%, 30% { background: color-mix(in srgb, var(--purple) 55%, #101016); box-shadow: inset 4px 0 0 var(--purple); } }
+/* tilt + glare on the picture */
+.tv-media { transform: perspective(1400px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tv-media.tilt { transition: transform 0.12s linear; }
+.tv-glare {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(40% 55% at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.16), transparent 70%);
+}
+.tv-media.tilt .tv-glare { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .tv-media { transform: none; } }

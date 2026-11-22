@@ -623,6 +623,7 @@ import Mascot from '../components/Mascot.astro';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
   import { initTiming, type TimingProject } from '../scripts/timing';
+  import { speedTrails } from '../scripts/speedtrails';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -630,6 +631,7 @@ import Mascot from '../components/Mascot.astro';
 
   initBlueprint(); // reveal-on-scroll
   scrollFx();      // scroll choreography (titles, wipes, parallax, hero exit)
+  speedTrails();   // night-race light trails that react to scroll speed
   smoothScroll();  // eased wheel scrolling so every scroll-driven effect glides
   document.getElementById('year')!.textContent = String(new Date().getFullYear());
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

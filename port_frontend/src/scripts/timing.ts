@@ -36,6 +36,8 @@ export function initTiming(host: HTMLElement, projects: TimingProject[], opts: {
         <canvas class="tv-board" aria-hidden="true" hidden></canvas>
         <div class="tv-lower"><span class="tv-ltag"></span><div><strong class="tv-ltitle"></strong><span class="tv-lsub mono"></span></div></div>
         <div class="tv-thumbs"></div>
+        <div class="tv-glare" aria-hidden="true"></div>
+        <div class="tv-stinger" aria-hidden="true"><span></span></div>
       </div>
       <div class="tv-body">
         <div class="tv-story">
@@ -79,17 +81,37 @@ export function initTiming(host: HTMLElement, projects: TimingProject[], opts: {
     $('.tv-lsub').textContent = photos[j]?.caption || [p.client, p.location, p.year].filter(Boolean).join(' · ');
   }
 
+  const media = $('.tv-media'), stinger = $('.tv-stinger');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let swapT = 0;
+
+  /** Switch project. After the first one, an F1 TV-style stinger wipes across and the
+   *  new picture is revealed behind it. */
   function show(i: number) {
     if (i === at || !projects[i]) return;
+    const first = at < 0;
     at = i;
     const p = projects[i];
-    host.style.setProperty('--c', p.color);
+    rows.forEach((r, k) => r.classList.toggle('flash', k === i && !first));
+    if (!first && !reduced) {
+      stinger.style.setProperty('--sc', p.color);
+      stinger.querySelector('span')!.textContent = p.tag;
+      stinger.classList.remove('go'); void stinger.offsetWidth; stinger.classList.add('go');
+      clearTimeout(swapT);
+      swapT = window.setTimeout(() => paint(i), 260); // swap while the band covers the picture
+    } else paint(i);
+    $('.tv-lap b').textContent = two(i + 1);
     rows.forEach((r, k) => {
       r.setAttribute('aria-selected', String(k === i));
       const prog = r.querySelector<HTMLElement>('.tv-prog')!;
       prog.style.animation = 'none'; void prog.offsetWidth; prog.style.animation = '';
     });
-    $('.tv-lap b').textContent = two(i + 1);
+  }
+
+  function paint(i: number) {
+    if (i !== at) return;
+    const p = projects[i];
+    host.style.setProperty('--c', p.color);
     stage.classList.remove('swap'); void stage.offsetWidth; stage.classList.add('swap');
 
     // media: photos with thumbnails, or the project's LED scene
@@ -108,6 +130,25 @@ export function initTiming(host: HTMLElement, projects: TimingProject[], opts: {
     $('.tv-hl').innerHTML = (p.highlights ?? []).map((h) => `<li>${esc(h)}</li>`).join('');
     $('.tv-stack').innerHTML = (p.stack ?? []).map((t, j) =>
       `<span class="tv-tyre" style="--compound: ${COMPOUNDS[j % 3][1]}"><i>${COMPOUNDS[j % 3][0]}</i>${esc(t)}</span>`).join('');
+  }
+
+  // the picture tilts a touch towards the cursor, with a glare sweeping across like real glass
+  if (!reduced && matchMedia('(pointer: fine)').matches) {
+    let raf = 0, mx = 0.5, my = 0.5;
+    const apply = () => {
+      raf = 0;
+      media.style.setProperty('--rx', `${((0.5 - my) * 3).toFixed(2)}deg`);
+      media.style.setProperty('--ry', `${((mx - 0.5) * 4).toFixed(2)}deg`);
+      media.style.setProperty('--gx', `${(mx * 100).toFixed(1)}%`);
+      media.style.setProperty('--gy', `${(my * 100).toFixed(1)}%`);
+    };
+    media.addEventListener('pointermove', (e) => {
+      const r = media.getBoundingClientRect();
+      mx = (e.clientX - r.left) / r.width; my = (e.clientY - r.top) / r.height;
+      media.classList.add('tilt');
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+    media.addEventListener('pointerleave', () => { mx = my = 0.5; media.classList.remove('tilt'); if (!raf) raf = requestAnimationFrame(apply); });
   }
 
   // tower clicks, thumbnails, auto toggle
