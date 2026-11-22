@@ -1,12 +1,14 @@
 // Project pit garages: each project is its team's F1 garage on a night-race pit lane, a CSS
 // 3D box you look straight into. Photos run on the screens on the back wall (always visible,
-// click for full size), the stack hangs as sponsor boards, the car sits on stands with tyre
+// click for full size), the stack hangs as sponsor boards, the car sits on stands in tyre
 // blankets, the crew is around it. The race engineer (your mascot, in a team jacket and
-// headset) does the talking: reads the caption of the photo you hover, and the highlights
-// when clicked. The camera drifts with the cursor and with scroll.
+// headset) does the talking. A top-down pit-lane map pins to the top of the section.
+//
+// Performance: off-screen garages aren't rendered at all (content-visibility), the camera
+// is a single composited transform updated once per frame, and the crew blobs run at 30 fps.
 import '../styles/lounge.css';
 import { API_BASE } from '../lib/api';
-import { Blob2D, DEFAULT_LOOK, type Look } from './crew/blob2d';
+import { Blob2D, DEFAULT_LOOK, type BlobOpts, type Look } from './crew/blob2d';
 
 export type LoungePhoto = { src: string; caption?: string; fit?: 'cover' | 'contain'; w?: number; h?: number; frame?: string };
 export type LoungeProject = {
@@ -15,42 +17,59 @@ export type LoungeProject = {
 };
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-const INK = '#0a0a0d';
+const CREW: BlobOpts = { line: 0.4, shade: true, fps: 30 }; // thin lines, shaded, background frame rate
+const EDGE = 'stroke="rgba(0,0,0,.55)" stroke-width="1.2" stroke-linejoin="round"';
 
-// the car, front-on, nose towards you: currentColor = team colour
-const CAR = `<svg viewBox="0 0 380 172" aria-hidden="true"><g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-  <rect x="98" y="12" width="184" height="16" rx="3" fill="#15151c"/>
-  <rect x="94" y="8" width="10" height="46" rx="2" fill="#15151c"/><rect x="276" y="8" width="10" height="46" rx="2" fill="#15151c"/>
-  <rect x="60" y="62" width="48" height="76" rx="13" fill="#15151c"/><rect x="272" y="62" width="48" height="76" rx="13" fill="#15151c"/>
-  <path d="M150 98 L164 42 Q190 26 216 42 L230 98 Z" fill="currentColor"/>
-  <ellipse cx="190" cy="47" rx="12" ry="8" fill="${INK}"/>
-  <path d="M96 122 Q100 80 150 76 L230 76 Q280 80 284 122 Z" fill="currentColor"/>
-  <path d="M110 112 Q150 96 176 96 M270 112 Q230 96 204 96" fill="none" stroke="#f3f3f5" stroke-width="5"/>
-  <rect x="134" y="70" width="18" height="9" rx="3" fill="#15151c"/><rect x="228" y="70" width="18" height="9" rx="3" fill="#15151c"/>
-  <path d="M158 86 Q190 54 222 86" fill="none" stroke="${INK}" stroke-width="8"/><path d="M190 60 V88" stroke-width="7"/>
-  <path d="M172 86 L208 86 L200 138 L180 138 Z" fill="currentColor"/>
-  <text x="190" y="118" text-anchor="middle" font-size="15" font-weight="900" font-style="italic" font-family="Titillium Web, sans-serif" fill="#fff" stroke="none">07</text>
-  <rect x="18" y="72" width="70" height="88" rx="16" fill="#15151c"/><rect x="292" y="72" width="70" height="88" rx="16" fill="#15151c"/>
-  <rect x="14" y="68" width="78" height="72" rx="14" fill="currentColor"/><rect x="288" y="68" width="78" height="72" rx="14" fill="currentColor"/>
-  <path d="M24 104 H82 M298 104 H356" stroke="#f3f3f5" stroke-width="5"/>
-  <path d="M58 140 H322 L334 154 H46 Z" fill="#15151c"/>
-  <path d="M70 146 H310" stroke="currentColor" stroke-width="5"/>
-  <rect x="40" y="128" width="12" height="28" rx="2" fill="#15151c"/><rect x="328" y="128" width="12" height="28" rx="2" fill="#15151c"/>
-  <path d="M178 154 L172 170 H208 L202 154" fill="#c9ccd6"/>
-  <rect x="30" y="158" width="46" height="12" rx="2" fill="#c9ccd6"/><rect x="304" y="158" width="46" height="12" rx="2" fill="#c9ccd6"/>
+// shared gradients (white/black only, so every garage can reuse them; colour comes from currentColor)
+const DEFS = `<defs>
+  <linearGradient id="pgShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>
+  <linearGradient id="pgSide" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+  <linearGradient id="pgTyre" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#050506"/><stop offset=".5" stop-color="#2e2f36"/><stop offset="1" stop-color="#050506"/></linearGradient>
+  <linearGradient id="pgCarbon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c2d34"/><stop offset="1" stop-color="#0a0a0d"/></linearGradient>
+  <linearGradient id="pgSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9ebf0"/><stop offset="1" stop-color="#8e929c"/></linearGradient>
+</defs>`;
+const lit = (d: string) => `<path d="${d}" fill="currentColor"/><path d="${d}" fill="url(#pgShade)" stroke="none"/>`;
+
+// the car, front-on, nose towards you
+const CAR = `<svg viewBox="0 0 380 172" aria-hidden="true">${DEFS}<g ${EDGE}>
+  <rect x="98" y="12" width="184" height="16" rx="3" fill="url(#pgCarbon)"/>
+  <rect x="94" y="8" width="9" height="46" rx="2" fill="url(#pgCarbon)"/><rect x="277" y="8" width="9" height="46" rx="2" fill="url(#pgCarbon)"/>
+  <rect x="60" y="62" width="48" height="76" rx="13" fill="url(#pgTyre)"/><rect x="272" y="62" width="48" height="76" rx="13" fill="url(#pgTyre)"/>
+  ${lit('M150 98 L164 42 Q190 26 216 42 L230 98 Z')}
+  <ellipse cx="190" cy="47" rx="11" ry="7" fill="#050506"/>
+  ${lit('M96 122 Q100 80 150 76 L230 76 Q280 80 284 122 Z')}
+  <path d="M96 122 Q100 80 150 76 L230 76 Q280 80 284 122 Z" fill="url(#pgSide)" stroke="none"/>
+  <path d="M112 100 Q150 84 178 84 M268 100 Q230 84 202 84" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.4"/>
+  <rect x="134" y="70" width="18" height="8" rx="3" fill="url(#pgCarbon)"/><rect x="228" y="70" width="18" height="8" rx="3" fill="url(#pgCarbon)"/>
+  <path d="M158 86 Q190 54 222 86" fill="none" stroke="#141418" stroke-width="7" stroke-linecap="round"/><path d="M190 60 V88" stroke="#141418" stroke-width="6"/>
+  ${lit('M172 86 L208 86 L200 138 L180 138 Z')}
+  <path d="M190 88 V134" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>
+  <text x="190" y="120" text-anchor="middle" font-size="13" font-weight="900" font-style="italic" font-family="Titillium Web, sans-serif" fill="#fff" stroke="none">07</text>
+  <rect x="18" y="72" width="70" height="88" rx="16" fill="url(#pgTyre)"/><rect x="292" y="72" width="70" height="88" rx="16" fill="url(#pgTyre)"/>
+  ${lit('M28 68 H78 Q92 68 92 82 V126 Q92 140 78 140 H28 Q14 140 14 126 V82 Q14 68 28 68 Z')}
+  ${lit('M302 68 H352 Q366 68 366 82 V126 Q366 140 352 140 H302 Q288 140 288 126 V82 Q288 68 302 68 Z')}
+  <path d="M26 104 H80 M300 104 H354" stroke="#fff" stroke-opacity=".8" stroke-width="2"/>
+  <path d="M58 140 H322 L334 154 H46 Z" fill="url(#pgCarbon)"/>
+  <path d="M70 146 H310" stroke="currentColor" stroke-width="3"/>
+  <rect x="40" y="128" width="11" height="28" rx="2" fill="url(#pgCarbon)"/><rect x="329" y="128" width="11" height="28" rx="2" fill="url(#pgCarbon)"/>
+  <path d="M178 154 L172 170 H208 L202 154 Z" fill="url(#pgSteel)"/>
+  <rect x="30" y="158" width="46" height="12" rx="2" fill="url(#pgSteel)"/><rect x="304" y="158" width="46" height="12" rx="2" fill="url(#pgSteel)"/>
 </g></svg>`;
-// a stack of tyres in their blankets
-const TYRES = `<svg viewBox="0 0 74 132" aria-hidden="true"><g stroke="${INK}" stroke-width="3.5" stroke-linejoin="round">
-  ${[0, 1, 2].map((k) => `<rect x="2" y="${4 + k * 42}" width="70" height="40" rx="10" fill="currentColor"/><path d="M8 ${24 + k * 42} H66" stroke="#f3f3f5" stroke-width="4"/>`).join('')}
+const TYRES = `<svg viewBox="0 0 74 132" aria-hidden="true"><g ${EDGE}>
+  ${[0, 1, 2].map((k) => `${lit(`M10 ${4 + k * 42} H64 Q72 ${4 + k * 42} 72 ${14 + k * 42} V${34 + k * 42} Q72 ${44 + k * 42} 64 ${44 + k * 42} H10 Q2 ${44 + k * 42} 2 ${34 + k * 42} V${14 + k * 42} Q2 ${4 + k * 42} 10 ${4 + k * 42} Z`)}<path d="M8 ${24 + k * 42} H66" stroke="#fff" stroke-opacity=".75" stroke-width="2"/>`).join('')}
 </g></svg>`;
-// tool trolley with a little monitor on top
-const TROLLEY = `<svg viewBox="0 0 110 132" aria-hidden="true"><g stroke="${INK}" stroke-width="3.5" stroke-linejoin="round">
-  <rect x="34" y="2" width="44" height="30" rx="3" fill="#15151c"/><rect x="39" y="7" width="34" height="20" fill="#0d3b36"/><path d="M56 32 V42" />
-  <rect x="6" y="42" width="98" height="78" rx="6" fill="currentColor"/>
-  <path d="M12 64 H98 M12 84 H98 M12 102 H98" stroke="${INK}" stroke-width="3"/>
-  <path d="M46 54 H64 M46 74 H64 M46 93 H64 M46 111 H64" stroke="#f3f3f5" stroke-width="4"/>
-  <circle cx="20" cy="126" r="5" fill="#15151c"/><circle cx="90" cy="126" r="5" fill="#15151c"/>
+const TROLLEY = `<svg viewBox="0 0 110 132" aria-hidden="true"><g ${EDGE}>
+  <rect x="34" y="2" width="44" height="30" rx="2" fill="url(#pgCarbon)"/><rect x="38" y="6" width="36" height="22" fill="#0e3a44"/><path d="M56 32 V42" stroke="#222"/>
+  ${lit('M10 42 H100 Q104 42 104 46 V116 Q104 120 100 120 H10 Q6 120 6 116 V46 Q6 42 10 42 Z')}
+  <path d="M12 64 H98 M12 84 H98 M12 102 H98" stroke="rgba(0,0,0,.45)" stroke-width="1.5"/>
+  <path d="M46 54 H64 M46 74 H64 M46 93 H64 M46 111 H64" stroke="url(#pgSteel)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="20" cy="126" r="5" fill="#141418"/><circle cx="90" cy="126" r="5" fill="#141418"/>
 </g></svg>`;
+// small top-down car for the map, nose to the right
+const MAP_CAR = `<svg viewBox="0 0 46 20" aria-hidden="true"><rect x="4" y="1" width="8" height="5" rx="1.5" fill="#111"/><rect x="4" y="14" width="8" height="5" rx="1.5" fill="#111"/>
+  <rect x="30" y="1" width="7" height="5" rx="1.5" fill="#111"/><rect x="30" y="14" width="7" height="5" rx="1.5" fill="#111"/>
+  <path d="M2 7 H8 L14 5 H30 L44 9 V11 L30 15 H14 L8 13 H2 Z" fill="currentColor"/><rect x="0" y="4" width="3" height="12" fill="#111"/><rect x="42" y="3" width="3" height="14" fill="#111"/>
+  <ellipse cx="22" cy="10" rx="4" ry="2.2" fill="#111"/></svg>`;
 
 /** The main mascot from the Garage (Crew screen); falls back to the default ghost. */
 export async function chiefLook(): Promise<Look> {
@@ -77,7 +96,7 @@ const frameHTML = (p: LoungeProject, ph: LoungePhoto, j: number) => {
   const screen = ph.fit === 'contain' && ph.frame !== 'print';
   return `<button class="ph lg-frame${screen ? ' screen' : ''}" type="button" data-pid="${esc(p.id)}" data-i="${j}"
       data-cap="${esc(ph.caption)}" style="--ar: ${ar.toFixed(3)}" aria-label="${esc(ph.caption) || `Photo ${j + 1}`}">
-      <img src="${esc(ph.src)}" alt="${esc(ph.caption)}" loading="lazy" />
+      <img src="${esc(ph.src)}" alt="${esc(ph.caption)}" loading="lazy" decoding="async" />
     </button>`;
 };
 
@@ -113,43 +132,54 @@ export function loungeHTML(p: LoungeProject, i: number): string {
       <div class="pg-header"><b>P${i + 1}</b><strong>${esc(p.tag)}</strong><em>${esc(p.category)}</em></div>
       <div class="pg-lane" aria-hidden="true"></div>
       <div class="pg-lolly" aria-hidden="true"></div>
-      <i class="pg-glare l" aria-hidden="true"></i><i class="pg-glare r" aria-hidden="true"></i>
     </div>
     ${photos.length ? `<div class="pg-strip">${photos.map((ph, j) => frameHTML(p, ph, j)).join('')}</div>` : ''}`;
 }
 
-/** Staff every garage; wire up camera drift, switch-on, hover and click. */
+/** Top-down pit-lane map: one box per garage, a car marker that follows the one in view. */
+export function pitMap(host: HTMLElement, projects: LoungeProject[], onPick: (id: string) => void) {
+  host.innerHTML = `
+    <div class="pm-boxes">${projects.map((p, i) => `
+      <button class="pm-box" type="button" data-pm="${esc(p.id)}" style="--c: ${esc(p.color)}" aria-label="Garage P${i + 1}: ${esc(p.tag)}">
+        <b>P${i + 1}</b><span>${esc(p.tag)}</span>
+      </button>`).join('')}</div>
+    <div class="pm-lane"><span class="pm-in mono">PIT IN</span><span class="pm-limit">60</span><span class="pm-out mono">PIT OUT</span><i class="pm-car">${MAP_CAR}</i></div>`;
+  const boxes = Array.from(host.querySelectorAll<HTMLElement>('.pm-box'));
+  const car = host.querySelector<HTMLElement>('.pm-car')!;
+  host.addEventListener('click', (e) => {
+    const b = (e.target as Element).closest<HTMLElement>('[data-pm]');
+    if (b) onPick(b.dataset.pm!);
+  });
+  const setActive = (id: string) => {
+    boxes.forEach((b) => b.classList.toggle('on', b.dataset.pm === id));
+    const b = boxes.find((x) => x.dataset.pm === id);
+    if (!b) return;
+    car.style.color = b.style.getPropertyValue('--c');
+    car.style.transform = `translateX(${b.offsetLeft + b.offsetWidth / 2 - car.offsetWidth / 2}px)`;
+  };
+  // the garage crossing the middle of the screen is the active one
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) setActive((en.target as HTMLElement).id.replace(/^project-/, ''));
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  projects.forEach((p) => { const el = document.getElementById(`project-${p.id}`); if (el) io.observe(el); });
+  if (projects[0]) requestAnimationFrame(() => setActive(projects[0].id));
+}
+
+/** Staff every garage; wire up the camera, switch-on, hover and click. */
 export function wakeLounges(wrap: HTMLElement, projects: LoungeProject[], base: Look) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const pits = Array.from(wrap.querySelectorAll<HTMLElement>('.pit'));
-  const visible = new Set<HTMLElement>();
+  const fine = matchMedia('(pointer: fine)').matches;
 
-  // camera: drifts as the garage scrolls past, and towards the cursor while hovered
-  const aim = (pit: HTMLElement, mx = 0, my = 0) => {
-    const r = pit.getBoundingClientRect();
-    const t = Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight));
-    pit.style.setProperty('--px', `${50 + mx * 14}%`);
-    pit.style.setProperty('--py', `${34 + t * 18 + my * 8}%`);
-  };
-  if (!reduced) {
-    let raf = 0;
-    addEventListener('scroll', () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => visible.forEach((pit) => { if (!pit.matches(':hover')) aim(pit); }));
-    }, { passive: true });
-  }
-
-  pits.forEach((pit) => {
+  wrap.querySelectorAll<HTMLElement>('.pit').forEach((pit) => {
     const p = projects.find((x) => x.id === pit.dataset.pid);
     if (!p) return;
     const card = pit.parentElement!;
+    const box = pit.querySelector<HTMLElement>('.pg-box')!;
     const looks = crewFor(p, base);
     const host = pit.querySelector<HTMLElement>('.pg-eng .lg-blob')!;
     const bubble = pit.querySelector<HTMLElement>('.lg-bubble')!;
-    const engineer = new Blob2D(host, looks.engineer, 150);
-    const mechanic = new Blob2D(pit.querySelector<HTMLElement>('.pg-mech')!, looks.mechanic, 110);
-    const lollipop = new Blob2D(pit.querySelector<HTMLElement>('.pg-lolly')!, looks.lollipop, 104);
-    const crew = [engineer, mechanic, lollipop];
+    let crew: Blob2D[] = [];
+    let engineer: Blob2D | null = null;
     const idle = bubble.textContent ?? '';
     let backT = 0, tip = -1;
     const say = (text: string, ms = 0) => {
@@ -158,41 +188,50 @@ export function wakeLounges(wrap: HTMLElement, projects: LoungeProject[], base: 
       bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop');
       if (ms) backT = window.setTimeout(() => { bubble.textContent = idle; }, ms);
     };
-    aim(pit);
 
-    pit.addEventListener('pointermove', (e) => {
-      crew.forEach((b) => b.lookAt(e.clientX, e.clientY));
-      if (reduced) return;
-      const r = pit.getBoundingClientRect();
-      aim(pit, ((e.clientX - r.left) / r.width - 0.5) * 2, ((e.clientY - r.top) / r.height - 0.5) * 2);
-    });
-    pit.addEventListener('pointerleave', () => aim(pit));
+    // camera: a small turn of the whole garage towards the cursor, once per frame at most
+    let raf = 0, mx = 0, my = 0;
+    const turn = () => { raf = 0; box.style.transform = `rotateY(${(mx * 3).toFixed(2)}deg) rotateX(${(-my * 2).toFixed(2)}deg)`; };
+    if (fine && !reduced) {
+      pit.addEventListener('pointermove', (e) => {
+        const r = pit.getBoundingClientRect();
+        mx = (e.clientX - r.left) / r.width - 0.5; my = (e.clientY - r.top) / r.height - 0.5;
+        if (!raf) raf = requestAnimationFrame(turn);
+        crew.forEach((b) => b.lookAt(e.clientX, e.clientY));
+      });
+      pit.addEventListener('pointerleave', () => { mx = my = 0; if (!raf) raf = requestAnimationFrame(turn); });
+    }
 
-    // screens (and the phone strip): the crew looks at it, the engineer reads the caption
     card.querySelectorAll<HTMLElement>('.lg-frame').forEach((f) => {
       f.addEventListener('pointerenter', () => {
         const r = f.getBoundingClientRect();
         crew.forEach((b) => b.lookAt(r.left + r.width / 2, r.top + r.height / 2));
-        if (f.dataset.cap) { say(f.dataset.cap); engineer.setMood('talk'); }
+        if (f.dataset.cap) { say(f.dataset.cap); engineer?.setMood('talk'); }
       });
-      f.addEventListener('pointerleave', () => { engineer.setMood('idle'); backT = window.setTimeout(() => { bubble.textContent = idle; }, 1200); });
+      f.addEventListener('pointerleave', () => { engineer?.setMood('idle'); backT = window.setTimeout(() => { bubble.textContent = idle; }, 1200); });
     });
     host.addEventListener('click', () => {
       const hl = p.highlights ?? [];
-      if (!hl.length) { engineer.setMood('hop'); return; }
+      if (!hl.length) { engineer?.setMood('hop'); return; }
       tip = (tip + 1) % hl.length;
       say(hl[tip], 6000);
-      engineer.setMood('happy');
+      engineer?.setMood('happy');
     });
-    // switch the garage on the first time it's properly in view
-    let lit = false;
-    new IntersectionObserver(([en]) => {
-      if (en.isIntersecting) visible.add(pit); else visible.delete(pit);
-      if (en.isIntersecting && en.intersectionRatio > 0.45 && !lit) {
-        lit = true;
+
+    // the crew is only created when the garage first comes near the screen, then it switches on
+    new IntersectionObserver(([en], io) => {
+      if (!en.isIntersecting) return;
+      if (!crew.length) {
+        engineer = new Blob2D(host, looks.engineer, 150, CREW);
+        crew = [engineer,
+          new Blob2D(pit.querySelector<HTMLElement>('.pg-mech')!, looks.mechanic, 110, CREW),
+          new Blob2D(pit.querySelector<HTMLElement>('.pg-lolly')!, looks.lollipop, 104, CREW)];
+      }
+      if (en.intersectionRatio > 0.4) {
+        io.disconnect();
         pit.classList.add('on');
         if (!reduced) crew.forEach((b, k) => setTimeout(() => b.setMood('hop'), 500 + k * 160));
       }
-    }, { threshold: [0, 0.5] }).observe(pit);
+    }, { threshold: [0, 0.45], rootMargin: '200px 0px' }).observe(pit);
   });
 }

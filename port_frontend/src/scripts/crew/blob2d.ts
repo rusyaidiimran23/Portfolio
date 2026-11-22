@@ -62,6 +62,9 @@ export const SHAPES: Record<string, ShapeFn> = {
 export type Shape = keyof typeof SHAPES & string;
 const FLOATING = new Set(['heart', 'ghost']); // keep their own bottoms
 
+/** line: outline thickness multiplier; shade: soft 3D-ish shading; fps: animation frame cap. */
+export type BlobOpts = { line?: number; shade?: boolean; fps?: number };
+
 export const DEFAULT_LOOK: Look = { color: '#ff2bd6', shape: 'round', eyes: 'dots', visor: 'none', head: 'none', ears: 'none', prop: 'none', mouth: 'smile', outfit: 'none', outfitColor: '#e10600', helmetColor: '#f3f3f5' };
 
 const VISORS = {
@@ -121,8 +124,11 @@ export class Blob2D {
   private raf = 0;
   private last = 0;
   private onScreen = true;
+  private opts: Required<BlobOpts>;
+  private shade = el('g', { 'pointer-events': 'none' }); // soft shading over the body (opts.shade)
 
-  constructor(host: HTMLElement, look: Partial<Look> = {}, size = 220) {
+  constructor(host: HTMLElement, look: Partial<Look> = {}, size = 220, opts: BlobOpts = {}) {
+    this.opts = { line: 1, shade: false, fps: 60, ...opts };
     this.look = { ...DEFAULT_LOOK, ...look };
     this.svg = el('svg', { viewBox: '-140 -150 280 240', width: size * 280 / 240, height: size, role: 'img', 'aria-label': 'Blob mascot' });
     this.svg.style.overflow = 'visible';
@@ -134,7 +140,19 @@ export class Blob2D {
     const clipId = `bl-clip-${++Blob2D.ids}`;
     defs.append(el('clipPath', { id: clipId }, this.clipShape));
     this.outfit.setAttribute('clip-path', `url(#${clipId})`);
-    this.rig.append(this.back, this.body, this.outfit, this.shine, this.gear, this.face, this.front, this.dots);
+    if (this.opts.shade) {
+      // a darker base and a soft highlight, clipped to the body: reads as rounded rather than flat
+      const sid = `bl-shade-${Blob2D.ids}`, hid = `bl-hi-${Blob2D.ids}`;
+      defs.append(
+        el('linearGradient', { id: sid, x1: 0, y1: 0, x2: 0, y2: 1 },
+          el('stop', { offset: '0.35', 'stop-color': '#000', 'stop-opacity': 0 }), el('stop', { offset: '1', 'stop-color': '#000', 'stop-opacity': 0.45 })),
+        el('radialGradient', { id: hid, cx: 0.35, cy: 0.2, r: 0.45 },
+          el('stop', { offset: '0', 'stop-color': '#fff', 'stop-opacity': 0.5 }), el('stop', { offset: '1', 'stop-color': '#fff', 'stop-opacity': 0 })));
+      this.shade.setAttribute('clip-path', `url(#${clipId})`);
+      this.shade.append(el('rect', { x: -140, y: -150, width: 280, height: 260, fill: `url(#${sid})` }), el('rect', { x: -140, y: -150, width: 280, height: 260, fill: `url(#${hid})` }));
+      this.shine.setAttribute('opacity', '0.25');
+    }
+    this.rig.append(this.back, this.body, this.outfit, this.shade, this.shine, this.gear, this.face, this.front, this.dots);
     this.svg.append(defs, this.shadow, this.rig);
     host.append(this.svg);
     this.build();
@@ -319,7 +337,8 @@ export class Blob2D {
         g.append(el('ellipse', { rx: 9, ry: 13, fill: glow ?? INK }));
         if (!glow) g.append(el('circle', { cx: 3, cy: -5, r: 3.4, fill: '#fff' }));
       }
-      if (glow) g.setAttribute('filter', 'drop-shadow(0 0 4px ' + glow + ')');
+      // glow: a soft halo behind the eye (an SVG filter here is too slow with many blobs)
+      if (glow) g.prepend(el('ellipse', { rx: 16, ry: 19, fill: glow, opacity: 0.22 }));
       this.eyes.push(g);
       this.face.append(g);
     }
@@ -350,11 +369,20 @@ export class Blob2D {
       this.front.append(hold);
       this.anim.push((t) => hold.setAttribute('transform', `translate(0,${(Math.sin(t * 2.6) * 2).toFixed(1)})`));
     }
+    // thinner outlines on request (less cartoony): scale every ink stroke
+    if (this.opts.line !== 1) {
+      this.svg.querySelectorAll<SVGElement>(`[stroke="${INK}"]`).forEach((e) => {
+        const w = e.dataset.sw ?? e.getAttribute('stroke-width') ?? '5';
+        e.dataset.sw = w;
+        e.setAttribute('stroke-width', String(Number(w) * this.opts.line));
+      });
+    }
   }
 
   private frame(now: number) {
     this.raf = requestAnimationFrame(this.frame);
     if (!this.onScreen) { this.last = now; return; }
+    if (this.opts.fps < 60 && now - this.last < 1000 / this.opts.fps - 2) return; // frame cap for background blobs
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.t += dt; this.mt += dt;

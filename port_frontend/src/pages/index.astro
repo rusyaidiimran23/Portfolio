@@ -128,6 +128,9 @@ import Mascot from '../components/Mascot.astro';
       <div class="bb-nav" id="pj-nav" role="tablist" aria-label="Choose a project"></div>
     </div>
 
+    <!-- top-down pit-lane map: one box per garage, pinned while you scroll the work -->
+    <nav class="pitmap" id="pitmap" aria-label="Pit lane map: jump to a project" hidden></nav>
+
     <div class="filters mono reveal d1" id="filters" role="tablist" aria-label="Filter projects"></div>
     <div class="cases" id="projects"></div>
   </section>
@@ -580,7 +583,7 @@ import Mascot from '../components/Mascot.astro';
   .cases { display: grid; gap: 2.2rem; }
   .cases :global(.case) {
     position: relative; display: grid; background: linear-gradient(180deg, #0d0d12, #08080b);
-    border: 1px solid #1c1c24; border-top: 3px solid var(--c); scroll-margin-top: 110px; transition: box-shadow 0.25s;
+    border: 1px solid #1c1c24; border-top: 3px solid var(--c); scroll-margin-top: 160px; transition: box-shadow 0.25s;
   }
   .cases :global(.case[hidden]) { display: none; }
   .cases :global(.case:hover) { box-shadow: 0 30px 70px -40px var(--c); }
@@ -683,7 +686,7 @@ import Mascot from '../components/Mascot.astro';
   import { scrollFx } from '../scripts/scrollfx';
   import { smoothScroll } from '../scripts/smoothscroll';
   import { initBoard, type BoardApi } from '../scripts/ledboard';
-  import { chiefLook, loungeHTML, wakeLounges } from '../scripts/lounge';
+  import { chiefLook, loungeHTML, pitMap, wakeLounges } from '../scripts/lounge';
   import { initMap, type MapApi } from '../scripts/deploymap';
   import { API_BASE } from '../lib/api';
   import { initReaction } from '../scripts/reaction';
@@ -827,6 +830,8 @@ import Mascot from '../components/Mascot.astro';
         </div>
       </article>`).join('');
     chiefLook().then((look) => wakeLounges(wrap, projects, look));
+    const map = document.getElementById('pitmap')!;
+    if (projects.length) { map.hidden = false; pitMap(map, projects, openCase); }
 
 
     // projects without photos show their own LED scene in the media slot
