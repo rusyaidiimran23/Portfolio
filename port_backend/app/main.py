@@ -36,7 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 
 from .data import CONTENT
-from . import crew, game, garage_store, mailer, stats, telegram_bot, track_view
+from . import crew, game, garage_store, mailer, stats, telegram_bot, todo, track_view
 
 # --- config -----------------------------------------------------------------
 # Change the garage password by setting GARAGE_PASSWORD in the environment.
@@ -199,6 +199,24 @@ def put_crew(body: dict = Body(...)) -> dict:
         return {"members": crew.save(body.get("members"))}
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
+
+
+# --- garage to-do list: upgrades, servicing, road tax per active vehicle -----------
+
+@app.get("/api/garage/todo", dependencies=[Depends(require_auth)])
+def get_todo() -> dict:
+    return todo.get()
+
+
+@app.put("/api/garage/todo/{build_id}", dependencies=[Depends(require_auth)])
+def put_todo(build_id: str, body: dict = Body(...)) -> dict:
+    try:
+        out = todo.save(build_id, body.get("items"), body.get("odo"))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    if out is None:
+        raise HTTPException(status_code=404, detail="No such active vehicle.")
+    return out
 
 
 @app.get("/api/garage", dependencies=[Depends(require_auth)])

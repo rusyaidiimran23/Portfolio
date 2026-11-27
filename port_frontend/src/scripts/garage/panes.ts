@@ -1,9 +1,9 @@
 // Forza-style screens: GARAGE <-> TRACK DAY <-> STATS <-> CREW (tabs, edge arrows, Q/E keys, swipes).
 import { reduced } from './shared';
 
-export type Pane = 'garage' | 'track' | 'stats' | 'crew';
-const PANES: Pane[] = ['garage', 'track', 'stats', 'crew'];
-const LABEL: Record<Pane, string> = { garage: 'Garage', track: 'Track Day', stats: 'Stats', crew: 'Crew' };
+export type Pane = 'garage' | 'todo' | 'track' | 'stats' | 'crew';
+const PANES: Pane[] = ['garage', 'todo', 'track', 'stats', 'crew'];
+const LABEL: Record<Pane, string> = { garage: 'Garage', todo: 'To-do', track: 'Track Day', stats: 'Stats', crew: 'Crew' };
 
 export const paneFromHash = (): Pane => (PANES.find((p) => p !== 'garage' && location.hash === `#${p}`) ?? 'garage');
 

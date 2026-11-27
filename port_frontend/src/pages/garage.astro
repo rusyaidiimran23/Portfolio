@@ -38,6 +38,7 @@ import Base from '../layouts/Base.astro';
       <nav class="fzm" id="fzm" aria-label="Garage screens">
         <span class="fzm-key mono" aria-hidden="true">Q</span>
         <button class="fzm-tab" type="button" data-pane-go="garage" aria-selected="true">Garage</button>
+        <button class="fzm-tab" type="button" data-pane-go="todo" aria-selected="false">To-do</button>
         <button class="fzm-tab" type="button" data-pane-go="track" aria-selected="false">Track Day</button>
         <button class="fzm-tab" type="button" data-pane-go="stats" aria-selected="false">Stats</button>
         <button class="fzm-tab" type="button" data-pane-go="crew" aria-selected="false">Crew</button>
@@ -58,6 +59,17 @@ import Base from '../layouts/Base.astro';
         </section>
         <div id="builds" class="builds"></div>
 
+        </div>
+
+        <div class="pane" data-pane="todo" hidden>
+        <!-- TO-DO: upgrades, servicing and road tax for each active vehicle -->
+        <section aria-label="To-do list">
+          <div class="td-head">
+            <div><p class="eyebrow">Pit board — jobs list</p><h2 class="td-title display">To-do</h2></div>
+            <span class="todo-sum lcd-text" id="todo-sum">--</span>
+          </div>
+          <div class="todo-cards" id="todo-cards"><p class="td-empty mono">Loading the jobs list…</p></div>
+        </section>
         </div>
 
         <div class="pane" data-pane="track" hidden>
@@ -109,7 +121,7 @@ import Base from '../layouts/Base.astro';
       </div>
 
       <!-- edge arrows + the slash that sweeps across on a screen change -->
-      <button class="edge edge-next" type="button" data-pane-go="track" aria-label="Go to Track Day"><span>Track Day</span><b>▸</b></button>
+      <button class="edge edge-next" type="button" data-pane-go="todo" aria-label="Go to To-do"><span>To-do</span><b>▸</b></button>
       <button class="edge edge-prev" type="button" data-pane-go="garage" aria-label="Back to Garage" hidden><b>◂</b><span>Garage</span></button>
       <div class="slash" id="slash" aria-hidden="true"><span id="slash-label"></span></div>
     </section>
@@ -807,6 +819,7 @@ import Base from '../layouts/Base.astro';
   import { KEY, token } from '../scripts/garage/shared';
   import { loadStats } from '../scripts/garage/stats';
   import { loadCrew } from '../scripts/garage/crew';
+  import { loadTodo, setTodoBuilds } from '../scripts/garage/todo';
   import { initTrackday, renderTrackday, replayTrack } from '../scripts/garage/trackday';
   import type { GarageData, Photos } from '../scripts/garage/types';
 
@@ -827,6 +840,7 @@ import Base from '../layouts/Base.astro';
     const photos: Photos =
       await fetch('/work/photos.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
     renderBuilds(data.builds ?? [], photos);
+    setTodoBuilds(data.builds ?? []);
     renderTrackday(data.trackday, data.builds ?? []);
     gate.hidden = true;
     content.hidden = false;
@@ -837,7 +851,7 @@ import Base from '../layouts/Base.astro';
 
   initBuilds(() => loadGarage(token(), true));
   initTrackday();
-  const setPane = initPanes(content, { track: replayTrack, stats: loadStats, crew: loadCrew });
+  const setPane = initPanes(content, { track: replayTrack, stats: loadStats, crew: loadCrew, todo: loadTodo });
 
   // auto-unlock if a valid token is stored
   const saved = localStorage.getItem(KEY);
